@@ -1,5 +1,6 @@
 # FunSearch
 
+Fork of [jonppe's fork](https://github.com/jonppe/funsearch) of [google-deepmind's funsearch](https://github.com/google-deepmind/funsearch).
 
 Usage:
 

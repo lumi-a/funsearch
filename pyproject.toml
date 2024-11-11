@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["funsearch", "funsearch.container"]
 
+[tool.pdm]
 [project]
 name = "funsearch"
 dynamic = [
@@ -21,13 +22,14 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-  "absl-py==2.0.0",
-  "click==8.1",
-  "cloudpickle==3.0.0",
-  "llm==0.12",
-  "python-dotenv==1.0.0",
-  "scipy==1.11.4",
-  "numpy==1.26.2",
+    "absl-py==2.0.0",
+    "click==8.1",
+    "cloudpickle==3.0.0",
+    "llm==0.12",
+    "python-dotenv==1.0.0",
+    "scipy==1.11.4",
+    "numpy==1.26.2",
+    "gurobipy>=11.0.3",
 ]
 
 [project.scripts]

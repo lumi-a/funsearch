@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:2176753c00ed5391d22c98eb87ff425c9d1b9ca45176eb49f02f7a4f85fd2550"
+content_hash = "sha256:b81aea51e896eed1782cfe1049ab1fdcfa6bad58e965bd27b2ab7a86caaaadb5"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -359,6 +359,30 @@ files = [
     {file = "frozenlist-1.4.1-cp39-cp39-win_amd64.whl", hash = "sha256:e6a20a581f9ce92d389a8c7d7c3dd47c81fd5d6e655c8dddf341e14aa48659d0"},
     {file = "frozenlist-1.4.1-py3-none-any.whl", hash = "sha256:04ced3e6a46b4cfffe20f9ae482818e34eba9b5fb0ce4056e4cc9b6e212d09b7"},
     {file = "frozenlist-1.4.1.tar.gz", hash = "sha256:c037a86e8513059a2613aaba4d817bb90b9d9b6b69aace3ce9c877e8c8ed402b"},
+]
+
+[[package]]
+name = "gurobipy"
+version = "11.0.3"
+summary = "Python interface to Gurobi"
+groups = ["default"]
+files = [
+    {file = "gurobipy-11.0.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:ec3a8da22c8e818095bbe86ed0b71f9f3712272afb994edc04dc3c82654c7542"},
+    {file = "gurobipy-11.0.3-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:623ea11104b50b574d7c73ae19e87131431cd4d33adcaf0d408a7e44cb73ed43"},
+    {file = "gurobipy-11.0.3-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:2074a21e9e78b62a84e3b123a8d44566562667b3d0e6ae5543ccb45207d44de6"},
+    {file = "gurobipy-11.0.3-cp310-cp310-win_amd64.whl", hash = "sha256:ec84cd537a9d1b392ffd09cb03e617c6cc69322f5e195c0c87328cf592482123"},
+    {file = "gurobipy-11.0.3-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:138b4be8fb42d494b8484bd4cfa99ea1e511e8860cdb1171349f4fce06d9aa01"},
+    {file = "gurobipy-11.0.3-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:84c58e164c90fc1de8bc0aac8ad25a82b4a9d3079b5064735822cecf552b1b26"},
+    {file = "gurobipy-11.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:d8eed5ca4831d1f10b08cd701f75483b27810734750d414a5b3cb6e4ba4c17f3"},
+    {file = "gurobipy-11.0.3-cp311-cp311-win_amd64.whl", hash = "sha256:9e57508f7d7a8ef154767894c693273d94bed771fa300677ae74892fde7dfc57"},
+    {file = "gurobipy-11.0.3-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:05700979469511aedfcb4d0136c161077d085393b6a449c98e9ff7818747279c"},
+    {file = "gurobipy-11.0.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:b752a8a4d898a3cc59b0670aa449dee8e2159d4f420f30033baf96f14a36516d"},
+    {file = "gurobipy-11.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:d08a69a9884b2c7ab843c9967b44770c17c73ac5726db7a8794ae85d7c1fc446"},
+    {file = "gurobipy-11.0.3-cp312-cp312-win_amd64.whl", hash = "sha256:74fa0d9bace48bc0f25426b5cd70addb02a13b5ea1645494cad073a32c9ec2c4"},
+    {file = "gurobipy-11.0.3-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:af65aac3c342cf8d8f496183f9fa2f78b88ce90d8dface1324d2f32171eca4c1"},
+    {file = "gurobipy-11.0.3-cp39-cp39-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:4b72a3e03170c6299b5f5baf6b8f0b0e753625d13e6c481fc4d245ccb20a02ff"},
+    {file = "gurobipy-11.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:181e7c1b207ec1fae469735e00efbe9a57d6c398434624c1ca1cf68293ef2188"},
+    {file = "gurobipy-11.0.3-cp39-cp39-win_amd64.whl", hash = "sha256:1f33e7329b4e544d90357a93bc12d9b15bdd7d0b8944cd6ecc50901e9452767e"},
 ]
 
 [[package]]

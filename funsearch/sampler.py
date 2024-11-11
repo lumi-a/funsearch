@@ -16,26 +16,115 @@
 """Class for sampling new programs."""
 from collections.abc import Collection, Sequence
 
-import llm
+# import llm
 import numpy as np
-
 from funsearch import evaluator
 from funsearch import programs_database
+import re
+import autopep8
 
+def reformat_to_two_spaces(code: str) -> str:
+    # Regular expression to match leading spaces at the beginning of each line
+    pattern = r"^\s+"
+
+    # Function to replace leading spaces with two spaces per indentation level
+    def replace_with_two_spaces(match):
+        space_count = len(match.group(0))
+        return ' ' * (2 * (space_count // 4))  # Assumes original indentation was 4 spaces
+
+    # Split the code into lines, reformat each line, and join back into a single string
+    reformatted_lines = [
+        re.sub(pattern, replace_with_two_spaces, line)
+        for line in code.splitlines()
+    ]
+    return "\n".join(reformatted_lines)
+
+def post_process(code: str) -> str:
+    # Define a list of patterns to remove
+    patterns = [
+        r'\[/INST\]',
+        r'>\[INST\]',
+        r'<s>',
+        r'<\s>',
+        r'\[PYTHON\]\n```',
+        r'```\n\[/PYTHON\]',
+        r'\[PYTHON\]',
+        r'\[/PYTHON\]',
+    ]
+
+    for pattern in patterns:
+        code = re.sub(pattern, '', code)
+    return code
 
 class LLM:
   """Language model that predicts continuation of provided source code."""
 
-  def __init__(self, samples_per_prompt: int, model: llm.Model, log_path=None) -> None:
+  def __init__(self, samples_per_prompt: int, model, log_path=None, model_type='gpt') -> None:
     self._samples_per_prompt = samples_per_prompt
     self.model = model
     self.prompt_count = 0
     self.log_path = log_path
+    self.model_type = model_type
 
   def _draw_sample(self, prompt: str) -> str:
-    """Returns a predicted continuation of `prompt`."""
-    response = self.model.prompt(prompt, max_tokens=2048)
-    self._log(prompt, response, self.prompt_count)
+
+    if self.model_type=='gpt':
+      response = self.model.prompt(prompt)
+    else:
+      output = self.model(
+          "<s>[INST] " + prompt + " [/INST]", 
+          max_tokens=4096,
+          stop=["</s>"],
+          echo=True
+      )
+
+      output_text = output['choices'][0]['text']
+
+      #Saves full response and prompt for debugging purposes
+      with open('last_full_responses.txt', 'a') as file_eval:  
+        file_eval.write(f"PRE POSTPROCESSING RESPONSE {self.prompt_count}\n{output_text}\n")
+        file_eval.flush()  
+        
+      with open('last_prompts.txt', 'a') as file_eval:  
+        file_eval.write(f"Prompt {self.prompt_count}\n{prompt}\n")
+        file_eval.flush()  
+
+      #Code to try and find starting and ending point of the code, does not look clean, but catches most of the code 
+
+      code_start = output_text.find('```@funsearch.run\n') + 3  # Find the start of the code block
+      code_start_md = output_text.find('```\n')
+      code_end_md = output_text.find('```', code_start_md + 3)
+      code_start_py = output_text.find('```python\n')
+      code_end_py = output_text.find('```', code_start_py + 3)
+      code_start_def = output_text.find('def priority_v2')
+
+      #Actually extracts the code if it found a valid starting point
+      if code_start_py != -1 and code_end_py != -1:
+          response = output_text[code_start_py + len('```python\n'):code_end_py]
+      elif code_start_md != -1 and code_end_md != -1:
+          response = output_text[code_start_md + len('```\n'):code_end_md]
+      elif code_start != -1:
+          response = output_text[code_start:]
+      elif code_start_def != -1:
+          response = output_text[code_start_def:]
+      else:
+          response = output_text
+
+      #Saves after process response for debugging purposes
+      with open('last_processed_responses.txt', 'a') as file_eval:  
+        file_eval.write(f"AFTER POSTPROCESSING RESPONSE {self.prompt_count}\n{response}\n")
+        file_eval.flush()  
+
+      response = post_process(response)
+      response = autopep8.fix_code(response, options={
+        'indent_size': 2  #PVD: format to 2 spaces
+      })
+      with open('last_eval.txt', 'a') as file_eval:   #PVD: output for inspection what else may be required
+        file_eval.write(f"FINAL RESPONSE\n{response}\n")
+        file_eval.flush()  
+
+    if response:
+      self._log(prompt, response, self.prompt_count)
     self.prompt_count += 1
     return response
 
@@ -69,6 +158,11 @@ class Sampler:
     prompt = self._database.get_prompt()
     samples = self._llm.draw_samples(prompt.code)
     # This loop can be executed in parallel on remote evaluator machines.
+
+    with open('last_eval.txt', 'a') as file_eval:   #PVD: show when output is valid according to parser
+      file_eval.write(f"SAMPLES\n{samples}\n")
+      file_eval.flush()
+
     for sample in samples:
       chosen_evaluator = np.random.choice(self._evaluators)
       chosen_evaluator.analyse(

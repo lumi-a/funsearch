@@ -1,7 +1,10 @@
 import funsearch.gasoline.instance as ins
+from funsearch.gasoline.generalised_instance import GeneralisedInstance
 import abc
 from math import inf
-from gurobipy import GRB
+from gurobipy import GRB, tuplelist
+from typing import List
+from typing import Self
 
 class Result :
     def __init__(self, instance : ins.Instance, label : str) -> None:
@@ -22,6 +25,28 @@ class IterativeAlgo(abc.ABC) :
     @abc.abstractmethod
     def run(self, instance : ins.Instance) -> tuple[Result, float] :
         pass
+
+    def approximation_ratio(self, xs: List[float], ys: List[float]) -> float :
+          n = len(xs)
+          if len(ys) < n - 1:
+              print(f"<*> len(ys) < n-1")
+              return 0
+          ys = ys[: n - 1]
+          difference = sum(xs) - sum(ys)
+          ys.append(difference)
+          instance = ins.Instance()
+          instance.n = n
+          instance.k = 1
+          instance.x = tuplelist((x for x in xs))
+          instance.y = tuplelist((y for y in ys))
+          instance.init_model()
+
+          opt = instance.solve()
+          if opt <= 0:
+              return 0
+          _, val = self.run(instance)
+          ratio = val / opt
+          return ratio
 
 class ValueOrdered(IterativeAlgo):
     def __init__(self) -> None:

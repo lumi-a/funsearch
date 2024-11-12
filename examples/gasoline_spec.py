@@ -6,39 +6,17 @@ Try to make the code short.
 """
 
 from typing import List
+import numpy as np
 import funsearch
-from funsearch.gasoline.generalised_instance import GeneralisedInstance
 from funsearch.gasoline.iterative_rounding import SlotOrdered
-import gurobipy as gp
 
 @funsearch.run
 def evaluate(n: int) -> float:
   """Returns the approximation-ratio of the gasoline problem"""
   xs, ys = gasoline(n)
-
-  n = len(xs)
-  if len(ys) < n - 1:
-      print(f"<*> len(ys) < n-1")
-      return 0
-  ys = ys[: n - 1]
-  difference = sum(xs) - sum(ys)
-  ys.append(difference)
-  instance = GeneralisedInstance()
-  instance.n = n
-  instance.k = 1
-  instance.x = gp.tuplelist(((x,) for x in xs))
-  instance.y = gp.tuplelist(((y,) for y in ys))
-  instance.init_model()
-
-  opt = instance.solve()
-  if opt <= 0:
-      print(f"<x> opt <=0")
-      return 0
-  _, val = SlotOrdered().run(instance)
-  ratio = val / opt
-  print(f"</> {ratio}")
+  ratio = SlotOrdered().approximation_ratio(xs, ys)
+  print(f"<*> ratio = {ratio}")
   return ratio
-
 
 @funsearch.evolve
 def gasoline(n: int) -> tuple[List[float], List[float]]:
@@ -46,6 +24,6 @@ def gasoline(n: int) -> tuple[List[float], List[float]]:
   with poor approximation-ratio.
   n is the length of the x-values and y-values.
   """
-  xs = [i/3 + i%2 for i in range(n)]
-  ys = [i/5 + i%7 for i in range(n)]
+  xs = [np.sqrt(i) for i in range(n)]
+  ys = [i/3 + i**2 % np.pi for i in range(n)]
   return xs, ys

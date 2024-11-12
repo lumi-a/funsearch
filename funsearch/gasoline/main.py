@@ -1,6 +1,6 @@
-import iterative_rounding as ir
 import gurobipy as gp
-import generalised_instance as ins
+import funsearch.gasoline.iterative_rounding as ir
+import funsearch.gasoline.generalised_instance as ins
 
 SIZE = 5000
 k = 15

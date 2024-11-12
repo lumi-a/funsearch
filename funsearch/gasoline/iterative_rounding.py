@@ -1,4 +1,4 @@
-import instance as ins
+import funsearch.gasoline.instance as ins
 import abc
 from math import inf
 from gurobipy import GRB

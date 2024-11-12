@@ -2,7 +2,6 @@ import numpy.random as rand
 from random import choices
 import gurobipy as gp
 import numpy as np
-import matplotlib.pyplot as plt
 import itertools as it
 
 from gurobipy import GRB
@@ -37,23 +36,6 @@ class Instance :
 
     def add_solution(self, permut : list[int], label : str, val : float) -> None :
         self.solutions.append((permut, label, val))
-
-    """
-        Plots all saved solutions to the same plot so that they can be compared.
-    """
-    def plot_solutions(self):
-        fig, ax = plt.subplots(layout='constrained')
-        x = np.arange(2*self.n +1)
-        max_val = max(x)
-        min_val = min(x)
-        ax.hlines(y=0, color='black',xmin = 0, xmax=2*self.n +1, linestyle= 'dashed')
-        ax.plot(x, self.compute_cumulative(self.opt_permut), label="optimal solution", color="red")
-        for permut, label, _ in self.solutions :
-            y = self.compute_cumulative(permut)
-            max_val = max(max_val, max(y))
-            min_val = min(min_val, min(y))
-            ax.plot(x, y, label=label)
-        plt.show()
     
     """
         Computes the prefix sums of the solution associated with the 

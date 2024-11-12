@@ -1,8 +1,11 @@
 """Finds sets for which the iterative rounding algorithm on the gasoline-problem has a poor (high) approximation-ratio.
 
+The gasoline-problem find a permutation of the xs and ys (lists of positive integers) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).
+
+As such, the problem is invariant under a permutation of the xs and ys.
+
 On every iteration, improve gasoline_v1 over the gasoline_vX methods from previous iterations.
-Make only small changes.
-Try to make the code short.
+Make only small code-changes. Do not use np.random.
 """
 
 from typing import List

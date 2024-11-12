@@ -15,7 +15,6 @@ def evaluate(n: int) -> float:
   """Returns the approximation-ratio of the gasoline problem"""
   xs, ys = gasoline(n)
   ratio = SlotOrdered().approximation_ratio(xs, ys)
-  print(f"<*> ratio = {ratio}")
   return ratio
 
 @funsearch.evolve

@@ -156,6 +156,7 @@ class ProgramsDatabase:
       self._best_scores_per_test_per_island[island_id] = scores_per_test
       self._best_score_per_island[island_id] = score
       logging.info('Best score of island %d increased to %s', island_id, score)
+      print(program)
 
   def register_program(
       self,

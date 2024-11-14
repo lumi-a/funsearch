@@ -89,7 +89,10 @@ class Instance :
 
 class MyModel :
     def __init__(self) -> None:
-        self.gurobi_model : gp.Model = gp.Model()
+        with gp.Env(empty=True) as env:
+            env.setParam('OutputFlag', 0)
+            env.start()
+            self.gurobi_model : gp.Model = gp.Model(env=env)
 
     def _init_vars(self, inst : Instance) -> None:
         self.alpha = self.gurobi_model.addVar(vtype = GRB.INTEGER, name="alpha", lb = -float('inf'), ub = float('inf'))

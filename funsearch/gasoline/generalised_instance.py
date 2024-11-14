@@ -77,7 +77,10 @@ class GeneralisedInstance :
 
 class MyGenealisedModel :
     def __init__(self, k : int) -> None:
-        self.gurobi_model : gp.Model = gp.Model()
+        with gp.Env(empty=True) as env:
+            env.setParam('OutputFlag', 0)
+            env.start()
+            self.gurobi_model : gp.Model = gp.Model(env=env)
         self.k = k
         self.alpha = []
         self.beta = []

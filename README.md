@@ -4,7 +4,7 @@ Fork of [jonppe's fork](https://github.com/jonppe/funsearch) of [google-deepmind
 
 ## Getting Started
 
-```bash
+```shell
 python -m venv .venv        # Create virtual environment
 source .venv/bin/activate   # On Windows, use `.venv\Scripts\activate`
                             # Use `deactivate` to exit the environment
@@ -17,11 +17,13 @@ mkdir data                  # Create directory for storing data
 
 Consult `llm keys set --help` and set your API-key. The following runs funsearch with OpenAI's `gpt-3.5-turbo`:
 
-```bash
+```shell
 funsearch run --model_name gpt-3.5-turbo --output_path ./data --sandbox_type ExternalProcessSandbox ./examples/gasoline_spec.py 11
 ```
+<!-- TODO: Add example output -->
 
-Explanation for above arguments (run `funsearch run --help` for more options)
+
+Explanation for above arguments (run `funsearch run --help` for more options):
 
 - Pick your `--model_name` from the list of available models (`llm models list`). To use other models, see the [llm-docs](https://llm.datasette.io/en/stable/other-models.html).
 - The `--output_path` directory stores API-calls and responses.
@@ -29,10 +31,15 @@ Explanation for above arguments (run `funsearch run --help` for more options)
 - The python-script `./examples/gasoline_spec.py` specifies the problem, evaluation-function, and the function to start search at.
 - The parameter `11` is the parameter passed to the `evaluate` function in `./examples/gasoline_spec.py`, i.e. the number of entries the `xs`-vector and `ys`-vector should have.
 
+Eventually abort the search with ctrl+c. Inspect found functions via:
+
+```shell
+funsearch ls data/backups/data/backups/program_db_gasoline_{timestamp}_0.pickle
+```
 <!-- TODO: Add example output -->
 
 ---
 
 Publication accompanying the [original repo]([google-deepmind's funsearch](https://github.com/google-deepmind/funsearch)):
 
-> Romera-Paredes, B. et al. [Mathematical discoveries from program search with large language models](https://www.nature.com/articles/s41586-023-06924-6). *Nature* (2023)
+> Romera-Paredes, B. et al. [Mathematical discoveries from program search with large language models]y(https://www.nature.com/articles/s41586-023-06924-6). *Nature* (2023)

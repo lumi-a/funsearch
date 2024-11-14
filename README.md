@@ -21,8 +21,19 @@ Consult `llm keys set --help` and set your API-key. The following runs funsearch
 
 ```shell
 funsearch run --model_name gpt-3.5-turbo --output_path data --sandbox_type ExternalProcessSandbox examples/gasoline_spec.py 11
+
+# Example output:
+# INFO:root:Writing logs to data/1731323471
+# INFO:absl:Best score of island 0 increased to 1.0
+#  ⋮
+# INFO:absl:Best score of island 9 increased to 1.0
+# INFO:absl:Best score of island 3 increased to 1.2
+# INFO:absl:Best score of island 8 increased to 1.0555555555555556
+# INFO:absl:Best score of island 4 increased to 1.105263157894737
+# INFO:absl:Best score of island 8 increased to 1.2222222222222223
+# INFO:root:Keyboard interrupt. Stopping.
+# INFO:absl:Saving backup to data/backups/program_db_gasoline_1731323471_0.pickle.
 ```
-<!-- TODO: Add example output -->
 
 
 Explaining the arguments (run `funsearch run --help` for more options):
@@ -38,9 +49,63 @@ Explaining the arguments (run `funsearch run --help` for more options):
 Eventually abort the search with ctrl+c. Inspect found functions via:
 
 ```shell
-funsearch ls data/backups/program_db_gasoline_{timestamp}_0.pickle
+funsearch ls data/backups/program_db_gasoline_1731323471_0.pickle
+
+# Example output:
+# Found 10 programs
+# 0: Program with score 1.2222222222222223
+# def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+#   """Given a gasoline-problem specified by the list of x-values and y-values,
+#   return a new gasoline-problem, with one additional x-value and y-value.
+#   The integers are always non-negative.
+#   """
+#   x = np.random.randint(1, 10)  # generate a random x-value between 1 and 10
+#   y = np.random.randint(1, 10)  # generate a random y-value between 1 and 10
+#   return x, y
+# 
+# 
+# 1: Program with score 1.2
+# def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+#   """Given a gasoline-problem specified by the list of x-values and y-values,
+#   return a new gasoline-problem, with one additional x-value and y-value.
+#   The integers are always non-negative.
+#   """
+#   # Start by copying the code from gasoline_v0
+#   x = [10, 18, 16, 5, 5][len(xs) % 5]
+#   y = [6, 17, 10, 18, 15][len(ys) % 5]
+# 
+#   # Make small code changes to improve the function
+#   # For example, we can increase the range of numbers for x and y
+#   x = [10, 18, 16, 5, 5, 10, 15, 20][len(xs) % 8]
+#   y = [6, 17, 10, 18, 15, 8, 12, 16][len(ys) % 8]
+# 
+#   return x, y
+# 
+# 
+# 2: Program with score 1.105263157894737
+# def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+#   """Given a gasoline-problem specified by the list of x-values and y-values,
+#   return a new gasoline-problem, with one additional x-value and y-value.
+#   The integers are always non-negative.
+#   """
+#   x = [7, 12, 9, 13, 14][len(xs) % 5]
+#   y = [8, 11, 5, 19, 8][len(ys) % 5]
+#   return x, y
+# 
+# 
+# 3: Program with score 1.0
+# def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+#   """Given a gasoline-problem specified by the list of x-values and y-values,
+#   return a new gasoline-problem, with one additional x-value and y-value.
+#   The integers are always non-negative.
+#   """
+#   x = [10, 18, 16, 5, 5][len(xs) % 5]
+#   y = [6, 17, 10, 18, 15][len(ys) % 5]
+#   return x, y
+# 
+# 
+# 4: Program with score 1.0 [...]
 ```
-<!-- TODO: Add example output -->
 
 ---
 

@@ -2,85 +2,34 @@
 
 Fork of [jonppe's fork](https://github.com/jonppe/funsearch) of [google-deepmind's funsearch](https://github.com/google-deepmind/funsearch).
 
-Usage:
+## Getting Started
 
+```bash
+python -m venv .venv  # Create virtual environment
+source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
+# Use `deactivate` to exit the virtual environment
 
-You can run FunSearch in container using Podman or Docker
-
-```
-podman build . -t funsearch
-
-
-# Create a folder to share with the container
-mkdir data
-podman run -it -v ./data:/workspace/data funsearch
-
-# Set the environment variable OPENAI_API_KEY=sk-xxxx or create .env file.
-# "gpt-3.5-turbo-instruct" model is used by default.
-# Refer to 'llm' package docs to use other models.
-
-funsearch run examples/cap_set_spec.py 11 --sandbox_type ExternalProcessSandbox
-```
-In here we are searching for the algorithm to find maximum cap sets for dimension 11.
-You should see output something like
-```
-root@11c22cd7aeac:/workspace# funsearch run examples/cap_set_spec.py 11 --sandbox_type ExternalProcessSandbox
-INFO:root:Writing logs to data/1704956206
-INFO:absl:Best score of island 0 increased to 2048
-INFO:absl:Best score of island 1 increased to 2048
-INFO:absl:Best score of island 2 increased to 2048
-INFO:absl:Best score of island 3 increased to 2048
-INFO:absl:Best score of island 4 increased to 2048
-INFO:absl:Best score of island 5 increased to 2048
-INFO:absl:Best score of island 6 increased to 2048
-INFO:absl:Best score of island 7 increased to 2048
-INFO:absl:Best score of island 8 increased to 2048
-INFO:absl:Best score of island 9 increased to 2048
-INFO:absl:Best score of island 5 increased to 2053
-INFO:absl:Best score of island 1 increased to 2049
-INFO:absl:Best score of island 8 increased to 2684
-^C^CINFO:root:Keyboard interrupt. Stopping.
-INFO:absl:Saving backup to data/backups/program_db_priority_1704956206_0.pickle.
+pip install pdm  # For package- and dependency-management
+pdm install --no-self  # Install project's dependencies
+pip install -e --no-deps .  # Install project
+mkdir data  # Create directory for storing data
 ```
 
-Note that in the last command we use the ExternalProcessSandbox that is not fully safe
-but makes it a bit less likely that invalid code from LLM would break the search.
+Consult `llm keys set --help` and set your API-key. The following runs funsearch with OpenAI's `gpt-3.5-turbo`:
 
-
-Alternatively, you can run the main Python process on a host computer outside of any container and let
-the process build and run separate sandbox containers (still requires Podman/Docker).
-This variant could be also used, e.g., in Colab quite safely since the environment is some kind of container itself.
-
-```
-pip install .
-
-funsearch run examples/cap_set_spec.py 11
+```bash
+funsearch run --model_name gpt-3.5-turbo --output_path ./data --sandbox_type ExternalProcessSandbox ./examples/gasoline_spec.py 11
 ```
 
-For more complex input data, you can provide the input also as a .json or .pickle file.
+Explanation for above arguments (run `funsearch run --help` for more options)
 
-Currently, the search is only using single thread with no asyncio and is somewhat slow
-for challenging tasks.  
+- List your available models via `llm models list`. To use other models, see the [llm-docs](https://llm.datasette.io/en/stable/other-models.html).
+- The `--output_path` directory stores API-calls and responses.
+- The `--sandbox_type` sets the sandbox in which the searched functions will be run. Since we execute code that the LLM gave to us without restrictions, you may want sandboxing. The documentation in `/funsearch/sandbox.py` explains the different sandbox types. The sandbox used above `ExternalProcessSandbox` offers no protection from malicious code. Instead, if you have Podman/Docker, you can try using the `ContainerSandbox` instead, or follow [jonppe's instructions](https://github.com/jonppe/funsearch/blob/745f2e7a61ef1418a95e09a009f2f65a3ce7c2ac/README.md) to set up a container to run `funsearch` in.
+- In the python-script `./examples/gasoline_spec.py`, we specify the problem, evaluation-function, and initial function.
+- The parameter `11` is the parameter passed to the `evaluate` function in `./examples/gasoline_spec.py`, i.e. the number of entries the `xs`-vector and `ys`-vector should have.
 
-## Alternative LLMs
-
-The search uses gpt-3.5-turbo-instruct by default, but other models can be used with the --model_name argument
-and possibly installing extensions to the llm package.
-As an example of performance, with gpt-3.5-turbo-instruct on dimension 8 it usually around 20 tries to find a few
-improvements to the naive algorithm.
-
-On the other hand, using orca-mini-3b-gguf2-q4_0 doesn't seem to work quite well.
-The latest version has a bit improved parsing to find the last priority_vX method from the LLM response
-even if it contains other content like Markdown formatting. Anyway, the model seems to often
-use strange indentation of 1 space and thus might require some customization to be useful at all.
-Lastly, even with correct Python syntax, orca-mini-3b does not seem to find improvements (in 60 runs) and mostly
-generates code that throws "IndexError: tuple index out of range". The situation changes a bit
-if the search is started using a database generated by gpt-3.5-turbo prompts.
-
-Overall, all models would probably require some prompt engineering, temperatures tuning, and such for the tool
-to be useful at all except for very simple problems.
-Also, the implementation is currently lacking good tools to analyze large amount of responses properly which
-makes any prompt engineering more difficult.
+<!-- TODO: Add example output -->
 
 ---
 

@@ -34,6 +34,6 @@ def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
   return a new gasoline-problem, with one additional x-value and y-value.
   The integers are always non-negative.
   """
-  x = max(ys, default=0) + 1
-  y = np.ceil(sum(xs) / (1+sum(ys)))
+  x = [10, 18, 16, 5, 5][len(xs) % 5]
+  y = [6, 17, 10, 18, 15][len(ys) % 5]
   return x, y

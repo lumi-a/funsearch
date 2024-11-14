@@ -29,7 +29,6 @@ class IterativeAlgo(abc.ABC) :
     def approximation_ratio(self, xs: List[int], ys: List[int]) -> float :
           n = len(xs)
           if len(ys) < n - 1:
-              print(f"<*> len(ys) < n-1")
               return 0
           ys = ys[: n - 1]
           difference = sum(xs) - sum(ys)

@@ -4,10 +4,13 @@ Fork of [jonppe's fork](https://github.com/jonppe/funsearch) of [google-deepmind
 
 ## Installation
 
+Requires a [Python](https://www.python.org/) version ≥ 3.9.
+
 ```shell
 python -m venv .venv        # Create virtual environment
-source .venv/bin/activate   # On Windows, use `.venv\Scripts\activate`
-                            # Use `deactivate` to exit the environment
+source .venv/bin/activate   # Enter your virtual environment
+# On Windows, use `.venv\Scripts\activate`
+# Use `deactivate` to exit the environment (any platform)
 
 pip install pdm             # For package- and dependency-management
 pdm install --no-self       # Install project's dependencies
@@ -17,7 +20,7 @@ mkdir data                  # Create directory for storing data
 
 ## Running
 
-Consult `llm keys set --help` and set your API-key. The following runs funsearch with OpenAI's `gpt-3.5-turbo`:
+Enter your virtual environment (see above). Consult `llm keys set --help` and set your API-key. The following runs funsearch with OpenAI's `gpt-3.5-turbo`:
 
 ```shell
 funsearch run --model_name gpt-3.5-turbo --output_path data --sandbox_type ExternalProcessSandbox examples/gasoline_spec.py 11

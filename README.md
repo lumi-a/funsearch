@@ -51,61 +51,66 @@ Eventually abort the search with ctrl+c. Inspect found functions via:
 
 ```shell
 funsearch ls data/backups/program_db_gasoline_1731323471_0.pickle
+```
 
-# Example output:
-# Found 10 programs
-# 0: Program with score 1.2222222222222223
-# def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
-#   """Given a gasoline-problem specified by the list of x-values and y-values,
-#   return a new gasoline-problem, with one additional x-value and y-value.
-#   The integers are always non-negative.
-#   """
-#   x = np.random.randint(1, 10)  # generate a random x-value between 1 and 10
-#   y = np.random.randint(1, 10)  # generate a random y-value between 1 and 10
-#   return x, y
-# 
-# 
-# 1: Program with score 1.2
-# def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
-#   """Given a gasoline-problem specified by the list of x-values and y-values,
-#   return a new gasoline-problem, with one additional x-value and y-value.
-#   The integers are always non-negative.
-#   """
-#   # Start by copying the code from gasoline_v0
-#   x = [10, 18, 16, 5, 5][len(xs) % 5]
-#   y = [6, 17, 10, 18, 15][len(ys) % 5]
-# 
-#   # Make small code changes to improve the function
-#   # For example, we can increase the range of numbers for x and y
-#   x = [10, 18, 16, 5, 5, 10, 15, 20][len(xs) % 8]
-#   y = [6, 17, 10, 18, 15, 8, 12, 16][len(ys) % 8]
-# 
-#   return x, y
-# 
-# 
-# 2: Program with score 1.105263157894737
-# def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
-#   """Given a gasoline-problem specified by the list of x-values and y-values,
-#   return a new gasoline-problem, with one additional x-value and y-value.
-#   The integers are always non-negative.
-#   """
-#   x = [7, 12, 9, 13, 14][len(xs) % 5]
-#   y = [8, 11, 5, 19, 8][len(ys) % 5]
-#   return x, y
-# 
-# 
-# 3: Program with score 1.0
-# def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
-#   """Given a gasoline-problem specified by the list of x-values and y-values,
-#   return a new gasoline-problem, with one additional x-value and y-value.
-#   The integers are always non-negative.
-#   """
-#   x = [10, 18, 16, 5, 5][len(xs) % 5]
-#   y = [6, 17, 10, 18, 15][len(ys) % 5]
-#   return x, y
-# 
-# 
-# 4: Program with score 1.0 [...]
+which prints:
+
+```py
+Example output:
+Found 10 programs
+0: Program with score 1.2222222222222223
+def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+  """Given a gasoline-problem specified by the list of x-values and y-values,
+  return a new gasoline-problem, with one additional x-value and y-value.
+  The integers are always non-negative.
+  """
+  x = np.random.randint(1, 10)  # generate a random x-value between 1 and 10
+  y = np.random.randint(1, 10)  # generate a random y-value between 1 and 10
+  return x, y
+
+
+1: Program with score 1.2
+def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+  """Given a gasoline-problem specified by the list of x-values and y-values,
+  return a new gasoline-problem, with one additional x-value and y-value.
+  The integers are always non-negative.
+  """
+  # Start by copying the code from gasoline_v0
+  x = [10, 18, 16, 5, 5][len(xs) % 5]
+  y = [6, 17, 10, 18, 15][len(ys) % 5]
+
+  # Make small code changes to improve the function
+  # For example, we can increase the range of numbers for x and y
+  x = [10, 18, 16, 5, 5, 10, 15, 20][len(xs) % 8]
+  y = [6, 17, 10, 18, 15, 8, 12, 16][len(ys) % 8]
+
+  return x, y
+
+
+2: Program with score 1.105263157894737
+def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+  """Given a gasoline-problem specified by the list of x-values and y-values,
+  return a new gasoline-problem, with one additional x-value and y-value.
+  The integers are always non-negative.
+  """
+  x = [7, 12, 9, 13, 14][len(xs) % 5]
+  y = [8, 11, 5, 19, 8][len(ys) % 5]
+  return x, y
+
+
+3: Program with score 1.0
+def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+  """Given a gasoline-problem specified by the list of x-values and y-values,
+  return a new gasoline-problem, with one additional x-value and y-value.
+  The integers are always non-negative.
+  """
+  x = [10, 18, 16, 5, 5][len(xs) % 5]
+  y = [6, 17, 10, 18, 15][len(ys) % 5]
+  return x, y
+
+
+4: Program with score 1.0
+[...]
 ```
 
 ---

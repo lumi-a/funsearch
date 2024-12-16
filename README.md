@@ -12,7 +12,7 @@ source .venv/bin/activate   # Enter your virtual environment
 
 pip install pdm             # For package- and dependency-management
 pdm install --no-self       # Install project's dependencies
-pip install -e --no-deps .  # Install project
+pip install --no-deps -e .  # Install project
 mkdir data                  # Create directory for storing data
 ```
 

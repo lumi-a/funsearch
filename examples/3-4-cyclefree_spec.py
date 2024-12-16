@@ -21,7 +21,7 @@ def solve(n: int) -> set[tuple[int, int]]:
   for (vertex_v, vertex_w), _ in sorted(priorities.items(), key=lambda x: -x[1]):
     # Does adding the edge {vertex_v, vertex_w} add a 3-cycle?
     if not neighbors[vertex_v].isdisjoint(neighbors[vertex_w]):
-      break
+      continue
 
     # Does adding the edge {vertex_v, vertex_w} add a 4-cycle?
     has_4_cycle = False
@@ -30,7 +30,7 @@ def solve(n: int) -> set[tuple[int, int]]:
         has_4_cycle = True
         break
     if has_4_cycle:
-      break
+      continue
 
     # Insert edge
     neighbors[vertex_v].add(vertex_w)
@@ -41,6 +41,6 @@ def solve(n: int) -> set[tuple[int, int]]:
 
 @funsearch.evolve
 def priority(vertex_v: int, vertex_w: int, n: int) -> float:
-  """Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph. `n` is the number of vertices in the graph.
+  """Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v always is a lower index than vertex_w. `n` is the number of vertices in the graph.
   """
   return 0.0

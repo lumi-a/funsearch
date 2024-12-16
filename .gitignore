@@ -25,3 +25,5 @@ MANIFEST
 /data
 .pdm-python
 last_eval.txt
+
+.venv

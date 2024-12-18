@@ -144,9 +144,10 @@ def ls(db_file):
   database.load(db_file)
 
   progs = database.get_best_programs_per_island()
-  print(f"Found {len(progs)} programs")
+  print(f"# Found {len(progs)} programs")
   for i, (prog, score) in enumerate(progs):
-    print(f"{i}: Program with score {score}")
+    print(f"# {i}: Program with score {score}")
+    prog.name += f"_{i}"
     print(prog)
     print("\n")
 

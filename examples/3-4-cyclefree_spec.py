@@ -7,13 +7,14 @@ Make only small code-changes. Do not use np.random.
 import funsearch
 
 @funsearch.run
-def evaluate(total_vertex_count: int) -> float:
-  """Returns the number of edges in an undirected graph on `total_vertex_count` vertices having no 3-cycles or 4-cycles."""
-  edges = solve(total_vertex_count)
-  return len(edges)
+def evaluate(total_vertex_count_min: int) -> float:
+  """Returns the average number of edges in an undirected graph on `total_vertex_count` vertices that has no 3-cycles or 4-cycles."""
+  opt = {190: 1049, 191:1057, 192:1065, 193:1073, 194:1081, 195:1089, 196:1097, 197:1105, 198:1113, 199:1121, 200:1129}
+  val = sum(len(solve(i))/opt[i] for i in range(total_vertex_count_min, total_vertex_count_min+11))
+  return val
 
 def solve(total_vertex_count: int) -> set[tuple[int, int]]:
-  """Returns a large graph on `total_vertex_count` vertices without 3-cycles or 4-cycles."""
+  """Returns a large graph on `total_vertex_count` vertices that has no 3-cycles or 4-cycles."""
 
   edge_to_priority = {(vertex_v, vertex_w): priority(vertex_v, vertex_w, total_vertex_count) for vertex_v in range(total_vertex_count) for vertex_w in range(vertex_v + 1, total_vertex_count)}
   vertex_to_neighbors = {vertex_v: set() for vertex_v in range(total_vertex_count)}

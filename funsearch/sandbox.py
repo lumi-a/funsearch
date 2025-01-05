@@ -124,7 +124,7 @@ class ExternalProcessSandbox(DummySandbox):
         try:
             namespace = DummySandbox.compile_code(program)
 
-            prog_file = (call_data_folder / f"prog.pickle").absolute()
+            prog_file = (call_data_folder / "prog.pickle").absolute()
             with open(prog_file, "wb+") as f:
                 cloudpickle.dump(namespace[function_to_run], f)
 
@@ -137,7 +137,7 @@ class ExternalProcessSandbox(DummySandbox):
                 self._save_diagnostics(program, call_data_folder)
                 return None, False
 
-            output_file = call_data_folder / f"output.pickle"
+            output_file = call_data_folder / "output.pickle"
             with open(output_file, "rb") as f:
                 out = cloudpickle.load(f)
                 return out, True

@@ -78,12 +78,7 @@ class LLM:
         response = match.group(3) if match else output_text
 
         response = post_process(response)
-        response = autopep8.fix_code(
-            response,
-            options={
-                "indent_size": 2  # PVD: format to 2 spaces
-            },
-        )
+        response = autopep8.fix_code(response)
         with open(
             "last_eval.txt", "a"
         ) as file_eval:  # PVD: output for inspection what else may be required

@@ -1,4 +1,3 @@
-import gurobipy as gp
 import numpy as np
 from funsearch.gasoline.iterative_rounding import SlotOrdered
 

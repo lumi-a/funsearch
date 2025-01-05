@@ -1,8 +1,6 @@
 import numpy.random as rand
 from random import choices
 import gurobipy as gp
-import numpy as np
-import itertools as it
 
 from gurobipy import GRB
 from typing import Self
@@ -58,18 +56,18 @@ class GeneralisedInstance:
                     noise_y[pos_y][coord] += sign
 
             new_x = [
-                tuple(self.x[i][l] + noise_x[i][l] for l in range(self.k))
+                tuple(self.x[i][ll] + noise_x[i][ll] for ll in range(self.k))
                 for i in range(self.n)
             ]
             new_y = [
-                tuple(self.y[i][l] + noise_y[i][l] for l in range(self.k))
+                tuple(self.y[i][ll] + noise_y[i][ll] for ll in range(self.k))
                 for i in range(self.n)
             ]
 
             valid = True
             if any(
-                new_x[i][l] < 0 or new_y[i][l] < 0
-                for l in range(self.k)
+                new_x[i][ll] < 0 or new_y[i][ll] < 0
+                for ll in range(self.k)
                 for i in range(self.n)
             ):
                 valid = False
@@ -114,25 +112,25 @@ class MyGenealisedModel:
                     ub=float("inf"),
                 )
             )
-        l = list(range(inst.n))
-        self.z = self.gurobi_model.addVars(l, l, vtype=GRB.BINARY, name="z")
+        ll = list(range(inst.n))
+        self.z = self.gurobi_model.addVars(ll, ll, vtype=GRB.BINARY, name="z")
         self.n = inst.n
 
     def __init_constrs(self, inst: GeneralisedInstance) -> None:
         self.gurobi_model.addConstrs((self.z.sum("*", j) == 1 for j in range(inst.n)))
         self.gurobi_model.addConstrs((self.z.sum(i, "*") == 1 for i in range(inst.n)))
 
-        for l in range(self.k):
+        for ll in range(self.k):
             # prefix smaller than Beta
             self.gurobi_model.addConstrs(
                 (
                     gp.quicksum(
-                        inst.x[i][l] * self.z[i, j]
+                        inst.x[i][ll] * self.z[i, j]
                         for i in range(inst.n)
                         for j in range(k)
                     )
-                    - gp.quicksum(inst.y[j][l] for j in range(0, k - 1))
-                    <= self.beta[l]
+                    - gp.quicksum(inst.y[j][ll] for j in range(0, k - 1))
+                    <= self.beta[ll]
                     for k in range(1, inst.n + 1)
                 )
             )
@@ -140,12 +138,12 @@ class MyGenealisedModel:
             self.gurobi_model.addConstrs(
                 (
                     gp.quicksum(
-                        inst.x[i][l] * self.z[i, j]
+                        inst.x[i][ll] * self.z[i, j]
                         for i in range(inst.n)
                         for j in range(k)
                     )
-                    - gp.quicksum(inst.y[j][l] for j in range(0, k))
-                    >= self.alpha[l]
+                    - gp.quicksum(inst.y[j][ll] for j in range(0, k))
+                    >= self.alpha[ll]
                     for k in range(1, inst.n + 1)
                 )
             )
@@ -154,7 +152,7 @@ class MyGenealisedModel:
         self._init_vars(inst)
         self.__init_constrs(inst)
         self.gurobi_model.setObjective(
-            gp.quicksum(self.beta[l] - self.alpha[l] for l in range(self.k)),
+            gp.quicksum(self.beta[ll] - self.alpha[ll] for ll in range(self.k)),
             GRB.MINIMIZE,
         )
         self.gurobi_model.setParam("OutputFlag", False)
@@ -196,18 +194,18 @@ class MyGenealisedModel:
         print("Obj: %g" % m.ObjVal)
         n = self.n
         vals = [[m.getVarByName(f"z[{i},{j}]").X for j in range(n)] for i in range(n)]
-        for l in vals:
-            print(*[f"{elem:.2f}" for elem in l], end="\n")
+        for ll in vals:
+            print(*[f"{elem:.2f}" for elem in ll], end="\n")
 
     def display_constrs(self) -> None:
         self.gurobi_model.write("model.lp")
 
 
 def _generate_tab(n: int, k: int, min: int, max: int) -> gp.tuplelist[tuple[int]]:
-    l = gp.tuplelist()
+    ll = gp.tuplelist()
     for i in range(n):
-        l.append(tuple(rand.randint(min, max) for _ in range(k)))
-    return l
+        ll.append(tuple(rand.randint(min, max) for _ in range(k)))
+    return ll
 
 
 def generate_instance(n: int, k: int, min: int, max: int) -> GeneralisedInstance:
@@ -225,11 +223,11 @@ def generate_instance_distinct(
         inst.x = _generate_tab(n, k, x_min, x_max)
         inst.y = _generate_tab(n - 1, k, y_min, y_max)
         diff = tuple(
-            sum([inst.x[i][l] for i in range(n)])
-            - sum([inst.y[i][l] for i in range(n - 1)])
-            for l in range(k)
+            sum([inst.x[i][ll] for i in range(n)])
+            - sum([inst.y[i][ll] for i in range(n - 1)])
+            for ll in range(k)
         )
-        if all(diff[l] >= y_min and diff[l] < y_max for l in range(k)):
+        if all(diff[ll] >= y_min and diff[ll] < y_max for ll in range(k)):
             inst.y.append(diff)
             valid = True
     return inst

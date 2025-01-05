@@ -1,10 +1,8 @@
 import funsearch.gasoline.instance as ins
-from funsearch.gasoline.generalised_instance import GeneralisedInstance
 import abc
 from math import inf
 from gurobipy import GRB, tuplelist
 from typing import List
-from typing import Self
 
 
 class Result:

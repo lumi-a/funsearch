@@ -74,7 +74,7 @@ def _trim_function_body(generated_code: str) -> str:
     """Extracts the body of the generated function, trimming anything after it."""
     if not generated_code:
         return ""
-    if not type(generated_code) is str:
+    if type(generated_code) is not str:
         generated_code = str(generated_code)
 
     method_name = "fake_function_header"

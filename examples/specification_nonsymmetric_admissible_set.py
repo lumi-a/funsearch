@@ -2,6 +2,7 @@
 
 import itertools
 import numpy as np
+import funsearch
 
 
 def block_children(scores, admissible_set, new_element):

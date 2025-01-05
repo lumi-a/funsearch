@@ -9,7 +9,6 @@ Make only small code-changes. Do not use np.random.
 """
 
 from typing import List
-import numpy as np
 import funsearch
 from funsearch.gasoline.iterative_rounding import SlotOrdered
 

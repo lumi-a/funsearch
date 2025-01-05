@@ -1,7 +1,6 @@
 import numpy.random as rand
 from random import choices
 import gurobipy as gp
-import numpy as np
 import itertools as it
 
 from gurobipy import GRB
@@ -106,8 +105,8 @@ class MyModel:
         self.beta = self.gurobi_model.addVar(
             vtype=GRB.INTEGER, name="beta", lb=-float("inf"), ub=float("inf")
         )
-        l = list(range(inst.n))
-        self.z = self.gurobi_model.addVars(l, l, vtype=GRB.BINARY, name="z")
+        ll = list(range(inst.n))
+        self.z = self.gurobi_model.addVars(ll, ll, vtype=GRB.BINARY, name="z")
         self.n = inst.n
 
     def __init_constrs(self, inst: Instance) -> None:
@@ -181,18 +180,18 @@ class MyModel:
         print("Obj: %g" % m.ObjVal)
         n = self.n
         vals = [[m.getVarByName(f"z[{i},{j}]").X for j in range(n)] for i in range(n)]
-        for l in vals:
-            print(*[f"{elem:.2f}" for elem in l], end="\n")
+        for ll in vals:
+            print(*[f"{elem:.2f}" for elem in ll], end="\n")
 
     def display_constrs(self) -> None:
         self.gurobi_model.write("model.lp")
 
 
 def _generate_tab(n: int, min: int, max: int) -> gp.tuplelist[int]:
-    l = gp.tuplelist()
+    ll = gp.tuplelist()
     for i in range(n):
-        l.append(rand.randint(min, max))
-    return l
+        ll.append(rand.randint(min, max))
+    return ll
 
 
 def generate_instance(n: int, min: int, max: int) -> Instance:

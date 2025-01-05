@@ -78,7 +78,7 @@ class LLM:
           echo=True
       )
 
-      output_text = output['choices'][0]['text']
+      output_text: str = output['choices'][0]['text']
 
       #Saves full response and prompt for debugging purposes
       with open('last_full_responses.txt', 'a') as file_eval:  
@@ -89,26 +89,9 @@ class LLM:
         file_eval.write(f"Prompt {self.prompt_count}\n{prompt}\n")
         file_eval.flush()  
 
-      #Code to try and find starting and ending point of the code, does not look clean, but catches most of the code 
 
-      code_start = output_text.find('```@funsearch.run\n') + 3  # Find the start of the code block
-      code_start_md = output_text.find('```\n')
-      code_end_md = output_text.find('```', code_start_md + 3)
-      code_start_py = output_text.find('```python\n')
-      code_end_py = output_text.find('```', code_start_py + 3)
-      code_start_def = output_text.find('def priority_v2')
-
-      #Actually extracts the code if it found a valid starting point
-      if code_start_py != -1 and code_end_py != -1:
-          response = output_text[code_start_py + len('```python\n'):code_end_py]
-      elif code_start_md != -1 and code_end_md != -1:
-          response = output_text[code_start_md + len('```\n'):code_end_md]
-      elif code_start != -1:
-          response = output_text[code_start:]
-      elif code_start_def != -1:
-          response = output_text[code_start_def:]
-      else:
-          response = output_text
+      match = re.search(r'(```(python|))(.*?```|.*)', output_text, re.DOTALL)
+      response = match.group(3) if match else output_text
 
       #Saves after process response for debugging purposes
       with open('last_processed_responses.txt', 'a') as file_eval:  

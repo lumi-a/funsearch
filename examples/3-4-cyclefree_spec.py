@@ -8,10 +8,24 @@ import funsearch
 
 
 @funsearch.run
-def evaluate(total_vertex_count: int) -> float:
+def evaluate(_total_vertex_count: int) -> float:
   """Returns the number of edges in an undirected graph on `total_vertex_count` vertices having no 3-cycles or 4-cycles."""
-  edges = solve(total_vertex_count)
-  return len(edges)
+
+  BEST_KNOWN = {
+    190: 1049,
+    191: 1057,
+    192: 1065,
+    193: 1073,
+    194: 1081,
+    195: 1089,
+    196: 1097,
+    197: 1105,
+    198: 1113,
+    199: 1121,
+    200: 1129,
+  }
+  fraction = sum(len(solve(x)) / y for x, y in BEST_KNOWN.items()) / len(BEST_KNOWN)
+  return fraction
 
 
 def solve(total_vertex_count: int) -> set[tuple[int, int]]:
@@ -34,7 +48,6 @@ def solve(total_vertex_count: int) -> set[tuple[int, int]]:
     for neighbor_u in vertex_to_neighbors[vertex_v]:
       if not vertex_to_neighbors[neighbor_u].isdisjoint(vertex_to_neighbors[vertex_w]):
         has_4_cycle = True
-
         break
     if has_4_cycle:
       continue

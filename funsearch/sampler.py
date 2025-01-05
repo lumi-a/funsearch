@@ -59,55 +59,27 @@ def post_process(code: str) -> str:
 class LLM:
   """Language model that predicts continuation of provided source code."""
 
-  def __init__(self, samples_per_prompt: int, model, log_path=None, model_type='gpt') -> None:
+  def __init__(self, samples_per_prompt: int, model, log_path=None) -> None:
     self._samples_per_prompt = samples_per_prompt
     self.model = model
     self.prompt_count = 0
     self.log_path = log_path
-    self.model_type = model_type
 
   def _draw_sample(self, prompt: str) -> str:
+    output_text = self.model.prompt(prompt).text()
 
-    if self.model_type=='gpt':
-      response = self.model.prompt(prompt)
-    else:
-      output = self.model(
-          "<s>[INST] " + prompt + " [/INST]", 
-          max_tokens=4096,
-          stop=["</s>"],
-          echo=True
-      )
+    match = re.search(r'(```(python|))(.*?```|.*)', output_text, re.DOTALL)
+    response = match.group(3) if match else output_text
 
-      output_text: str = output['choices'][0]['text']
+    response = post_process(response)
+    response = autopep8.fix_code(response, options={
+      'indent_size': 2  #PVD: format to 2 spaces
+    })
+    with open('last_eval.txt', 'a') as file_eval:   #PVD: output for inspection what else may be required
+      file_eval.write(f"FINAL RESPONSE\n{response}\n")
+      file_eval.flush()  
 
-      #Saves full response and prompt for debugging purposes
-      with open('last_full_responses.txt', 'a') as file_eval:  
-        file_eval.write(f"PRE POSTPROCESSING RESPONSE {self.prompt_count}\n{output_text}\n")
-        file_eval.flush()  
-        
-      with open('last_prompts.txt', 'a') as file_eval:  
-        file_eval.write(f"Prompt {self.prompt_count}\n{prompt}\n")
-        file_eval.flush()  
-
-
-      match = re.search(r'(```(python|))(.*?```|.*)', output_text, re.DOTALL)
-      response = match.group(3) if match else output_text
-
-      #Saves after process response for debugging purposes
-      with open('last_processed_responses.txt', 'a') as file_eval:  
-        file_eval.write(f"AFTER POSTPROCESSING RESPONSE {self.prompt_count}\n{response}\n")
-        file_eval.flush()  
-
-      response = post_process(response)
-      response = autopep8.fix_code(response, options={
-        'indent_size': 2  #PVD: format to 2 spaces
-      })
-      with open('last_eval.txt', 'a') as file_eval:   #PVD: output for inspection what else may be required
-        file_eval.write(f"FINAL RESPONSE\n{response}\n")
-        file_eval.flush()  
-
-    if response:
-      self._log(prompt, response, self.prompt_count)
+    self._log(prompt, response, self.prompt_count)
     self.prompt_count += 1
     return response
 

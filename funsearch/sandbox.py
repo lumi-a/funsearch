@@ -95,14 +95,27 @@ class ExternalProcessSandbox(DummySandbox):
     Everything except the /workspace folder will be read-only so that the environment remains good
     for future runs.
     """
+    import subprocess
+
     prog_path = call_data_path / "prog.pickle"
     output_file = call_data_path / "output.pickle"
     cmd = (
       f"{self.python_path} {CONTAINER_MAIN} {prog_path} {input_path} {output_file}"
       f"  2> {error_file_path}"
     )
-    logging.debug(f"Executing: {cmd}")
-    return os.system(cmd)
+
+    logging.debug(f"Executing {cmd}")
+    TIMEOUT = 10
+    try:
+      result = subprocess.run(cmd, timeout=TIMEOUT, shell=True, check=False)
+      return result.returncode
+    except subprocess.TimeoutExpired:
+      print(f"Command timed out after {TIMEOUT} seconds")
+      logging.debug(f"Command timed out after {TIMEOUT} seconds")
+      return 1
+    except Exception as e:
+      logging.debug(f"Command failed with error: {e}")
+      return 1
 
   def run(
     self,

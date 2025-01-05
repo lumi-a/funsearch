@@ -12,7 +12,6 @@ import numpy as np
 def evaluate(total_vertex_count: int) -> float:
   """Returns the average number of edges in an undirected graph on `total_vertex_count` vertices that has no 3-cycles or 4-cycles."""
   val = len(solve(total_vertex_count))
-  print(val)
   return val
 
 

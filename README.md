@@ -18,10 +18,10 @@ mkdir data                  # Create directory for storing data
 
 ## Running
 
-Enter your virtual environment (see above). Consult `llm keys set --help` and set your API-key. The following runs funsearch with OpenAI's `gpt-4o-mini`:
+Enter your virtual environment (see above). Consult `llm keys set --help` and set your API-key. The following runs funsearch with OpenAI's `gpt-3.5-turbo`:
 
 ```shell
-funsearch run --model_name gpt-4o-mini --output_path data --sandbox_type ExternalProcessSandbox examples/gasoline_spec.py 11
+funsearch run --model_name gpt-3.5-turbo --output_path data --sandbox_type ExternalProcessSandbox examples/gasoline_spec.py 11
 
 # Example output:
 # INFO:root:Writing logs to data/1731323471

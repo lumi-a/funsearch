@@ -105,7 +105,7 @@ class ExternalProcessSandbox(DummySandbox):
     )
 
     logging.debug(f"Executing {cmd}")
-    TIMEOUT = 10
+    TIMEOUT = 20
     try:
       result = subprocess.run(cmd, timeout=TIMEOUT, shell=True, check=False)
       return result.returncode

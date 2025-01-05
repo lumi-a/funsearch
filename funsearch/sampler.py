@@ -70,15 +70,13 @@ class LLM:
 
   def _draw_sample(self, prompt: str) -> str:
     output_text = self.model.prompt(prompt).text()
-    print("❌" * 4 + "\n" + str(output_text) + "\n" + "⛔" * 3)
 
     match = re.search(r"(```(python|))(.*?)```", output_text, re.DOTALL)
     response = match.group(3) if match else output_text
 
     response = post_process(response)
     response = autopep8.fix_code(
-      response,
-      options={"indent_size": 2},
+      response, options={"indent_size": 2, "ignore": ["E11"]}
     )
     with open("last_eval.txt", "a") as file_eval:
       file_eval.write(f"FINAL RESPONSE\n{response}\n")
@@ -86,7 +84,6 @@ class LLM:
 
     self._log(prompt, response, self.prompt_count)
     self.prompt_count += 1
-    print("❌" * 8 + "\n" + str(response) + "\n" + "⛔" * 7)
     return response
 
   def draw_samples(self, prompt: str) -> Collection[str]:

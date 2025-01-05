@@ -174,6 +174,6 @@ class Evaluator:
           raise ValueError('@function.run did not return an int/float score.')
         scores_per_test[current_input] = test_output
       else:
-        print("❌"*16 + "\n" + str(sample) + "\n" + "⛔"*16)
+        print("❌"*16 + "\n" + str(sample) + "\n" + "⛔"*15)
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)

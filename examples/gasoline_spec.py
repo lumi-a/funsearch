@@ -15,26 +15,26 @@ from funsearch.gasoline.iterative_rounding import SlotOrdered
 
 @funsearch.run
 def evaluate(n: int) -> float:
-    """Returns the approximation-ratio of the gasoline problem"""
-    xs, ys = [1], [1]
-    for _ in range(n - 1):
-        x, y = gasoline(xs, ys)
-        xs.append(x)
-        ys.append(y)
+  """Returns the approximation-ratio of the gasoline problem"""
+  xs, ys = [1], [1]
+  for _ in range(n - 1):
+    x, y = gasoline(xs, ys)
+    xs.append(x)
+    ys.append(y)
 
-    if any(x < 0 for x in xs) or any(y < 0 for y in ys):
-        return 0
+  if any(x < 0 for x in xs) or any(y < 0 for y in ys):
+    return 0
 
-    ratio = SlotOrdered().approximation_ratio(xs, ys)
-    return ratio
+  ratio = SlotOrdered().approximation_ratio(xs, ys)
+  return ratio
 
 
 @funsearch.evolve
 def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
-    """Given a gasoline-problem specified by the list of x-values and y-values,
-    return a new gasoline-problem, with one additional x-value and y-value.
-    The integers are always non-negative.
-    """
-    x = [10, 18, 16, 5, 5][len(xs) % 5]
-    y = [6, 17, 10, 18, 15][len(ys) % 5]
-    return x, y
+  """Given a gasoline-problem specified by the list of x-values and y-values,
+  return a new gasoline-problem, with one additional x-value and y-value.
+  The integers are always non-negative.
+  """
+  x = [10, 18, 16, 5, 5][len(xs) % 5]
+  y = [6, 17, 10, 18, 15][len(ys) % 5]
+  return x, y

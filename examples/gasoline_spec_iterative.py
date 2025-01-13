@@ -4,8 +4,8 @@ The gasoline-problem find a permutation of the xs and ys (lists of positive inte
 
 As such, the problem is invariant under a permutation of the xs and ys.
 
-On every iteration, improve gasoline_v1 over the gasoline_vX methods from previous iterations.
-Make only small code-changes. Do not use np.random.
+On every iteration, improve gasoline_v1 over the gasoline_vX methods from previous iterations. The methods must be deterministic.
+Make only small code-changes.
 """
 
 from typing import List
@@ -20,7 +20,7 @@ def evaluate(n: int) -> float:
   for _ in range(n - 1):
     x, y = gasoline(xs, ys)
 
-    # Check determinancy
+    # Assert determinancy
     if (x, y) != gasoline(xs, ys):
       return 0
 

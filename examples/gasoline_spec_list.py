@@ -4,8 +4,8 @@ The gasoline-problem find a permutation of the xs and ys (lists of positive inte
 
 As such, the problem is invariant under a permutation of the xs and ys.
 
-On every iteration, improve gasoline_v1 over the gasoline_vX methods from previous iterations.
-Make only small code-changes. Do not use np.random.
+On every iteration, improve gasoline_v1 over the gasoline_vX methods from previous iterations. The methods must be deterministic.
+Make only small code-changes.
 """
 
 from typing import List
@@ -14,12 +14,12 @@ from funsearch.gasoline.iterative_rounding import SlotOrdered
 
 
 @funsearch.run
-def evaluate(_: int) -> float:
+def evaluate(n: int) -> float:
   """Returns the approximation-ratio of the gasoline problem"""
-  xs, ys = gasoline()
+  xs, ys = gasoline(n)
 
   # Check determinancy
-  if (xs, ys) != gasoline():
+  if (xs, ys) != gasoline(n):
     return 0
 
   if any(x < 0 for x in xs) or any(y < 0 for y in ys):
@@ -30,18 +30,9 @@ def evaluate(_: int) -> float:
 
 
 @funsearch.evolve
-def gasoline() -> tuple[List[int], List[int]]:
+def gasoline(n: int) -> tuple[List[int], List[int]]:
   """Return a new gasoline-problem, specified by the list of x-values and y-values.
+  The lists should have length `n`.
   The integers are always non-negative.
   """
-  k = 4
-  xs, ys = [], []
-  for i in range(1, k):
-    u = int(2**k * (1 - 2 ** (-i)))
-    xs.extend([u for _ in range(2**i)])
-    ys.extend([u for _ in range(2**i)])
-  xs.extend([int(2**k) for _ in range(2**k - 1)])
-  xs.append(0)
-  u = int(2**k * (1 - 2 ** (-k)))
-  ys.extend([u for _ in range(2**k)])
-  return xs, ys
+  return [0] * n, [0] * n

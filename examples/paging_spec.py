@@ -14,9 +14,9 @@ from collections import deque
 def evaluate(_: int) -> float:
   """Returns the (negative) number of page-faults of the paging-problem."""
 
-  num_pages = 30
+  num_pages = 256
   pages_list = []
-  history = deque(maxlen=1000)
+  history = deque(maxlen=2048)
   page_faults = 0
 
   for page in read_accesses():
@@ -24,7 +24,8 @@ def evaluate(_: int) -> float:
       if len(pages_list) < num_pages:
         pages_list.append(page)
       else:
-        index = max(0, min(replace(history, pages_list, page), num_pages - 1))
+        replace_index = replace(history.copy(), pages_list.copy(), page)
+        index = max(0, min(replace_index, num_pages - 1))
         pages_list[index] = page
         page_faults += 1
 
@@ -34,7 +35,7 @@ def evaluate(_: int) -> float:
 
 
 @funsearch.evolve
-def replace(access_history: List[int], pages: List[int], new_page: int) -> int:
+def replace(access_history: deque[int], pages: List[int], new_page: int) -> int:
   """Given a list of `pages` and a `new_page` not currently in `pages`, return
   the index of the page that `new_page` should replace in `pages`.
   `access_history` is the list of the past 1000 accesses, but excluding `new_page`.

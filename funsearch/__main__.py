@@ -6,7 +6,9 @@ import pickle
 import time
 
 import click
+from pathlib import Path
 import llm
+import re
 from dotenv import load_dotenv
 
 
@@ -173,9 +175,31 @@ def run(
 
 
 @main.command()
-@click.argument("db_file", type=click.File("rb"))
+@click.argument("db_file", type=click.File("rb"), required=False)
 def ls(db_file):
-  """List programs from a stored database (usually in data/backups/ )"""
+  """List programs from a stored database (usually in data/backups/ ). If not provided, selects the most recent one from data/backups/."""
+  if db_file is None:
+    # Define the directory and file pattern
+    backup_dir = Path("data/backups")
+    file_pattern = re.compile(r"program_db_.*_(\d+)_(\d+)\.pickle")
+
+    # Find all matching files and extract (X, Y) values
+    matching_files = []
+    for file in backup_dir.glob("program_db_*.pickle"):
+      match = file_pattern.match(file.name)
+      if match:
+        x, y = map(int, match.groups())
+        matching_files.append((x, y, file))
+
+    # Select the file with lexicographically maximal (X, Y)
+    if not matching_files:
+      raise FileNotFoundError("No matching backup files found in data/backups/")
+
+    _, _, selected_file = max(matching_files)
+    db_file = open(selected_file, "rb")
+    print(f"Selected file: {selected_file}")
+
+  # Load and process the database
   conf = config.Config(num_evaluators=1)
 
   # A bit silly way to list programs. This probably does not work if config has changed any way

@@ -105,13 +105,13 @@ class ExternalProcessSandbox(DummySandbox):
     )
 
     logging.debug(f"Executing {cmd}")
-    TIMEOUT = 20
+    timeout = int(self.timeout_secs)
     try:
-      result = subprocess.run(cmd, timeout=TIMEOUT, shell=True, check=False)
+      result = subprocess.run(cmd, timeout=timeout, shell=True, check=False)
       return result.returncode
     except subprocess.TimeoutExpired:
-      print(f"Command timed out after {TIMEOUT} seconds")
-      logging.debug(f"Command timed out after {TIMEOUT} seconds")
+      print(f"Command timed out after {timeout} seconds")
+      logging.debug(f"Command timed out after {timeout} seconds")
       return 1
     except Exception as e:
       logging.debug(f"Command failed with error: {e}")

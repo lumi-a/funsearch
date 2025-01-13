@@ -51,7 +51,11 @@ class LLM:
     self.log_path = log_path
 
   def _draw_sample(self, prompt: str) -> str:
-    output_text = self.model.prompt(prompt).text()
+    try:
+      output_text = self.model.prompt(prompt).text()
+    except Exception as e:
+      print("LLM call failed:", e)
+      output_text = ""
 
     match = re.search(r"(```(python|))(.*?)```", output_text, re.DOTALL)
     response = match.group(3) if match else output_text

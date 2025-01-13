@@ -40,6 +40,6 @@ def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
   return a new gasoline-problem, with one additional x-value and y-value.
   The integers are always non-negative.
   """
-  x = [10, 18, 16, 5, 5][len(xs) % 5]
-  y = [6, 17, 10, 18, 15][len(ys) % 5]
+  x = len(xs)
+  y = len(ys) ** 2 + 1
   return x, y

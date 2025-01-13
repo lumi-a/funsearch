@@ -25,17 +25,6 @@ from funsearch import code_manipulation
 from funsearch import programs_database
 from funsearch import sandbox
 
-"""
-  Regex to find all methods named 'priority_vX'.
-  With each match, start from the 'def priority_vX(' and continue until there's a new line with any of
-  - a new 'def'
-  - ` or ' or # without indentation
-"""
-METHOD_MATCHER = re.compile(
-  r"def priority_v\d\(.*?\) -> float:(?:\s*(?:[ \t]*(?!def|#|`|').*(?:\n|$)))+"
-)
-METHOD_NAME_MATCHER = re.compile(r"priority_v\d+")
-
 
 class _FunctionLineVisitor(ast.NodeVisitor):
   """Visitor that finds the last line number of a function with a given name."""
@@ -57,20 +46,34 @@ class _FunctionLineVisitor(ast.NodeVisitor):
     return self._function_end_line
 
 
-def _find_method_implementation(generated_code: str) -> Tuple[str, str]:
+def _find_method_implementation(
+  generated_code: str, function_to_evolve: str
+) -> Tuple[str, str]:
   """Find the last 'def priority_vX()' method from generated code.
 
   Return the code and the name of the method.
   """
-  matches = METHOD_MATCHER.findall(generated_code)
+
+  """
+  Regex to find all methods named 'priority_vX'.
+  With each match, start from the 'def priority_vX(' and continue until there's a new line with any of
+  - a new 'def'
+  - ` or ' or # without indentation
+  """
+  method_matcher = re.compile(
+    rf"def {function_to_evolve}_v\d\(.*?\) -> (?:int|float):(?:\s*(?:[ \t]*(?!def|#|`|').*(?:\n|$)))+"
+  )
+  method_name_matcher = re.compile(rf"{function_to_evolve}_v\d+")
+
+  matches = method_matcher.findall(generated_code)
   if not matches:
     return "", ""
   last_match = matches[-1]
-  name = METHOD_NAME_MATCHER.search(last_match).group()
+  name = method_name_matcher.search(last_match).group()
   return last_match, name
 
 
-def _trim_function_body(generated_code: str) -> str:
+def _trim_function_body(generated_code: str, function_to_evolve: str) -> str:
   """Extracts the body of the generated function, trimming anything after it."""
   if not generated_code:
     return ""
@@ -79,8 +82,8 @@ def _trim_function_body(generated_code: str) -> str:
 
   method_name = "fake_function_header"
   # Check is the response only a continuation for our prompt or full method implementation with header
-  if "def priority_v" in generated_code:
-    code, method_name = _find_method_implementation(generated_code)
+  if f"def {function_to_evolve}_v" in generated_code:
+    code, method_name = _find_method_implementation(generated_code, function_to_evolve)
   else:
     code = f"def {method_name}():\n{generated_code}"
 
@@ -109,7 +112,7 @@ def _sample_to_program(
   function_to_evolve: str,
 ) -> tuple[code_manipulation.Function, str]:
   """Returns the compiled generated function and the full runnable program."""
-  body = _trim_function_body(generated_code)
+  body = _trim_function_body(generated_code, function_to_evolve)
   if version_generated is not None:
     body = code_manipulation.rename_function_calls(
       body, f"{function_to_evolve}_v{version_generated}", function_to_evolve
@@ -184,5 +187,12 @@ class Evaluator:
         if not isinstance(test_output, (int, float)):
           raise ValueError("@function.run did not return an int/float score.")
         scores_per_test[current_input] = test_output
+        print(" ┌ " + "\n │ ".join(program.splitlines()) + "\n └────────")
+
+        # Print the error-message, too:
+        error_file = self._sandbox.output_path / f"stderr_{i}.log"
+        error_text = error_file.read_text()
+        print(" ╔ " + "\n ║ ".join(error_text.splitlines()) + "\n ╚════════")
+
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)

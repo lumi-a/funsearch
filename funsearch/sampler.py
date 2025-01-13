@@ -41,24 +41,6 @@ def reformat_to_two_spaces(code: str) -> str:
   return "\n".join(reformatted_lines)
 
 
-def post_process(code: str) -> str:
-  # Define a list of patterns to remove
-  patterns = [
-    r"\[/INST\]",
-    r">\[INST\]",
-    r"<s>",
-    r"<\s>",
-    r"\[PYTHON\]\n```",
-    r"```\n\[/PYTHON\]",
-    r"\[PYTHON\]",
-    r"\[/PYTHON\]",
-  ]
-
-  for pattern in patterns:
-    code = re.sub(pattern, "", code)
-  return code
-
-
 class LLM:
   """Language model that predicts continuation of provided source code."""
 
@@ -69,15 +51,14 @@ class LLM:
     self.log_path = log_path
 
   def _draw_sample(self, prompt: str) -> str:
-    output_text = self.model.prompt(prompt).text()
+    formatted_prompt = response = autopep8.fix_code(
+      prompt, options={"indent_size": 2, "ignore": ["E11"]}
+    )
+    output_text = self.model.prompt(formatted_prompt).text()
 
     match = re.search(r"(```(python|))(.*?)```", output_text, re.DOTALL)
     response = match.group(3) if match else output_text
 
-    response = post_process(response)
-    response = autopep8.fix_code(
-      response, options={"indent_size": 2, "ignore": ["E11"]}
-    )
     with open("last_eval.txt", "a") as file_eval:
       file_eval.write(f"FINAL RESPONSE\n{response}\n")
       file_eval.flush()

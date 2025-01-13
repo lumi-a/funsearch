@@ -165,10 +165,6 @@ class Evaluator:
   ) -> None:
     """Compiles the sample into a program and executes it on test inputs."""
 
-    # Fix rare indentation-bug
-    if not sample.startswith("  "):
-      sample = "  " + sample
-
     new_function, program = _sample_to_program(
       sample, version_generated, self._template, self._function_to_evolve
     )

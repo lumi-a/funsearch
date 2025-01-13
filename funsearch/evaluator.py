@@ -61,7 +61,7 @@ def _find_method_implementation(
   - ` or ' or # without indentation
   """
   method_matcher = re.compile(
-    rf"def {function_to_evolve}_v\d\(.*?\) -> (?:int|float):(?:\s*(?:[ \t]*(?!def|#|`|').*(?:\n|$)))+"
+    rf"def {function_to_evolve}_v\d\(.*?\) -> .*:\n(?:\s*(?:[ \t]*(?!def|#|`|').*(?:\n|$)))+"
   )
   method_name_matcher = re.compile(rf"{function_to_evolve}_v\d+")
 

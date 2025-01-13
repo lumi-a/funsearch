@@ -51,10 +51,7 @@ class LLM:
     self.log_path = log_path
 
   def _draw_sample(self, prompt: str) -> str:
-    formatted_prompt = response = autopep8.fix_code(
-      prompt, options={"indent_size": 2, "ignore": ["E11"]}
-    )
-    output_text = self.model.prompt(formatted_prompt).text()
+    output_text = self.model.prompt(prompt).text()
 
     match = re.search(r"(```(python|))(.*?)```", output_text, re.DOTALL)
     response = match.group(3) if match else output_text

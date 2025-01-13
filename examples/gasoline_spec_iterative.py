@@ -19,6 +19,11 @@ def evaluate(n: int) -> float:
   xs, ys = [1], [1]
   for _ in range(n - 1):
     x, y = gasoline(xs, ys)
+
+    # Check determinancy
+    if (x, y) != gasoline(xs, ys):
+      return 0
+
     xs.append(x)
     ys.append(y)
 

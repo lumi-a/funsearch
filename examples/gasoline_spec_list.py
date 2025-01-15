@@ -18,10 +18,11 @@ def evaluate(n: int) -> float:
   """Returns the approximation-ratio of the gasoline problem"""
   xs, ys = gasoline(n)
 
-  # Check determinancy
+  # Assert determinancy
   if (xs, ys) != gasoline(n):
     return 0
 
+  # Assert non-negativity
   if any(x < 0 for x in xs) or any(y < 0 for y in ys):
     return 0
 

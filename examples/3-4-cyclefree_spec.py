@@ -8,11 +8,10 @@ import funsearch
 
 
 @funsearch.run
-def evaluate(_total_vertex_count: int) -> float:
+def evaluate(total_vertex_count: int) -> float:
   """Returns the number of edges in an undirected graph on `total_vertex_count` vertices having no 3-cycles or 4-cycles."""
 
-  BEST_KNOWN = {150: 749, 151: 756, 152: 763, 153: 770, 154: 777, 155: 784, 156: 791, 157: 798, 158: 805, 159: 812, 160: 819, 161: 826, 162: 834, 163: 841, 164: 849, 165: 856, 166: 863, 167: 871, 168: 878, 169: 886, 170: 893, 171: 901, 172: 909, 173: 917, 174: 925, 175: 933, 176: 941, 177: 948, 178: 956, 179: 963, 180: 971, 181: 979, 182: 986, 183: 994, 184: 1001, 185: 1009, 186: 1017, 187: 1025, 188: 1033, 189: 1041, 190: 1049, 191: 1057, 192: 1065, 193: 1073, 194: 1081, 195: 1089, 196: 1097, 197: 1105, 198: 1113, 199: 1121, 200: 1129}  # fmt: skip
-  fraction = max(len(solve(x)) / y for x, y in BEST_KNOWN.items())
+  fraction = len(solve(total_vertex_count)) / 1192
   return fraction
 
 

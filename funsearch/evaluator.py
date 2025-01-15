@@ -181,14 +181,24 @@ class Evaluator:
         and test_output is not None
       ):
         if not isinstance(test_output, (int, float)):
+          print("error?")
           raise ValueError("@function.run did not return an int/float score.")
+        print(f"Score {test_output}")
         scores_per_test[current_input] = test_output
-        print(" ┌ " + "\n │ ".join(program.splitlines()) + "\n └────────")
+      else:
+        i = self._sandbox.call_count - 1
+        if not runs_ok:
+          print(f"❌ {i} Didn't run okay")
+        elif _calls_ancestor(program, self._function_to_evolve):
+          print(f"❌ {i} Called ancestor")
+        else:
+          print(f"❌ {i} test_output is None")
+        print(" ┌ " + "\n │ ".join(program.splitlines()) + "\n ├────────────────")
 
         # Print the error-message, too:
         error_file = self._sandbox.output_path / f"stderr_{i}.log"
         error_text = error_file.read_text()
-        print(" ╔ " + "\n ║ ".join(error_text.splitlines()) + "\n ╚════════")
+        print(" ║ " + f"\n ║ ".join(error_text.splitlines()) + "\n ╚════════════════")
 
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)

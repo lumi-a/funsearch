@@ -39,9 +39,7 @@ def greedy_ratio(sets: list[set[int]]) -> float:
       f"cover_{element}",
     )
   model.setObjective(sum(x), GRB.MINIMIZE)
-  print(f"start {len(sets)}")
   model.optimize()
-  print("stop")
 
   if model.status != GRB.OPTIMAL:
     raise RuntimeError("Gurobi did not find an optimal solution")

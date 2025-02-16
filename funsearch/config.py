@@ -34,7 +34,7 @@ class ProgramsDatabaseConfig:
     backup_folder: Path for automatic backups
   """
 
-  functions_per_prompt: int = 3
+  functions_per_prompt: int = 2
   num_islands: int = 10
   reset_period: int = 4 * 60 * 60
   cluster_sampling_temperature_init: float = 0.1

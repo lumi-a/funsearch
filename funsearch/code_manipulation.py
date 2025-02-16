@@ -90,7 +90,7 @@ class Program:
       )
     if count > 1:
       raise ValueError(
-        f"function {function_name} exists more than once in program:\n" f"{str(self)}"
+        f"function {function_name} exists more than once in program:\n{str(self)}"
       )
     index = function_names.index(function_name)
     return index
@@ -167,8 +167,7 @@ def text_to_function(text: str) -> Function:
   program = text_to_program(text)
   if len(program.functions) != 1:
     raise ValueError(
-      f"Only one function expected, got {len(program.functions)}"
-      f":\n{program.functions}"
+      f"Only one function expected, got {len(program.functions)}:\n{program.functions}"
     )
   return program.functions[0]
 

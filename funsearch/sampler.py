@@ -59,10 +59,6 @@ class LLM:
     match = re.search(r"(```(python|))(.*?)```", output_text, re.DOTALL)
     response = match.group(3) if match else output_text
 
-    with open("last_eval.txt", "a") as file_eval:
-      file_eval.write(f"FINAL RESPONSE\n{response}\n")
-      file_eval.flush()
-
     self._log(prompt, response, self.prompt_count)
     self.prompt_count += 1
     return (response, self.prompt_count - 1)

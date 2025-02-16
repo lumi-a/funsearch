@@ -102,6 +102,8 @@ class ProgramsDatabase:
           config.cluster_sampling_temperature_period,
         )
       )
+    self._failure_counts: list[int] = [0] * config.num_islands
+    self._success_counts: list[int] = [0] * config.num_islands
     self._best_score_per_island: list[float] = [-float("inf")] * config.num_islands
     self._best_program_per_island: list[code_manipulation.Function | None] = [
       None
@@ -114,6 +116,12 @@ class ProgramsDatabase:
     self._program_counter = 0
     self._backups_done = 0
     self.identifier = identifier
+
+  def increment_failure(self, island_id: int) -> None:
+    self._failure_counts[island_id] += 1
+
+  def increment_success(self, island_id: int) -> None:
+    self._success_counts[island_id] += 1
 
   def get_best_programs_per_island(
     self,

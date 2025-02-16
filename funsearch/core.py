@@ -69,6 +69,7 @@ def run(samplers: list[Sampler], database: ProgramsDatabase, iterations: int = -
     else:
       while True:
         t.join(timeout=1)
+
   except KeyboardInterrupt:
     logging.info("Keyboard interrupt. Stopping all sampler threads.")
   finally:

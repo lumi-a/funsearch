@@ -187,6 +187,8 @@ class Evaluator:
 
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)
-      self._database.increment_success(island_id)
+      if island_id is not None:
+        self._database.increment_success(island_id)
     else:
-      self._database.increment_failure(island_id)
+      if island_id is not None:
+        self._database.increment_failure(island_id)

@@ -36,5 +36,10 @@ dependencies = [
 [project.scripts]
 funsearch = "funsearch.__main__:main"
 
+[dependency-groups]
+lint = [
+  "ruff"
+]
+
 [tool.ruff]
 indent-width = 2

@@ -102,6 +102,8 @@ class ProgramsDatabase:
           config.cluster_sampling_temperature_period,
         )
       )
+    self._failure_counts: list[int] = [0] * config.num_islands
+    self._success_counts: list[int] = [0] * config.num_islands
     self._best_score_per_island: list[float] = [-float("inf")] * config.num_islands
     self._best_program_per_island: list[code_manipulation.Function | None] = [
       None
@@ -114,6 +116,12 @@ class ProgramsDatabase:
     self._program_counter = 0
     self._backups_done = 0
     self.identifier = identifier
+
+  def increment_failure(self, island_id: int) -> None:
+    self._failure_counts[island_id] += 1
+
+  def increment_success(self, island_id: int) -> None:
+    self._success_counts[island_id] += 1
 
   def get_best_programs_per_island(
     self,
@@ -174,8 +182,7 @@ class ProgramsDatabase:
       self._best_program_per_island[island_id] = program
       self._best_scores_per_test_per_island[island_id] = scores_per_test
       self._best_score_per_island[island_id] = score
-      print()
-      logging.info("✔ Best score of island %d increased to %s ✔", island_id, score)
+      logging.info("✔ Best score of island %d increased to %s", island_id, score)
 
   def register_program(
     self,
@@ -229,6 +236,62 @@ class ProgramsDatabase:
       founder = self._best_program_per_island[founder_island_id]
       founder_scores = self._best_scores_per_test_per_island[founder_island_id]
       self._register_program_in_island(founder, island_id, founder_scores)
+      # TODO: Should we carry over _success_count and _failure_counts?
+
+  def log_tabular(self, first_run):
+    scores = self._best_score_per_island
+    score_width = max(5, max(len(str(x)) for x in scores))
+    separator = "  "
+
+    output = []
+    headers = [
+      f"{'Isl':>3}",
+      f"{'Score':>{score_width}}",
+      f"{'Queries':>7}",
+      f"{'Failures':>8}",
+      f"{'ok%':>3}",
+    ]
+    headers = separator.join(headers)
+    output.append(headers)
+    output.append("─" * len(headers))
+
+    for idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
+      successes = self._success_counts[idx]
+      failures = self._failure_counts[idx]
+      attempts = successes + failures
+      success_rate = int(100 * successes / attempts if attempts > 0 else 0)
+
+      columns = [
+        f"{idx:>3}",
+        f"{score:>{score_width}}",
+        f"{attempts:>7}",
+        f"{failures:>8}",
+        f"{success_rate:>2.0f}% ",
+      ]
+      output.append(separator.join(columns))
+
+    total_successes = sum(self._success_counts)
+    total_failures = sum(self._failure_counts)
+    total_attempts = total_successes + total_failures
+    total_success_rate = int(
+      100 * total_successes / total_attempts if total_attempts > 0 else 0
+    )
+    summary = [
+      f"{total_attempts:>7}",
+      f"{total_failures:>8}",
+      f"{total_success_rate:>2.0f}% ",
+    ]
+    output.append(
+      (" " * (2 * len(separator) + score_width - 5))
+      + " Total: "
+      + separator.join(summary)
+    )
+
+    if not first_run:
+      lines_to_move = len(output)
+      print(f"\033[{lines_to_move}A", end="")
+
+    print("\n".join(output))
 
 
 class Island:

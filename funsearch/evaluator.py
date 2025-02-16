@@ -182,23 +182,13 @@ class Evaluator:
         and test_output is not None
       ):
         if not isinstance(test_output, (int, float)):
-          print(f"❌ {index} didn't return a number")
           raise ValueError("@function.run did not return an int/float score.")
-        print(f"{test_output}", end=" ", flush=True)
         scores_per_test[current_input] = test_output
-      else:
-        if not runs_ok:
-          print(f"\033[91m!{index}\033[0m", end=" ", flush=True)
-        elif _calls_ancestor(program, self._function_to_evolve):
-          print(f"❌ {index} Called ancestor")
-        else:
-          print(f"❌ {index} test_output is None")
-        # print(" ┌ " + "\n │ ".join(program.splitlines()) + "\n ├────────────────")
-
-        # Print the error-message, too:
-        # error_file = self._sandbox.output_path / f"stderr_{i}.log"
-        # error_text = error_file.read_text()
-        # print(" ║ " + "\n ║ ".join(error_text.splitlines()) + "\n ╚════════════════")
 
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)
+      if island_id is not None:
+        self._database.increment_success(island_id)
+    else:
+      if island_id is not None:
+        self._database.increment_failure(island_id)

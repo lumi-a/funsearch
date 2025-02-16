@@ -424,7 +424,7 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest" }]
+dev = [{ name = "pytest", specifier = ">=8.3.4" }]
 lint = [{ name = "ruff" }]
 
 [[package]]

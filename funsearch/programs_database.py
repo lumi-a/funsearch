@@ -149,7 +149,7 @@ class ProgramsDatabase:
     if not p.exists():
       p.mkdir(parents=True, exist_ok=True)
     filepath = p / filename
-    logging.info(f"Saving backup to {filepath}.")
+    logging.info(f"Saving backup to {filepath}")
 
     with open(filepath, mode="wb") as f:
       self.save(f)

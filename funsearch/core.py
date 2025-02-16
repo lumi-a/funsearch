@@ -56,7 +56,7 @@ def run(samplers: list[Sampler], database: ProgramsDatabase, iterations: int = -
 
   for sampler in samplers:
     t = threading.Thread(target=sampler_runner, args=(sampler, iterations))
-    t.daemon = True  # optional: ensures threads exit when main thread exits
+    t.daemon = True
     t.start()
     threads.append(t)
 

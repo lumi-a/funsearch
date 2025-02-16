@@ -96,8 +96,8 @@ class Sampler:
     """Continuously gets prompts, samples programs, sends them for analysis."""
     prompt = self._database.get_prompt()
     samples = self._llm.draw_samples(prompt.code)
-    # This loop can be executed in parallel on remote evaluator machines.
 
+    # This loop can be executed in parallel on remote evaluator machines.
     for sample, index in samples:
       chosen_evaluator: evaluator.Evaluator = np.random.choice(self._evaluators)
       chosen_evaluator.analyse(

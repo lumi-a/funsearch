@@ -61,4 +61,5 @@ ignore = [
     "ANN201", # Disable return-type-annotation
     "PLR2004", # Allow magic values
     "SLF001", # Allow accessing private members
+    "ANN001", # Allow missing type-annotations in function-arguments
 ]

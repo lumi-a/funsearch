@@ -190,9 +190,9 @@ class ProgramsDatabaseTest(parameterized.TestCase):
 
   @parameterized.parameters(
     [
-      dict(logits=np.array([10, 9, -1000], dtype=np.float32)),
-      dict(logits=np.array([10, 9, -1000], dtype=np.int32)),
-      dict(logits=np.zeros(50)),
+      {"logits": np.array([10, 9, -1000], dtype=np.float32)},
+      {"logits": np.array([10, 9, -1000], dtype=np.int32)},
+      {"logits": np.zeros(50)},
     ]
   )
   def test_softmax(self, logits: np.ndarray):
@@ -212,8 +212,8 @@ class ProgramsDatabaseTest(parameterized.TestCase):
 
   @parameterized.parameters(
     [
-      dict(temperature=1, expected=[0.6590012, 0.242433, 0.0985659]),
-      dict(temperature=2, expected=[0.50168777, 0.304289, 0.19402324]),
+      {"temperature": 1, "expected": [0.6590012, 0.242433, 0.0985659]},
+      {"temperature": 2, "expected": [0.50168777, 0.304289, 0.19402324]},
     ]
   )
   def test_softmax_output(self, temperature, expected):
@@ -223,9 +223,9 @@ class ProgramsDatabaseTest(parameterized.TestCase):
 
   @parameterized.parameters(
     [
-      dict(logits=np.array([100, 200, 300, np.nan])),
-      dict(logits=np.array([100, np.inf, 300, 200])),
-      dict(logits=np.array([-np.inf, 200, 300, 100])),
+      {"logits": np.array([100, 200, 300, np.nan])},
+      {"logits": np.array([100, np.inf, 300, 200])},
+      {"logits": np.array([-np.inf, 200, 300, 100])},
     ]
   )
   def test_softmax_non_finite_error(self, logits):

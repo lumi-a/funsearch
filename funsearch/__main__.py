@@ -149,27 +149,35 @@ def run(
   inputs = parse_input(inputs)
 
   sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
-  evaluators = [
-    evaluator.Evaluator(
-      database,
-      sandbox_class(base_path=log_path),
-      template,
-      function_to_evolve,
-      function_to_run,
-      inputs,
+
+  def construct_evaluators(sampler_ix: int) -> list[evaluator.Evaluator]:
+    evaluators = [
+      evaluator.Evaluator(
+        database,
+        sandbox_class(
+          base_path=log_path / f"sampler-{sampler_ix}-evaluator-{i}", timeout_secs=30
+        ),
+        template,
+        function_to_evolve,
+        function_to_run,
+        inputs,
+      )
+      for i in range(conf.num_evaluators)
+    ]
+
+    # We send the initial implementation to be analysed by one of the evaluators.
+    initial = template.get_function(function_to_evolve).body
+    evaluators[0].analyse(initial, island_id=None, version_generated=None, index=0)
+    assert len(database._islands[0]._clusters) > 0, (
+      "Initial analysis failed. Make sure that Sandbox works! "
+      "See e.g. the error files under sandbox data."
     )
-    for _ in range(conf.num_evaluators)
+
+    return evaluators
+
+  samplers = [
+    sampler.Sampler(database, construct_evaluators(i), lm) for i in range(samplers)
   ]
-
-  # We send the initial implementation to be analysed by one of the evaluators.
-  initial = template.get_function(function_to_evolve).body
-  evaluators[0].analyse(initial, island_id=None, version_generated=None, index=0)
-  assert len(database._islands[0]._clusters) > 0, (
-    "Initial analysis failed. Make sure that Sandbox works! "
-    "See e.g. the error files under sandbox data."
-  )
-
-  samplers = [sampler.Sampler(database, evaluators, lm) for _ in range(samplers)]
 
   core.run(samplers, database, iterations)
 

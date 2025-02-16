@@ -22,7 +22,6 @@ import numpy as np
 from funsearch import evaluator
 from funsearch import programs_database
 import re
-import autopep8
 
 
 def reformat_to_two_spaces(code: str) -> str:
@@ -98,12 +97,6 @@ class Sampler:
     prompt = self._database.get_prompt()
     samples = self._llm.draw_samples(prompt.code)
     # This loop can be executed in parallel on remote evaluator machines.
-
-    with open(
-      "last_eval.txt", "a"
-    ) as file_eval:  # PVD: show when output is valid according to parser
-      file_eval.write(f"SAMPLES\n{samples}\n")
-      file_eval.flush()
 
     for sample in samples:
       chosen_evaluator = np.random.choice(self._evaluators)

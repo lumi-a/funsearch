@@ -1,4 +1,5 @@
 import numpy as np
+
 from funsearch.gasoline.iterative_rounding import SlotOrdered
 
 SIZE = 5000

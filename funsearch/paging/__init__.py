@@ -1,5 +1,5 @@
-from typing import Iterator
 import os
+from collections.abc import Iterator
 
 
 def read_accesses() -> Iterator[int]:

@@ -16,14 +16,12 @@
 """Class for evaluating programs proposed by the Sampler."""
 
 import ast
+import copy
 import re
 from collections.abc import Sequence
-import copy
 from typing import Any, Tuple
 
-from funsearch import code_manipulation
-from funsearch import programs_database
-from funsearch import sandbox
+from funsearch import code_manipulation, programs_database, sandbox
 
 
 class _FunctionLineVisitor(ast.NodeVisitor):
@@ -51,7 +49,6 @@ def _find_method_implementation(generated_code: str, function_to_evolve: str) ->
 
   Return the code and the name of the method.
   """
-
   """
   Regex to find all methods named 'priority_vX'.
   With each match, start from the 'def priority_vX(' and continue until there's a new line with any of
@@ -163,7 +160,6 @@ class Evaluator:
     index: int,
   ) -> None:
     """Compiles the sample into a program and executes it on test inputs."""
-
     new_function, program = _sample_to_program(
       sample, version_generated, self._template, self._function_to_evolve
     )
@@ -183,6 +179,5 @@ class Evaluator:
       self._database.register_program(new_function, island_id, scores_per_test)
       if island_id is not None:
         self._database.increment_success(island_id)
-    else:
-      if island_id is not None:
-        self._database.increment_failure(island_id)
+    elif island_id is not None:
+      self._database.increment_failure(island_id)

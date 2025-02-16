@@ -4,16 +4,16 @@ On every iteration, improve replace_v1 over the replace_vX methods from previous
 Make only small code-changes.
 """
 
+from collections import deque
 from typing import List
+
 import funsearch
 from funsearch.paging import read_accesses
-from collections import deque
 
 
 @funsearch.run
 def evaluate(_: int) -> float:
   """Returns the (negative) number of page-faults of the paging-problem."""
-
   num_pages = 256
   pages_list = []
   history = deque(maxlen=2048)

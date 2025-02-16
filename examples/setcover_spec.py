@@ -3,8 +3,9 @@
 On every iteration, improve setcover_instance_v1 over the setcover_instance_vX methods from previous iterations. Do not use np.random.
 """
 
+from gurobipy import GRB, Model
+
 import funsearch
-from gurobipy import Model, GRB
 
 
 @funsearch.run

@@ -1,6 +1,5 @@
-import logging
-
 import ast
+import logging
 import os
 import pathlib
 import sys
@@ -37,7 +36,6 @@ class DummySandbox:
     timeout_seconds: int,
   ) -> tuple[Any, bool]:
     """Returns `function_to_run(test_input)` and whether execution succeeded."""
-
     # The same "program" seems to be now repeatedly parsed using AST and then compiled.
     # This could probably be simplified quite a bit.
     namespace = DummySandbox.compile_code(program)
@@ -180,8 +178,7 @@ class ContainerSandbox(ExternalProcessSandbox):
       ret = os.system("docker --version")
       if ret != 0:
         raise Exception("Could not find Podman or Docker. Can not use ContainerSandbox.")
-      else:
-        cls.executable = "docker"
+      cls.executable = "docker"
 
     dockerfile = pathlib.Path(__file__).parent / "container" / "Dockerfile"
     logging.debug("Building container image")

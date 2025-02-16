@@ -15,8 +15,7 @@
 import pathlib
 import textwrap
 
-from absl.testing import absltest
-from absl.testing import parameterized
+from absl.testing import absltest, parameterized
 
 from funsearch import evaluator
 

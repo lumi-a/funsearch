@@ -15,17 +15,17 @@
 
 """A programs database that implements the evolutionary algorithm."""
 
-import pathlib
-import pickle
-from collections.abc import Mapping, Sequence
 import copy
 import dataclasses
+import pathlib
+import pickle
 import time
-from typing import Any, Iterable, Tuple
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any, Tuple
 
-from absl import logging
 import numpy as np
 import scipy
+from absl import logging
 
 from funsearch import code_manipulation
 from funsearch import config as config_lib
@@ -69,6 +69,7 @@ class Prompt:
     island_id: Identifier of the island that produced the implementations
        included in the prompt. Used to direct the newly generated implementation
        into the same island.
+
   """
 
   code: str

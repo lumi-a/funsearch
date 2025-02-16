@@ -1,9 +1,9 @@
-import numpy.random as rand
 from random import choices
-import gurobipy as gp
-
-from gurobipy import GRB
 from typing import Self
+
+import gurobipy as gp
+import numpy.random as rand
+from gurobipy import GRB
 
 
 class GeneralisedInstance:
@@ -107,27 +107,27 @@ class MyGenealisedModel:
     self.n = inst.n
 
   def __init_constrs(self, inst: GeneralisedInstance) -> None:
-    self.gurobi_model.addConstrs((self.z.sum("*", j) == 1 for j in range(inst.n)))
-    self.gurobi_model.addConstrs((self.z.sum(i, "*") == 1 for i in range(inst.n)))
+    self.gurobi_model.addConstrs(self.z.sum("*", j) == 1 for j in range(inst.n))
+    self.gurobi_model.addConstrs(self.z.sum(i, "*") == 1 for i in range(inst.n))
 
     for ll in range(self.k):
       # prefix smaller than Beta
       self.gurobi_model.addConstrs(
-        (
+
           gp.quicksum(inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k))
-          - gp.quicksum(inst.y[j][ll] for j in range(0, k - 1))
+          - gp.quicksum(inst.y[j][ll] for j in range(k - 1))
           <= self.beta[ll]
           for k in range(1, inst.n + 1)
-        )
+
       )
       # prefix greater than Alpha
       self.gurobi_model.addConstrs(
-        (
+
           gp.quicksum(inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k))
-          - gp.quicksum(inst.y[j][ll] for j in range(0, k))
+          - gp.quicksum(inst.y[j][ll] for j in range(k))
           >= self.alpha[ll]
           for k in range(1, inst.n + 1)
-        )
+
       )
 
   def initialize(self, inst: GeneralisedInstance) -> None:

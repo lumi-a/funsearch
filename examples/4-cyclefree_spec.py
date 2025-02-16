@@ -10,7 +10,6 @@ import funsearch
 @funsearch.run
 def evaluate(total_vertex_count: int) -> float:
   """Returns the number of edges in an undirected graph on `total_vertex_count` vertices that has no 4-cycle."""
-
   return len(solve(total_vertex_count))
 
 
@@ -19,7 +18,6 @@ def solve(total_vertex_count: int) -> set[tuple[int, int]]:
 
   This incrementally adds edges in order of their priority, skipping edges that would create a 4-cycle.
   """
-
   edge_to_priority = {
     (vertex_v, vertex_w): priority(vertex_v, vertex_w, total_vertex_count)
     for vertex_v in range(total_vertex_count)

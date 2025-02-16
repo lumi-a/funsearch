@@ -10,13 +10,11 @@ import funsearch
 @funsearch.run
 def evaluate(total_vertex_count: int) -> float:
   """Returns the number of edges in an undirected graph on `total_vertex_count` vertices having no 3-cycles or 4-cycles."""
-
   return len(solve(total_vertex_count))
 
 
 def solve(total_vertex_count: int) -> set[tuple[int, int]]:
   """Returns a large graph on `total_vertex_count` vertices without 3-cycles or 4-cycles."""
-
   edge_priorities = {
     (vertex_v, vertex_w): priority(vertex_v, vertex_w, total_vertex_count)
     for vertex_v in range(total_vertex_count)

@@ -9,6 +9,7 @@ Make only small code-changes.
 """
 
 from typing import List
+
 import funsearch
 from funsearch.gasoline.iterative_rounding import SlotOrdered
 

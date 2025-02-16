@@ -23,10 +23,10 @@ It implements 2 classes representing unities of code:
 """
 
 import ast
-from collections.abc import Iterator, MutableSet, Sequence
 import dataclasses
 import io
 import tokenize
+from collections.abc import Iterator, MutableSet, Sequence
 
 from absl import logging
 
@@ -85,9 +85,9 @@ class Program:
     function_names = [f.name for f in self.functions]
     count = function_names.count(function_name)
     if count == 0:
-      raise ValueError(f"function {function_name} does not exist in program:\n{str(self)}")
+      raise ValueError(f"function {function_name} does not exist in program:\n{self!s}")
     if count > 1:
-      raise ValueError(f"function {function_name} exists more than once in program:\n{str(self)}")
+      raise ValueError(f"function {function_name} exists more than once in program:\n{self!s}")
     index = function_names.index(function_name)
     return index
 
@@ -194,10 +194,9 @@ def _yield_token_and_is_call(code: str) -> Iterator[tuple[tokenize.TokenInfo, bo
       ):  # and in particular it is '('.
         yield prev_token, not is_attribute_access
         is_attribute_access = False
-      else:
-        if prev_token:
-          is_attribute_access = prev_token.type == tokenize.OP and prev_token.string == "."
-          yield prev_token, False
+      elif prev_token:
+        is_attribute_access = prev_token.type == tokenize.OP and prev_token.string == "."
+        yield prev_token, False
       prev_token = token
     if prev_token:
       yield prev_token, False

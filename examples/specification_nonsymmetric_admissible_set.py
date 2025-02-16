@@ -1,7 +1,9 @@
 """Generating maximal admissible sets of different dimensionalities."""
 
 import itertools
+
 import numpy as np
+
 import funsearch
 
 
@@ -53,6 +55,7 @@ def solve(n: int, w: int) -> np.ndarray:
 
   Returns:
     An array of shape [admissible_set_size, n], with entries in {0, 1, 2}.
+
   """
   children = np.array(list(itertools.product((0, 1, 2), repeat=n)), dtype=np.int32)
 
@@ -90,5 +93,6 @@ def priority(el: tuple[int, ...], n: int, w: int) -> float:
 
   Returns:
     A number reflecting the priority with which we want to add `el` to the set.
+
   """
   return 0.0

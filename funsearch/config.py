@@ -32,6 +32,7 @@ class ProgramsDatabaseConfig:
         sampling temperature.
     backup_period: Number of iterations before backing up the program database on disk
     backup_folder: Path for automatic backups
+
   """
 
   functions_per_prompt: int = 2
@@ -57,6 +58,7 @@ class Config:
         can execute in parallel as part of a distributed system.
     samples_per_prompt: How many independently sampled program continuations to
         obtain for each prompt.
+
   """
 
   programs_database: ProgramsDatabaseConfig = dataclasses.field(default_factory=ProgramsDatabaseConfig)

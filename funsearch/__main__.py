@@ -3,23 +3,22 @@ import logging
 import os
 import pathlib
 import pickle
+import re
 import time
+from pathlib import Path
 
 import click
-from pathlib import Path
 import llm
-import re
 from dotenv import load_dotenv
 
-
 from funsearch import (
+  code_manipulation,
   config,
   core,
-  sandbox,
-  sampler,
-  programs_database,
-  code_manipulation,
   evaluator,
+  programs_database,
+  sampler,
+  sandbox,
 )
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
@@ -46,7 +45,7 @@ def parse_input(filename_or_data: str):
   p = pathlib.Path(filename_or_data)
   if p.exists():
     if p.name.endswith(".json"):
-      return json.load(open(filename_or_data, "r"))
+      return json.load(open(filename_or_data))
     if p.name.endswith(".pickle"):
       return pickle.load(open(filename_or_data, "rb"))
     raise Exception("Unknown file format or filename")
@@ -115,7 +114,6 @@ def run(
                 8,9,10
                 ./examples/cap_set_input_data.json
   """
-
   # Load environment variables from .env file.
   #
   # Using OpenAI APIs with 'llm' package requires setting the variable

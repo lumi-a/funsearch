@@ -1,6 +1,7 @@
 import pathlib
 import tempfile
-from funsearch.sandbox import ExternalProcessSandbox, ContainerSandbox
+
+from funsearch.sandbox import ContainerSandbox, ExternalProcessSandbox
 
 test_prog = """
 print("running!")

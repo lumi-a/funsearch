@@ -1,8 +1,10 @@
-import funsearch.gasoline.instance as ins
 import abc
 from math import inf
-from gurobipy import GRB, tuplelist
 from typing import List
+
+from gurobipy import GRB, tuplelist
+
+import funsearch.gasoline.instance as ins
 
 
 class Result:
@@ -39,8 +41,8 @@ class IterativeAlgo(abc.ABC):
     instance = ins.Instance()
     instance.n = n
     instance.k = 1
-    instance.x = tuplelist((x for x in xs))
-    instance.y = tuplelist((y for y in ys))
+    instance.x = tuplelist(x for x in xs)
+    instance.y = tuplelist(y for y in ys)
     instance.init_model()
 
     opt = instance.solve()

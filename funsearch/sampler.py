@@ -15,13 +15,13 @@
 
 """Class for sampling new programs."""
 
+import re
 from collections.abc import Collection, Sequence
 
 # import llm
 import numpy as np
-from funsearch import evaluator
-from funsearch import programs_database
-import re
+
+from funsearch import evaluator, programs_database
 
 
 def reformat_to_two_spaces(code: str) -> str:

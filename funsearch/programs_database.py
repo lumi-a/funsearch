@@ -259,7 +259,7 @@ class ProgramsDatabase:
       successes = self._success_counts[idx]
       failures = self._failure_counts[idx]
       attempts = successes + failures
-      success_rate = 100 * successes / attempts if attempts > 0 else 0
+      success_rate = int(100 * successes / attempts if attempts > 0 else 0)
 
       output.append(
         separator.join(
@@ -268,7 +268,7 @@ class ProgramsDatabase:
             f"{score:>{score_width}}",
             f"{attempts:>7}",
             f"{failures:>8}",
-            f"{success_rate:>2.0f}%",
+            f"{success_rate:>2.0f}% ",
           ]
         )
       )

@@ -23,10 +23,10 @@ See `uv run funsearch run --help` for more options.
 
 Eventually abort the search with `ctrl+c`. Print the best functions:
 
-```shell
-# Inspect most recent backup
+```sh
+# Inspect most recent backup:
 uv run funsearch ls
-# Inspect specific backup
+# Inspect specific backup:
 uv run funsearch ls data/backups/program_db_priority_1731323471_0.pickle
 ```
 

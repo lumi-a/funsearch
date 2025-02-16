@@ -40,6 +40,10 @@ funsearch = "funsearch.__main__:main"
 lint = [
   "ruff"
 ]
+dev = [
+    "pytest>=8.3.4",
+]
+
 
 [tool.ruff]
 indent-width = 2

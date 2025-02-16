@@ -16,8 +16,11 @@
 """A single-threaded implementation of the FunSearch pipeline."""
 
 import logging
+import threading
 
 from funsearch import code_manipulation
+from funsearch.programs_database import ProgramsDatabase
+from funsearch.sampler import Sampler
 
 
 def _extract_function_names(specification: str) -> tuple[str, str]:
@@ -35,18 +38,38 @@ def _extract_function_names(specification: str) -> tuple[str, str]:
   return evolve_functions[0], run_functions[0]
 
 
-def run(samplers, database, iterations: int = -1):
-  """Launches a FunSearch experiment."""
+def sampler_runner(sampler: Sampler, iterations: int):
+  try:
+    if iterations < 0:
+      while True:
+        sampler.sample()
+    else:
+      for _ in range(iterations):
+        sampler.sample()
+  except KeyboardInterrupt:
+    logging.info("Keyboard interrupt in sampler thread.")
+
+
+def run(samplers: list[Sampler], database: ProgramsDatabase, iterations: int = -1):
+  """Launches a FunSearch experiment in parallel using threads."""
+  threads = []
+
+  for sampler in samplers:
+    t = threading.Thread(target=sampler_runner, args=(sampler, iterations))
+    t.daemon = True  # optional: ensures threads exit when main thread exits
+    t.start()
+    threads.append(t)
 
   try:
-    # This loop can be executed in parallel on remote sampler machines. As each
-    # sampler enters an infinite loop, without parallelization only the first
-    # sampler will do any work.
-    while iterations != 0:
-      for s in samplers:
-        s.sample()
-      if iterations > 0:
-        iterations -= 1
+    # If iterations is finite, wait for all threads to finish.
+    # Otherwise, just keep the main thread alive.
+    if iterations > 0:
+      for t in threads:
+        t.join()
+    else:
+      while True:
+        t.join(timeout=1)
   except KeyboardInterrupt:
-    logging.info("Keyboard interrupt. Stopping.")
-  database.backup()
+    logging.info("Keyboard interrupt. Stopping all sampler threads.")
+  finally:
+    database.backup()

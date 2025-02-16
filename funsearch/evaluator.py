@@ -183,12 +183,12 @@ class Evaluator:
         if not isinstance(test_output, (int, float)):
           print("❌ Function didn't return a number")
           raise ValueError("@function.run did not return an int/float score.")
-        print(f"Score {test_output}")
+        print(f"{test_output}", end=" ", flush=True)
         scores_per_test[current_input] = test_output
       else:
         i = self._sandbox.call_count - 1
         if not runs_ok:
-          print(f"❌ {i} Ran badly")
+          print(f"\033[91m!{i}\033[0m", end=" ", flush=True)
         elif _calls_ancestor(program, self._function_to_evolve):
           print(f"❌ {i} Called ancestor")
         else:

@@ -110,7 +110,6 @@ class ExternalProcessSandbox(DummySandbox):
       result = subprocess.run(cmd, timeout=timeout, shell=True, check=False)
       return result.returncode
     except subprocess.TimeoutExpired:
-      print(f"Command timed out after {timeout} seconds")
       logging.debug(f"Command timed out after {timeout} seconds")
       return 1
     except Exception as e:

@@ -52,11 +52,11 @@ def sampler_runner(sampler: Sampler, iterations: int):
 
 def run(samplers: list[Sampler], database: ProgramsDatabase, iterations: int = -1):
   """Launches a FunSearch experiment in parallel using threads."""
-  threads = []
+  threads: list[threading.Thread] = []
 
   for sampler in samplers:
     t = threading.Thread(target=sampler_runner, args=(sampler, iterations))
-    t.daemon = True  # optional: ensures threads exit when main thread exits
+    t.daemon = True
     t.start()
     threads.append(t)
 

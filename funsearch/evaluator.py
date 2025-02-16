@@ -193,12 +193,6 @@ class Evaluator:
           print(f"❌ {index} Called ancestor")
         else:
           print(f"❌ {index} test_output is None")
-        # print(" ┌ " + "\n │ ".join(program.splitlines()) + "\n ├────────────────")
-
-        # Print the error-message, too:
-        # error_file = self._sandbox.output_path / f"stderr_{i}.log"
-        # error_text = error_file.read_text()
-        # print(" ║ " + "\n ║ ".join(error_text.splitlines()) + "\n ╚════════════════")
 
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)

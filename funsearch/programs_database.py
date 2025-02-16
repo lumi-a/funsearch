@@ -174,7 +174,9 @@ class ProgramsDatabase:
       self._best_program_per_island[island_id] = program
       self._best_scores_per_test_per_island[island_id] = scores_per_test
       self._best_score_per_island[island_id] = score
+      print("✔")
       logging.info("Best score of island %d increased to %s", island_id, score)
+      print("✔")
 
   def register_program(
     self,
@@ -326,7 +328,7 @@ class Island:
       name=new_function_name,
       body="",
       docstring=(
-        "Improved version of " f"`{self._function_to_evolve}_v{next_version - 1}`."
+        f"Improved version of `{self._function_to_evolve}_v{next_version - 1}`."
       ),
     )
     versioned_functions.append(header)

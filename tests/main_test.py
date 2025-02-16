@@ -41,14 +41,10 @@ class TestMain(unittest.TestCase):
       assert mock_run.call_count == 1
 
   def test_main_sample(self):
-    with patch(
-      "funsearch.sampler.LLM._draw_sample", return_value="return 0.5"
-    ) as mock_run:
+    with patch("funsearch.sampler.LLM._draw_sample", return_value="return 0.5") as mock_run:
       result = runner.invoke(main, self.default_args)
       assert result.exit_code == 0, result.output
-      assert (
-        mock_run.call_count == 2
-      ), "There should be 2 sampler per sampler by default"
+      assert mock_run.call_count == 2, "There should be 2 sampler per sampler by default"
 
 
 def test_parse_input():

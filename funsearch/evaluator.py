@@ -46,9 +46,7 @@ class _FunctionLineVisitor(ast.NodeVisitor):
     return self._function_end_line
 
 
-def _find_method_implementation(
-  generated_code: str, function_to_evolve: str
-) -> Tuple[str, str]:
+def _find_method_implementation(generated_code: str, function_to_evolve: str) -> Tuple[str, str]:
   """Find the last 'def priority_vX()' method from generated code.
 
   Return the code and the name of the method.
@@ -176,11 +174,7 @@ class Evaluator:
         program, self._function_to_run, current_input, self._timeout_seconds
       )
 
-      if (
-        runs_ok
-        and not _calls_ancestor(program, self._function_to_evolve)
-        and test_output is not None
-      ):
+      if runs_ok and not _calls_ancestor(program, self._function_to_evolve) and test_output is not None:
         if not isinstance(test_output, (int, float)):
           raise ValueError("@function.run did not return an int/float score.")
         scores_per_test[current_input] = test_output

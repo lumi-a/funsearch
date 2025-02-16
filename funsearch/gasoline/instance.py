@@ -99,12 +99,8 @@ class MyModel:
       self.gurobi_model: gp.Model = gp.Model(env=env)
 
   def _init_vars(self, inst: Instance) -> None:
-    self.alpha = self.gurobi_model.addVar(
-      vtype=GRB.INTEGER, name="alpha", lb=-float("inf"), ub=float("inf")
-    )
-    self.beta = self.gurobi_model.addVar(
-      vtype=GRB.INTEGER, name="beta", lb=-float("inf"), ub=float("inf")
-    )
+    self.alpha = self.gurobi_model.addVar(vtype=GRB.INTEGER, name="alpha", lb=-float("inf"), ub=float("inf"))
+    self.beta = self.gurobi_model.addVar(vtype=GRB.INTEGER, name="beta", lb=-float("inf"), ub=float("inf"))
     ll = list(range(inst.n))
     self.z = self.gurobi_model.addVars(ll, ll, vtype=GRB.BINARY, name="z")
     self.n = inst.n
@@ -194,9 +190,7 @@ def generate_instance(n: int, min: int, max: int) -> Instance:
   return generate_instance_distinct(n, min, max, min, max)
 
 
-def generate_instance_distinct(
-  n: int, x_min: int, x_max: int, y_min: int, y_max: int
-) -> Instance:
+def generate_instance_distinct(n: int, x_min: int, x_max: int, y_min: int, y_max: int) -> Instance:
   inst = Instance()
   valid = False
   while not valid:
@@ -212,16 +206,8 @@ def generate_instance_distinct(
 
 def genrate_lb_instance(k: int) -> Instance:
   inst = Instance()
-  inst.x = list(
-    it.chain.from_iterable(
-      [[2**k - 2 ** (k - i) for _ in range(2**i)] for i in range(1, k)]
-    )
-  )
+  inst.x = list(it.chain.from_iterable([[2**k - 2 ** (k - i) for _ in range(2**i)] for i in range(1, k)]))
   inst.x.extend([2**k for _ in range(2**k - 1)] + [0])
-  inst.y = list(
-    it.chain.from_iterable(
-      [[2**k - 2 ** (k - i) for _ in range(2**i)] for i in range(1, k + 1)]
-    )
-  )
+  inst.y = list(it.chain.from_iterable([[2**k - 2 ** (k - i) for _ in range(2**i)] for i in range(1, k + 1)]))
   inst.n = len(inst.x)
   return inst

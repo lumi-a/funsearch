@@ -85,13 +85,9 @@ class Program:
     function_names = [f.name for f in self.functions]
     count = function_names.count(function_name)
     if count == 0:
-      raise ValueError(
-        f"function {function_name} does not exist in program:\n{str(self)}"
-      )
+      raise ValueError(f"function {function_name} does not exist in program:\n{str(self)}")
     if count > 1:
-      raise ValueError(
-        f"function {function_name} exists more than once in program:\n{str(self)}"
-      )
+      raise ValueError(f"function {function_name} exists more than once in program:\n{str(self)}")
     index = function_names.index(function_name)
     return index
 
@@ -166,9 +162,7 @@ def text_to_function(text: str) -> Function:
   """Returns Function object by parsing input text using Python AST."""
   program = text_to_program(text)
   if len(program.functions) != 1:
-    raise ValueError(
-      f"Only one function expected, got {len(program.functions)}:\n{program.functions}"
-    )
+    raise ValueError(f"Only one function expected, got {len(program.functions)}:\n{program.functions}")
   return program.functions[0]
 
 
@@ -202,9 +196,7 @@ def _yield_token_and_is_call(code: str) -> Iterator[tuple[tokenize.TokenInfo, bo
         is_attribute_access = False
       else:
         if prev_token:
-          is_attribute_access = (
-            prev_token.type == tokenize.OP and prev_token.string == "."
-          )
+          is_attribute_access = prev_token.type == tokenize.OP and prev_token.string == "."
           yield prev_token, False
       prev_token = token
     if prev_token:
@@ -237,9 +229,7 @@ def rename_function_calls(code: str, source_name: str, target_name: str) -> str:
 
 def get_functions_called(code: str) -> MutableSet[str]:
   """Returns the set of all functions called in `code`."""
-  return set(
-    token.string for token, is_call in _yield_token_and_is_call(code) if is_call
-  )
+  return set(token.string for token, is_call in _yield_token_and_is_call(code) if is_call)
 
 
 def yield_decorated(code: str, module: str, name: str) -> Iterator[str]:
@@ -253,9 +243,5 @@ def yield_decorated(code: str, module: str, name: str) -> Iterator[str]:
           attribute = decorator
         elif isinstance(decorator, ast.Call):
           attribute = decorator.func
-        if (
-          attribute is not None
-          and attribute.value.id == module
-          and attribute.attr == name
-        ):
+        if attribute is not None and attribute.value.id == module and attribute.attr == name:
           yield node.name

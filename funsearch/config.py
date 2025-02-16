@@ -59,9 +59,7 @@ class Config:
         obtain for each prompt.
   """
 
-  programs_database: ProgramsDatabaseConfig = dataclasses.field(
-    default_factory=ProgramsDatabaseConfig
-  )
+  programs_database: ProgramsDatabaseConfig = dataclasses.field(default_factory=ProgramsDatabaseConfig)
   num_samplers: int = 15
   num_evaluators: int = 140
   samples_per_prompt: int = 4

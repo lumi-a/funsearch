@@ -82,9 +82,7 @@ def main(ctx):
   type=click.File("rb"),
   help="Use existing program database",
 )
-@click.option(
-  "--iterations", default=-1, type=click.INT, help="Max iterations per sampler"
-)
+@click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
 @click.option("--samplers", default=15, type=click.INT, help="Samplers")
 @click.option(
   "--sandbox_type",
@@ -154,9 +152,7 @@ def run(
     evaluators = [
       evaluator.Evaluator(
         database,
-        sandbox_class(
-          base_path=log_path / f"sampler-{sampler_ix}-evaluator-{i}", timeout_secs=30
-        ),
+        sandbox_class(base_path=log_path / f"sampler-{sampler_ix}-evaluator-{i}", timeout_secs=30),
         template,
         function_to_evolve,
         function_to_run,
@@ -169,15 +165,12 @@ def run(
     initial = template.get_function(function_to_evolve).body
     evaluators[0].analyse(initial, island_id=None, version_generated=None, index=0)
     assert len(database._islands[0]._clusters) > 0, (
-      "Initial analysis failed. Make sure that Sandbox works! "
-      "See e.g. the error files under sandbox data."
+      "Initial analysis failed. Make sure that Sandbox works! See e.g. the error files under sandbox data."
     )
 
     return evaluators
 
-  samplers = [
-    sampler.Sampler(database, construct_evaluators(i), lm) for i in range(samplers)
-  ]
+  samplers = [sampler.Sampler(database, construct_evaluators(i), lm) for i in range(samplers)]
 
   core.run(samplers, database, iterations)
 
@@ -211,9 +204,7 @@ def ls(db_file):
   conf = config.Config(num_evaluators=1)
 
   # A bit silly way to list programs. This probably does not work if config has changed any way
-  database = programs_database.ProgramsDatabase(
-    conf.programs_database, None, "", identifier=""
-  )
+  database = programs_database.ProgramsDatabase(conf.programs_database, None, "", identifier="")
   database.load(db_file)
 
   progs = database.get_best_programs_per_island()

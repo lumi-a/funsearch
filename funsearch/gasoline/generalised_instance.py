@@ -55,21 +55,11 @@ class GeneralisedInstance:
           noise_x[pos_x][coord] += sign
           noise_y[pos_y][coord] += sign
 
-      new_x = [
-        tuple(self.x[i][ll] + noise_x[i][ll] for ll in range(self.k))
-        for i in range(self.n)
-      ]
-      new_y = [
-        tuple(self.y[i][ll] + noise_y[i][ll] for ll in range(self.k))
-        for i in range(self.n)
-      ]
+      new_x = [tuple(self.x[i][ll] + noise_x[i][ll] for ll in range(self.k)) for i in range(self.n)]
+      new_y = [tuple(self.y[i][ll] + noise_y[i][ll] for ll in range(self.k)) for i in range(self.n)]
 
       valid = True
-      if any(
-        new_x[i][ll] < 0 or new_y[i][ll] < 0
-        for ll in range(self.k)
-        for i in range(self.n)
-      ):
+      if any(new_x[i][ll] < 0 or new_y[i][ll] < 0 for ll in range(self.k) for i in range(self.n)):
         valid = False
 
     self.x = gp.tuplelist(new_x)
@@ -124,9 +114,7 @@ class MyGenealisedModel:
       # prefix smaller than Beta
       self.gurobi_model.addConstrs(
         (
-          gp.quicksum(
-            inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k)
-          )
+          gp.quicksum(inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k))
           - gp.quicksum(inst.y[j][ll] for j in range(0, k - 1))
           <= self.beta[ll]
           for k in range(1, inst.n + 1)
@@ -135,9 +123,7 @@ class MyGenealisedModel:
       # prefix greater than Alpha
       self.gurobi_model.addConstrs(
         (
-          gp.quicksum(
-            inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k)
-          )
+          gp.quicksum(inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k))
           - gp.quicksum(inst.y[j][ll] for j in range(0, k))
           >= self.alpha[ll]
           for k in range(1, inst.n + 1)
@@ -219,9 +205,7 @@ def generate_instance_distinct(
     inst.x = _generate_tab(n, k, x_min, x_max)
     inst.y = _generate_tab(n - 1, k, y_min, y_max)
     diff = tuple(
-      sum([inst.x[i][ll] for i in range(n)])
-      - sum([inst.y[i][ll] for i in range(n - 1)])
-      for ll in range(k)
+      sum([inst.x[i][ll] for i in range(n)]) - sum([inst.y[i][ll] for i in range(n - 1)]) for ll in range(k)
     )
     if all(diff[ll] >= y_min and diff[ll] < y_max for ll in range(k)):
       inst.y.append(diff)

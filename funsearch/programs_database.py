@@ -105,12 +105,8 @@ class ProgramsDatabase:
     self._failure_counts: list[int] = [0] * config.num_islands
     self._success_counts: list[int] = [0] * config.num_islands
     self._best_score_per_island: list[float] = [-float("inf")] * config.num_islands
-    self._best_program_per_island: list[code_manipulation.Function | None] = [
-      None
-    ] * config.num_islands
-    self._best_scores_per_test_per_island: list[ScoresPerTest | None] = [
-      None
-    ] * config.num_islands
+    self._best_program_per_island: list[code_manipulation.Function | None] = [None] * config.num_islands
+    self._best_scores_per_test_per_island: list[ScoresPerTest | None] = [None] * config.num_islands
 
     self._last_reset_time: float = time.time()
     self._program_counter = 0
@@ -217,8 +213,7 @@ class ProgramsDatabase:
     """Resets the weaker half of islands."""
     # We sort best scores after adding minor noise to break ties.
     indices_sorted_by_score: np.ndarray = np.argsort(
-      self._best_score_per_island
-      + np.random.randn(len(self._best_score_per_island)) * 1e-6
+      self._best_score_per_island + np.random.randn(len(self._best_score_per_island)) * 1e-6
     )
     num_islands_to_reset = self._config.num_islands // 2
     reset_islands_ids = indices_sorted_by_score[:num_islands_to_reset]
@@ -273,19 +268,13 @@ class ProgramsDatabase:
     total_successes = sum(self._success_counts)
     total_failures = sum(self._failure_counts)
     total_attempts = total_successes + total_failures
-    total_success_rate = int(
-      100 * total_successes / total_attempts if total_attempts > 0 else 0
-    )
+    total_success_rate = int(100 * total_successes / total_attempts if total_attempts > 0 else 0)
     summary = [
       f"{total_attempts:>7}",
       f"{total_failures:>8}",
       f"{total_success_rate:>2.0f}% ",
     ]
-    output.append(
-      (" " * (2 * len(separator) + score_width - 5))
-      + " Total: "
-      + separator.join(summary)
-    )
+    output.append((" " * (2 * len(separator) + score_width - 5)) + " Total: " + separator.join(summary))
 
     if not first_run:
       lines_to_move = len(output)
@@ -331,15 +320,11 @@ class Island:
   def get_prompt(self) -> tuple[str, int]:
     """Constructs a prompt containing functions from this island."""
     signatures = list(self._clusters.keys())
-    cluster_scores = np.array(
-      [self._clusters[signature].score for signature in signatures]
-    )
+    cluster_scores = np.array([self._clusters[signature].score for signature in signatures])
 
     # Convert scores to probabilities using softmax with temperature schedule.
     period = self._cluster_sampling_temperature_period
-    temperature = self._cluster_sampling_temperature_init * (
-      1 - (self._num_programs % period) / period
-    )
+    temperature = self._cluster_sampling_temperature_init * (1 - (self._num_programs % period) / period)
     probabilities = _softmax(cluster_scores, temperature)
 
     # At the beginning of an experiment when we have few clusters, place fewer
@@ -360,9 +345,7 @@ class Island:
     version_generated = len(sorted_implementations) + 1
     return self._generate_prompt(sorted_implementations), version_generated
 
-  def _generate_prompt(
-    self, implementations: Sequence[code_manipulation.Function]
-  ) -> str:
+  def _generate_prompt(self, implementations: Sequence[code_manipulation.Function]) -> str:
     """Creates a prompt containing a sequence of function `implementations`."""
     implementations = copy.deepcopy(implementations)  # We will mutate these.
 
@@ -373,9 +356,7 @@ class Island:
       implementation.name = new_function_name
       # Update the docstring for all subsequent functions after `_v0`.
       if i >= 1:
-        implementation.docstring = (
-          f"Improved version of `{self._function_to_evolve}_v{i - 1}`."
-        )
+        implementation.docstring = f"Improved version of `{self._function_to_evolve}_v{i - 1}`."
       # If the function is recursive, replace calls to itself with its new name.
       implementation = code_manipulation.rename_function_calls(
         str(implementation), self._function_to_evolve, new_function_name
@@ -389,9 +370,7 @@ class Island:
       implementations[-1],
       name=new_function_name,
       body="",
-      docstring=(
-        f"Improved version of `{self._function_to_evolve}_v{next_version - 1}`."
-      ),
+      docstring=(f"Improved version of `{self._function_to_evolve}_v{next_version - 1}`."),
     )
     versioned_functions.append(header)
 
@@ -420,8 +399,6 @@ class Cluster:
 
   def sample_program(self) -> code_manipulation.Function:
     """Samples a program, giving higher probability to shorther programs."""
-    normalized_lengths = (np.array(self._lengths) - min(self._lengths)) / (
-      max(self._lengths) + 1e-6
-    )
+    normalized_lengths = (np.array(self._lengths) - min(self._lengths)) / (max(self._lengths) + 1e-6)
     probabilities = _softmax(-normalized_lengths, temperature=1.0)
     return np.random.choice(self._programs, p=probabilities)

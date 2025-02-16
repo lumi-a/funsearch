@@ -98,9 +98,7 @@ def create_test_function(has_return_type: bool, has_docstring: bool) -> str:
   return code
 
 
-def create_test_program(
-  has_imports: bool, has_class: bool, has_assignment: bool
-) -> str:
+def create_test_program(has_imports: bool, has_class: bool, has_assignment: bool) -> str:
   code = ""
   if has_imports:
     code += _IMPORTS
@@ -115,9 +113,7 @@ def create_test_program(
 class PromptSamplingTest(parameterized.TestCase):
   @parameterized.parameters(list(itertools.product([False, True], repeat=2)))
   def test_text_to_function(self, has_return_type: bool, has_docstring: bool):
-    function = code_manipulation.text_to_function(
-      create_test_function(has_return_type, has_docstring)
-    )
+    function = code_manipulation.text_to_function(create_test_function(has_return_type, has_docstring))
     self.assertEqual(function.name, "get_capset_v0")
     self.assertEqual(function.args, "n: int")
     if has_return_type:
@@ -146,9 +142,7 @@ class PromptSamplingTest(parameterized.TestCase):
     self.assertEqual(str(program), str(program_again))
 
   @parameterized.parameters(list(itertools.product([False, True], repeat=3)))
-  def test_text_to_program(
-    self, has_imports: bool, has_class: bool, has_assignment: bool
-  ):
+  def test_text_to_program(self, has_imports: bool, has_class: bool, has_assignment: bool):
     code = create_test_program(has_imports, has_class, has_assignment)
     program = code_manipulation.text_to_program(code)
     self.assertLen(program.functions, 2)

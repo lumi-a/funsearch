@@ -21,10 +21,7 @@ def block_children(scores, admissible_set, new_element):
     (2, 1): (1, 2),
     (2, 2): (0, 1, 2),
   }
-  invalid_vals = [
-    [np.array(invalid_vals_raw[(i, j)], dtype=np.int32) for j in range(3)]
-    for i in range(3)
-  ]
+  invalid_vals = [[np.array(invalid_vals_raw[(i, j)], dtype=np.int32) for j in range(3)] for i in range(3)]
 
   # Block 2^w elements with the same support as `new_element`.
   w = np.count_nonzero(new_element)

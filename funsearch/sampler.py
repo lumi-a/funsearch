@@ -34,9 +34,7 @@ def reformat_to_two_spaces(code: str) -> str:
     return " " * (2 * (space_count // 4))  # Assumes original indentation was 4 spaces
 
   # Split the code into lines, reformat each line, and join back into a single string
-  reformatted_lines = [
-    re.sub(pattern, replace_with_two_spaces, line) for line in code.splitlines()
-  ]
+  reformatted_lines = [re.sub(pattern, replace_with_two_spaces, line) for line in code.splitlines()]
   return "\n".join(reformatted_lines)
 
 
@@ -96,6 +94,4 @@ class Sampler:
     # This loop can be executed in parallel on remote evaluator machines.
     for sample, index in samples:
       chosen_evaluator: evaluator.Evaluator = np.random.choice(self._evaluators)
-      chosen_evaluator.analyse(
-        sample, prompt.island_id, prompt.version_generated, index
-      )
+      chosen_evaluator.analyse(sample, prompt.island_id, prompt.version_generated, index)

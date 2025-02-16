@@ -110,21 +110,15 @@ class FunsearchTest(parameterized.TestCase):
     self.assertEqual(to_evolve, "capset")
 
   def test_extract_function_names_no_run(self):
-    with self.assertRaisesRegex(
-      ValueError, r"Expected 1 function decorated with `@funsearch.run`."
-    ):
+    with self.assertRaisesRegex(ValueError, r"Expected 1 function decorated with `@funsearch.run`."):
       core._extract_function_names(_PY_PROMPT_NO_RUN)
 
   def test_extract_function_names_no_evolve(self):
-    with self.assertRaisesRegex(
-      ValueError, r"Expected 1 function decorated with `@funsearch.evolve`."
-    ):
+    with self.assertRaisesRegex(ValueError, r"Expected 1 function decorated with `@funsearch.evolve`."):
       core._extract_function_names(_PY_PROMPT_NO_EVOLVE)
 
   def test_extract_function_names_double_run(self):
-    with self.assertRaisesRegex(
-      ValueError, r"Expected 1 function decorated with `@funsearch.run`."
-    ):
+    with self.assertRaisesRegex(ValueError, r"Expected 1 function decorated with `@funsearch.run`."):
       core._extract_function_names(_PY_PROMPT_DOUBLE_RUN)
 
 

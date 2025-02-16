@@ -8,9 +8,7 @@ from typing import Any
 
 import cloudpickle
 
-CONTAINER_MAIN = (
-  pathlib.Path(__file__).parent / "container" / "container_main.py"
-).absolute()
+CONTAINER_MAIN = (pathlib.Path(__file__).parent / "container" / "container_main.py").absolute()
 
 IMAGE_NAME = "funsearch_sandbox"
 
@@ -99,10 +97,7 @@ class ExternalProcessSandbox(DummySandbox):
 
     prog_path = call_data_path / "prog.pickle"
     output_file = call_data_path / "output.pickle"
-    cmd = (
-      f"{self.python_path} {CONTAINER_MAIN} {prog_path} {input_path} {output_file}"
-      f"  2> {error_file_path}"
-    )
+    cmd = f"{self.python_path} {CONTAINER_MAIN} {prog_path} {input_path} {output_file}  2> {error_file_path}"
 
     logging.debug(f"Executing {cmd}")
     timeout = int(self.timeout_secs)
@@ -184,9 +179,7 @@ class ContainerSandbox(ExternalProcessSandbox):
     if ret != 0:
       ret = os.system("docker --version")
       if ret != 0:
-        raise Exception(
-          "Could not find Podman or Docker. Can not use ContainerSandbox."
-        )
+        raise Exception("Could not find Podman or Docker. Can not use ContainerSandbox.")
       else:
         cls.executable = "docker"
 

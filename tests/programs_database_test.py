@@ -171,9 +171,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
         island_id=i,
         scores_per_test={"unused_input": score},
       )
-    database.register_program(
-      unused_function, island_id=7, scores_per_test={"unused_input": 17}
-    )
+    database.register_program(unused_function, island_id=7, scores_per_test={"unused_input": 17})
 
     expected_scores = list(scores)
     expected_scores[7] = 17

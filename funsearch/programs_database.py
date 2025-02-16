@@ -252,7 +252,7 @@ class ProgramsDatabase:
     ]
     headers = separator.join(headers)
     output.append(headers)
-    output.append("-" * len(headers))
+    output.append("─" * len(headers))
 
     for idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
       successes = self._success_counts[idx]

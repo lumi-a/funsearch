@@ -248,7 +248,8 @@ class ProgramsDatabase:
       f"{'Isl':>3}",
       f"{'Score':>{score_width}}",
       f"{'Queries':>7}",
-      f"{'Failures':>8} {'ok%':>3}",
+      f"{'Failures':>8}",
+      f"{'ok%':>3}",
     ]
     headers = separator.join(headers)
     output.append(headers)
@@ -268,6 +269,23 @@ class ProgramsDatabase:
         f"{success_rate:>2.0f}% ",
       ]
       output.append(separator.join(columns))
+
+    total_successes = sum(self._success_counts)
+    total_failures = sum(self._failure_counts)
+    total_attempts = total_successes + total_failures
+    total_success_rate = int(
+      100 * total_successes / total_attempts if total_attempts > 0 else 0
+    )
+    summary = [
+      f"{total_attempts:>7}",
+      f"{total_failures:>8}",
+      f"{total_success_rate:>2.0f}% ",
+    ]
+    output.append(
+      (" " * (2 * len(separator) + score_width - 5))
+      + " Total: "
+      + separator.join(summary)
+    )
 
     if not first_run:
       lines_to_move = len(output)

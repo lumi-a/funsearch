@@ -69,7 +69,7 @@ def main(ctx):
 @main.command()
 @click.argument("spec_file", type=click.File("r"))
 @click.argument("inputs")
-@click.option("--model_name", default="gpt-3.5-turbo-instruct", help="LLM model")
+@click.option("--model_name", default="gpt-3.5-turbo", help="LLM model")
 @click.option(
   "--output_path",
   default="./data/",
@@ -88,7 +88,7 @@ def main(ctx):
 @click.option("--samplers", default=15, type=click.INT, help="Samplers")
 @click.option(
   "--sandbox_type",
-  default="ContainerSandbox",
+  default="ExternalProcessSandbox",
   type=click.Choice(SANDBOX_NAMES),
   help="Sandbox type",
 )

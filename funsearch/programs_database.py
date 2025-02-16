@@ -242,7 +242,6 @@ class ProgramsDatabase:
     scores = self._best_score_per_island
     score_width = max(5, max(len(str(x)) for x in scores))
     separator = "  "
-    progression_limit = 6
 
     output = []
     headers = [
@@ -255,23 +254,20 @@ class ProgramsDatabase:
     output.append(headers)
     output.append("-" * len(headers))
 
-    for idx, score in enumerate(sorted(scores)):
+    for idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
       successes = self._success_counts[idx]
       failures = self._failure_counts[idx]
       attempts = successes + failures
       success_rate = int(100 * successes / attempts if attempts > 0 else 0)
 
-      output.append(
-        separator.join(
-          [
-            f"{idx:>3}",
-            f"{score:>{score_width}}",
-            f"{attempts:>7}",
-            f"{failures:>8}",
-            f"{success_rate:>2.0f}% ",
-          ]
-        )
-      )
+      columns = [
+        f"{idx:>3}",
+        f"{score:>{score_width}}",
+        f"{attempts:>7}",
+        f"{failures:>8}",
+        f"{success_rate:>2.0f}% ",
+      ]
+      output.append(separator.join(columns))
 
     if not first_run:
       lines_to_move = len(output)

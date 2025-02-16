@@ -251,7 +251,8 @@ class ProgramsDatabase:
       f"{'Queries':>7}",
       f"{'Failures':>8} {'ok%':>3}",
     ]
-    output.append(separator.join(headers))
+    headers = separator.join(headers)
+    output.append(headers)
     output.append("-" * len(headers))
 
     for idx, score in enumerate(sorted(scores)):

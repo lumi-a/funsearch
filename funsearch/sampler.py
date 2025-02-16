@@ -49,7 +49,7 @@ class LLM:
     self.prompt_count = 0
     self.log_path = log_path
 
-  def _draw_sample(self, prompt: str) -> str:
+  def _draw_sample(self, prompt: str) -> (str, int):
     try:
       output_text = self.model.prompt(prompt).text()
     except Exception as e:
@@ -65,9 +65,9 @@ class LLM:
 
     self._log(prompt, response, self.prompt_count)
     self.prompt_count += 1
-    return response
+    return (response, self.prompt_count - 1)
 
-  def draw_samples(self, prompt: str) -> Collection[str]:
+  def draw_samples(self, prompt: str) -> Collection[tuple[str, int]]:
     """Returns multiple predicted continuations of `prompt`."""
     return [self._draw_sample(prompt) for _ in range(self._samples_per_prompt)]
 
@@ -98,6 +98,8 @@ class Sampler:
     samples = self._llm.draw_samples(prompt.code)
     # This loop can be executed in parallel on remote evaluator machines.
 
-    for sample in samples:
-      chosen_evaluator = np.random.choice(self._evaluators)
-      chosen_evaluator.analyse(sample, prompt.island_id, prompt.version_generated)
+    for sample, index in samples:
+      chosen_evaluator: evaluator.Evaluator = np.random.choice(self._evaluators)
+      chosen_evaluator.analyse(
+        sample, prompt.island_id, prompt.version_generated, index
+      )

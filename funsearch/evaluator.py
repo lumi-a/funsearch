@@ -182,17 +182,8 @@ class Evaluator:
         and test_output is not None
       ):
         if not isinstance(test_output, (int, float)):
-          print(f"❌ {index} didn't return a number")
           raise ValueError("@function.run did not return an int/float score.")
-        print(f"{test_output}", end=" ", flush=True)
         scores_per_test[current_input] = test_output
-      else:
-        if not runs_ok:
-          print(f"\033[91m!{index}\033[0m", end=" ", flush=True)
-        elif _calls_ancestor(program, self._function_to_evolve):
-          print(f"❌ {index} Called ancestor")
-        else:
-          print(f"❌ {index} test_output is None")
 
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)

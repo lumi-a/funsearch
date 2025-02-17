@@ -41,14 +41,16 @@ SANDBOX_NAMES = [c.__name__ for c in SANDBOX_TYPES]
 
 def parse_input(filename_or_data: str):
   if len(filename_or_data) == 0:
-    raise Exception("No input data specified")
+    msg = "No input data specified"
+    raise Exception(msg)
   p = pathlib.Path(filename_or_data)
   if p.exists():
     if p.name.endswith(".json"):
       return json.load(open(filename_or_data))
     if p.name.endswith(".pickle"):
       return pickle.load(open(filename_or_data, "rb"))
-    raise Exception("Unknown file format or filename")
+    msg = "Unknown file format or filename"
+    raise Exception(msg)
   data = [filename_or_data] if "," not in filename_or_data else filename_or_data.split(",")
   if data[0].isnumeric():
     f = int if data[0].isdecimal() else float
@@ -189,7 +191,8 @@ def ls(db_file):
 
     # Select the file with lexicographically maximal (X, Y)
     if not matching_files:
-      raise FileNotFoundError("No matching backup files found in data/backups/")
+      msg = "No matching backup files found in data/backups/"
+      raise FileNotFoundError(msg)
 
     _, _, selected_file = max(matching_files)
     db_file = open(selected_file, "rb")

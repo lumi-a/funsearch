@@ -173,7 +173,8 @@ class Evaluator:
 
       if runs_ok and not _calls_ancestor(program, self._function_to_evolve) and test_output is not None:
         if not isinstance(test_output, (int, float)):
-          raise ValueError("@function.run did not return an int/float score.")
+          msg = "@function.run did not return an int/float score."
+          raise ValueError(msg)
         scores_per_test[current_input] = test_output
 
     if scores_per_test:

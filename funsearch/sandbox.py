@@ -177,7 +177,8 @@ class ContainerSandbox(ExternalProcessSandbox):
     if ret != 0:
       ret = os.system("docker --version")
       if ret != 0:
-        raise Exception("Could not find Podman or Docker. Can not use ContainerSandbox.")
+        msg = "Could not find Podman or Docker. Can not use ContainerSandbox."
+        raise Exception(msg)
       cls.executable = "docker"
 
     dockerfile = pathlib.Path(__file__).parent / "container" / "Dockerfile"

@@ -181,7 +181,7 @@ class MyModel:
 
 def _generate_tab(n: int, min: int, max: int) -> gp.tuplelist[int]:
   ll = gp.tuplelist()
-  for i in range(n):
+  for _i in range(n):
     ll.append(rand.randint(min, max))
   return ll
 

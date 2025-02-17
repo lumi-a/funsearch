@@ -185,7 +185,7 @@ class MyGenealisedModel:
 
 def _generate_tab(n: int, k: int, min: int, max: int) -> gp.tuplelist[tuple[int]]:
   ll = gp.tuplelist()
-  for i in range(n):
+  for _i in range(n):
     ll.append(tuple(rand.randint(min, max) for _ in range(k)))
   return ll
 

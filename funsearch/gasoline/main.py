@@ -8,7 +8,7 @@ k = 15
 n = 10
 
 tests = []
-for i in range(100):
+for _i in range(100):
   xs = list(np.random.randint(1, 20, size=5))
   ys = list(np.random.randint(1, 20, size=5))
   apx = SlotOrdered().approximation_ratio(xs, ys)

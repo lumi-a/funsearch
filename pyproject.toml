@@ -57,6 +57,7 @@ ignore = [
     "D213",   # multi-line-summary-second-line
     "COM812", # missing-trailing-comma, see https://docs.astral.sh/ruff/rules/missing-trailing-comma/
     "TRY201", # verbose-raise
+    "D401", 
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]

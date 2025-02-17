@@ -17,14 +17,17 @@
 
 from __future__ import annotations
 
-import pathlib
 import re
-from collections.abc import Collection, Sequence
 
-import llm
 import numpy as np
 
-from funsearch import evaluator, programs_database
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from funsearch import evaluator, programs_database
+  import llm
+  from collections.abc import Collection, Sequence
+  import pathlib
 
 
 def reformat_to_two_spaces(code: str) -> str:

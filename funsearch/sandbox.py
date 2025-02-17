@@ -66,7 +66,7 @@ class ExternalProcessSandbox(DummySandbox):
     timeout_secs: int = 30,
     python_path: str = "python",
   ):
-    super(ExternalProcessSandbox, self).__init__()
+    super().__init__()
 
     self.output_path = pathlib.Path(base_path) / f"sandbox{self.id}"
     self.timeout_secs = timeout_secs
@@ -200,7 +200,7 @@ class ContainerSandbox(ExternalProcessSandbox):
     extra_pip_packages: str = "numpy",
     timeout_secs=30,
   ):
-    super(ContainerSandbox, self).__init__(base_path, timeout_secs)
+    super().__init__(base_path, timeout_secs)
 
     if not ContainerSandbox.image_built:
       ContainerSandbox.build_image(extra_pip_packages)

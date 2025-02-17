@@ -35,7 +35,7 @@ def get_all_subclasses(cls):
   return all_subclasses
 
 
-SANDBOX_TYPES = get_all_subclasses(sandbox.DummySandbox) + [sandbox.DummySandbox]
+SANDBOX_TYPES = [*get_all_subclasses(sandbox.DummySandbox), sandbox.DummySandbox]
 SANDBOX_NAMES = [c.__name__ for c in SANDBOX_TYPES]
 
 

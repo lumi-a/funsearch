@@ -17,10 +17,10 @@ import copy
 import tempfile
 
 import numpy as np
+import pytest
 from absl.testing import absltest, parameterized
 
 from funsearch import code_manipulation, config, programs_database
-import pytest
 
 _SKELETON = '''
 """Finds large cap sets."""

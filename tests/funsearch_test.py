@@ -13,10 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 
+import pytest
 from absl.testing import absltest, parameterized
 
 from funsearch import core
-import pytest
 
 _PY_PROMPT = '''\
 import itertools

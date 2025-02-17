@@ -167,12 +167,12 @@ class MyGenealisedModel:
 
   def display_results(self):
     m = self.gurobi_model
-    print("___ Resuts ___\n")
-    print(f"Obj: {m.ObjVal:g}")
+    print("___ Resuts ___\n")  # noqa: T201
+    print(f"Obj: {m.ObjVal:g}")  # noqa: T201
     n = self.n
     vals = [[m.getVarByName(f"z[{i},{j}]").X for j in range(n)] for i in range(n)]
     for ll in vals:
-      print(*[f"{elem:.2f}" for elem in ll], end="\n")
+      print(*[f"{elem:.2f}" for elem in ll], end="\n")  # noqa: T201
 
   def display_constrs(self) -> None:
     self.gurobi_model.write("model.lp")

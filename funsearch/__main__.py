@@ -200,14 +200,14 @@ def ls(db_file):
   database.load(db_file)
 
   progs = database.get_best_programs_per_island()
-  print(f"# Found {len(progs)} programs")
+  print(f"# Found {len(progs)} programs")  # noqa: T201
   for ix, (prog, score) in enumerate(reversed(progs)):
     i = len(progs) - 1 - ix
-    print(f"# {i}: Program with score {score}")
+    print(f"# {i}: Program with score {score}")  # noqa: T201
     prog.name += f"_{i}"
-    print(prog)
-    print("\n")
-  print(f"# Programs loaded from file: {selected_file}")
+    print(prog)  # noqa: T201
+    print("\n")  # noqa: T201
+  print(f"# Programs loaded from file: {selected_file}")  # noqa: T201
 
 
 if __name__ == "__main__":

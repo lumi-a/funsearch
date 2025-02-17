@@ -58,7 +58,7 @@ class LLM:
     try:
       output_text = self.model.prompt(prompt).text()
     except Exception as e:
-      print("LLM call failed:", e)
+      print("LLM call failed:", e)  # noqa: T201
       output_text = ""
 
     match = re.search(r"(```(python|))(.*?)```", output_text, re.DOTALL)

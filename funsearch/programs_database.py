@@ -282,9 +282,9 @@ class ProgramsDatabase:
 
     if not first_run:
       lines_to_move = len(output)
-      print(f"\033[{lines_to_move}A", end="")
+      print(f"\033[{lines_to_move}A", end="")  # noqa: T201
 
-    print("\n".join(output))
+    print("\n".join(output))  # noqa: T201
 
 
 class Island:

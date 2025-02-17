@@ -13,4 +13,4 @@ for _i in range(100):
   ys = list(np.random.randint(1, 20, size=5))
   apx = SlotOrdered().approximation_ratio(xs, ys)
   tests.append((xs, ys, apx))
-print(max(tests, key=lambda x: x[2]))
+print(max(tests, key=lambda x: x[2]))  # noqa: T201

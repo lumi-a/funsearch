@@ -59,10 +59,9 @@ class Function:
     if name == "body":
       value = value.strip("\n")
     # Ensure there aren't leading & trailing quotes in `docstring``.
-    if name == "docstring" and value is not None:
-      if '"""' in value:
-        value = value.strip()
-        value = value.replace('"""', "")
+    if name == "docstring" and value is not None and '"""' in value:
+      value = value.strip()
+      value = value.replace('"""', "")
     super().__setattr__(name, value)
 
 

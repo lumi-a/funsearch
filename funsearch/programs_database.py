@@ -145,7 +145,7 @@ class ProgramsDatabase:
   def load(self, file):
     """Load previously saved database"""
     data = pickle.load(file)
-    for key in data.keys():
+    for key in data:
       setattr(self, key, data[key])
 
   def backup(self):

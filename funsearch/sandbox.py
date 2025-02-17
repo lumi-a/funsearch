@@ -164,7 +164,7 @@ class ContainerSandbox(ExternalProcessSandbox):
   - the sandbox should be safe against inadvertent bad code by LLM but not against malicious attacks.
   - does not require any other dependencies on the host than Podman/Docker
   - does not support multithreading
-  - might provide easier or more lightweight debugging experience than some other fancier sandbox environments
+  - might provide easier or more lightweight debugging experience than some other fancier sandbox environments.
   """
 
   executable = "podman"

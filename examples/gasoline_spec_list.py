@@ -14,7 +14,7 @@ from funsearch.gasoline.iterative_rounding import SlotOrdered
 
 @funsearch.run
 def evaluate(n: int) -> float:
-  """Returns the approximation-ratio of the gasoline problem"""
+  """Returns the approximation-ratio of the gasoline problem."""
   xs, ys = gasoline(n)
 
   # Assert determinancy

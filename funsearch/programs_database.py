@@ -133,7 +133,7 @@ class ProgramsDatabase:
     )
 
   def save(self, file):
-    """Save database to a file"""
+    """Save database to a file."""
     data = {}
     keys = [
       "_islands",
@@ -146,7 +146,7 @@ class ProgramsDatabase:
     pickle.dump(data, file)
 
   def load(self, file):
-    """Load previously saved database"""
+    """Load previously saved database."""
     data = pickle.load(file)
     for key in data:
       setattr(self, key, data[key])

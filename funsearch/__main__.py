@@ -143,7 +143,7 @@ def run(
   sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
 
   def construct_evaluators(sampler_ix: int) -> list[evaluator.Evaluator]:
-    evaluators = [
+    evaluators: list[evaluator.Evaluator] = [
       evaluator.Evaluator(
         database,
         sandbox_class(base_path=log_path / f"sampler-{sampler_ix}-evaluator-{i}", timeout_secs=30),
@@ -166,7 +166,6 @@ def run(
     return evaluators
 
   samplers = [sampler.Sampler(database, construct_evaluators(i), lm) for i in range(samplers)]
-
   core.run(samplers, database, iterations)
 
 

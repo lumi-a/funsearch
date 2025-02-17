@@ -89,8 +89,7 @@ class Program:
     if count > 1:
       msg = f"function {function_name} exists more than once in program:\n{self!s}"
       raise ValueError(msg)
-    index = function_names.index(function_name)
-    return index
+    return function_names.index(function_name)
 
   def get_function(self, function_name: str) -> Function:
     index = self.find_function_index(function_name)

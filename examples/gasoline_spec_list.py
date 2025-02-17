@@ -27,8 +27,7 @@ def evaluate(n: int) -> float:
   if any(x < 0 for x in xs) or any(y < 0 for y in ys):
     return 0
 
-  ratio = SlotOrdered().approximation_ratio(xs, ys)
-  return ratio
+  return SlotOrdered().approximation_ratio(xs, ys)
 
 
 @funsearch.evolve

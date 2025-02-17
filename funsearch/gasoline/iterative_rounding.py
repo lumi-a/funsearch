@@ -49,8 +49,7 @@ class IterativeAlgo(abc.ABC):
     if opt <= 0:
       return 0
     _, val = self.run(instance)
-    ratio = val / opt
-    return ratio
+    return val / opt
 
 
 class ValueOrdered(IterativeAlgo):

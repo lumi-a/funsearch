@@ -49,10 +49,7 @@ def parse_input(filename_or_data: str):
     if p.name.endswith(".pickle"):
       return pickle.load(open(filename_or_data, "rb"))
     raise Exception("Unknown file format or filename")
-  if "," not in filename_or_data:
-    data = [filename_or_data]
-  else:
-    data = filename_or_data.split(",")
+  data = [filename_or_data] if "," not in filename_or_data else filename_or_data.split(",")
   if data[0].isnumeric():
     f = int if data[0].isdecimal() else float
     data = [f(v) for v in data]

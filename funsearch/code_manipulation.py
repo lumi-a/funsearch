@@ -123,10 +123,7 @@ class ProgramVisitor(ast.NodeVisitor):
       docstring = None
       if isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Str):
         docstring = f'  """{ast.literal_eval(ast.unparse(node.body[0]))}"""'
-        if len(node.body) > 1:
-          body_start_line = node.body[1].lineno - 1
-        else:
-          body_start_line = function_end_line
+        body_start_line = node.body[1].lineno - 1 if len(node.body) > 1 else function_end_line
 
       self._functions.append(
         Function(

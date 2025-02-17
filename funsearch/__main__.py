@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 import logging
 import os
@@ -60,7 +61,7 @@ def parse_input(filename_or_data: str):
 
 @click.group()
 @click.pass_context
-def main(ctx) -> None:
+def main(ctx: click.Context) -> None:
   pass
 
 
@@ -89,16 +90,16 @@ def main(ctx) -> None:
   help="Sandbox type",
 )
 def run(
-  spec_file,
-  inputs,
-  model_name,
-  output_path,
-  load_backup,
-  iterations,
-  samplers,
-  sandbox_type,
+  spec_file: click.File,
+  inputs: str,
+  model_name: str,
+  output_path: click.Path,
+  load_backup: click.File | None,
+  iterations: int,
+  samplers: int,
+  sandbox_type: str,
 ) -> None:
-  r"""Execute function-search algorithm:
+  r"""Execute function-search algorithm.
 
   \b
     SPEC_FILE is a python module that provides the basis of the LLM prompt as
@@ -133,7 +134,7 @@ def run(
   database = programs_database.ProgramsDatabase(
     conf.programs_database, template, function_to_evolve, identifier=timestamp
   )
-  if load_backup:
+  if load_backup is not None:
     database.load(load_backup)
 
   inputs = parse_input(inputs)
@@ -169,8 +170,11 @@ def run(
 
 @main.command()
 @click.argument("db_file", type=click.File("rb"), required=False)
-def ls(db_file) -> None:
-  """List programs from a stored database (usually in data/backups/ ). If not provided, selects the most recent one from data/backups/."""
+def ls(db_file: click.File | None) -> None:
+  """List programs from a stored database (usually in data/backups/).
+
+  If not provided, selects the most recent one from data/backups/.
+  """
   if db_file is None:
     # Define the directory and file pattern
     backup_dir = Path("data/backups")

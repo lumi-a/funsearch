@@ -84,9 +84,11 @@ class Program:
     function_names = [f.name for f in self.functions]
     count = function_names.count(function_name)
     if count == 0:
-      raise ValueError(f"function {function_name} does not exist in program:\n{self!s}")
+      msg = f"function {function_name} does not exist in program:\n{self!s}"
+      raise ValueError(msg)
     if count > 1:
-      raise ValueError(f"function {function_name} exists more than once in program:\n{self!s}")
+      msg = f"function {function_name} exists more than once in program:\n{self!s}"
+      raise ValueError(msg)
     index = function_names.index(function_name)
     return index
 
@@ -158,7 +160,8 @@ def text_to_function(text: str) -> Function:
   """Returns Function object by parsing input text using Python AST."""
   program = text_to_program(text)
   if len(program.functions) != 1:
-    raise ValueError(f"Only one function expected, got {len(program.functions)}:\n{program.functions}")
+    msg = f"Only one function expected, got {len(program.functions)}:\n{program.functions}"
+    raise ValueError(msg)
   return program.functions[0]
 
 

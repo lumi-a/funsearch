@@ -40,7 +40,7 @@ class Instance:
     self.solutions.append((permut, label, val))
 
   """
-        Computes the prefix sums of the solution associated with the 
+        Computes the prefix sums of the solution associated with the
         permutation given as a parameter.
     """
 

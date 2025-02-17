@@ -67,8 +67,8 @@ class GeneralisedInstance:
 
   def copy(self):
     inst = GeneralisedInstance()
-    inst.x = gp.tuplelist([e for e in self.x])
-    inst.y = gp.tuplelist([e for e in self.y])
+    inst.x = gp.tuplelist(list(self.x))
+    inst.y = gp.tuplelist(list(self.y))
     inst.n = len(inst.x)
     inst.k = self.k
     return inst
@@ -162,7 +162,7 @@ class MyGenealisedModel:
 
   def get_permut(self) -> list[int]:
     n = self.n
-    res = [i for i in range(n)]
+    res = list(range(n))
     for i in range(n):
       for j in range(n):
         if abs(self.z[i, j].X - 1.0) <= 0.000001:

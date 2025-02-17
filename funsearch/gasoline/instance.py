@@ -85,8 +85,8 @@ class Instance:
 
   def copy(self):
     inst = Instance()
-    inst.x = [e for e in self.x]
-    inst.y = [e for e in self.y]
+    inst.x = list(self.x)
+    inst.y = list(self.y)
     inst.n = len(inst.x)
     return inst
 
@@ -158,7 +158,7 @@ class MyModel:
 
   def get_permut(self) -> list[int]:
     n = self.n
-    res = [i for i in range(n)]
+    res = list(range(n))
     for i in range(n):
       for j in range(n):
         if abs(self.z[i, j].X - 1.0) <= 0.000001:

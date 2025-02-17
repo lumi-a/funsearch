@@ -8,7 +8,6 @@ On every iteration, improve gasoline_v1 over the gasoline_vX methods from previo
 Make only small code-changes.
 """
 
-
 import funsearch
 from funsearch.gasoline.iterative_rounding import SlotOrdered
 

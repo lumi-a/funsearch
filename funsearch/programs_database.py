@@ -237,7 +237,7 @@ class ProgramsDatabase:
       self._register_program_in_island(founder, island_id, founder_scores)
       # TODO: Should we carry over _success_count and _failure_counts?
 
-  def log_tabular(self, first_run: bool) -> None:
+  def log_tabular(self, last_run: bool) -> None:
     scores = self._best_score_per_island
     score_width = max(5, *(len(str(x)) for x in scores))
     separator = "  "
@@ -277,11 +277,11 @@ class ProgramsDatabase:
     ]
     output.append((" " * (2 * len(separator) + score_width - 5)) + " Total: " + separator.join(summary))
 
-    if not first_run:
-      lines_to_move = len(output)
-      print(f"\033[{lines_to_move}A", end="")  # noqa: T201
-
     print("\n".join(output))  # noqa: T201
+
+    if not last_run:
+      lines_to_move = len(output)
+      print(f"\033[{lines_to_move}A", end="", flush=True)  # noqa: T201
 
 
 class Island:

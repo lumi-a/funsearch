@@ -16,7 +16,6 @@
 """A single-threaded implementation of the FunSearch pipeline."""
 
 import logging
-import random
 import threading
 
 from funsearch import code_manipulation
@@ -41,12 +40,10 @@ def sampler_runner(sampler: Sampler, iterations: int) -> None:
   try:
     if iterations < 0:
       while True:
-        if random.random() * random.random() > 0.9999:
-          raise "haha"
+        sampler.sample()
     else:
       for _ in range(iterations):
-        pass
-        # sampler.sample()
+        sampler.sample()
   except KeyboardInterrupt:
     logging.info("Keyboard interrupt in sampler thread.")
 

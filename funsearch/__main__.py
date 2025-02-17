@@ -191,7 +191,6 @@ def ls(db_file):
 
     _, _, selected_file = max(matching_files)
     db_file = open(selected_file, "rb")
-    print(f"Selected file: {selected_file}")
 
   # Load and process the database
   conf = config.Config(num_evaluators=1)
@@ -208,6 +207,7 @@ def ls(db_file):
     prog.name += f"_{i}"
     print(prog)
     print("\n")
+  print(f"# Programs loaded from file: {selected_file}")
 
 
 if __name__ == "__main__":

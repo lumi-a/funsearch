@@ -18,16 +18,17 @@
 from __future__ import annotations
 
 import re
+from typing import TYPE_CHECKING
 
 import numpy as np
 
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
-  from funsearch import evaluator, programs_database
-  import llm
-  from collections.abc import Collection, Sequence
   import pathlib
+  from collections.abc import Collection, Sequence
+
+  import llm
+
+  from funsearch import evaluator, programs_database
 
 
 def reformat_to_two_spaces(code: str) -> str:

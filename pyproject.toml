@@ -68,3 +68,6 @@ ignore = [
     "SLF001", # Allow accessing private members
     "ANN001", # Allow missing type-annotations in function-arguments
 ]
+"examples/**/*.py" = [
+    "EM101", # Allow raw-string-in-exception, hopefully focusing the LLM on more important things
+]

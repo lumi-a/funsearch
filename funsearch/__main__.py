@@ -113,11 +113,6 @@ def run(
                 8,9,10
                 ./examples/cap_set_input_data.json
   """
-  # Load environment variables from .env file.
-  #
-  # Using OpenAI APIs with 'llm' package requires setting the variable
-  # OPENAI_API_KEY=sk-...
-  # See 'llm' package on how to use other providers.
   load_dotenv()
 
   timestamp = str(int(time.time()))

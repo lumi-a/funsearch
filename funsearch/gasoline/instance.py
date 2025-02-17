@@ -111,22 +111,18 @@ class MyModel:
 
     # prefix smaller than Beta
     self.gurobi_model.addConstrs(
-
-        gp.quicksum(inst.x[i] * self.z[i, j] for i in range(inst.n) for j in range(k))
-        - gp.quicksum(inst.y[j] for j in range(k - 1))
-        <= self.beta
-        for k in range(1, inst.n + 1)
-
+      gp.quicksum(inst.x[i] * self.z[i, j] for i in range(inst.n) for j in range(k))
+      - gp.quicksum(inst.y[j] for j in range(k - 1))
+      <= self.beta
+      for k in range(1, inst.n + 1)
     )
 
-    # # prefix greater than Alpha
+    # prefix greater than Alpha
     self.gurobi_model.addConstrs(
-
-        gp.quicksum(inst.x[i] * self.z[i, j] for i in range(inst.n) for j in range(k))
-        - gp.quicksum(inst.y[j] for j in range(k))
-        >= self.alpha
-        for k in range(1, inst.n + 1)
-
+      gp.quicksum(inst.x[i] * self.z[i, j] for i in range(inst.n) for j in range(k))
+      - gp.quicksum(inst.y[j] for j in range(k))
+      >= self.alpha
+      for k in range(1, inst.n + 1)
     )
 
   def initialize(self, inst: Instance) -> None:
@@ -151,7 +147,6 @@ class MyModel:
   def solve(self) -> float:
     m = self.gurobi_model
     m.optimize()
-    # self.display_results()
     if m.Status != GRB.OPTIMAL:
       return float("inf")
     return m.ObjVal

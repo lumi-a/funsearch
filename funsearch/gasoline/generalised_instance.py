@@ -113,21 +113,17 @@ class MyGenealisedModel:
     for ll in range(self.k):
       # prefix smaller than Beta
       self.gurobi_model.addConstrs(
-
-          gp.quicksum(inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k))
-          - gp.quicksum(inst.y[j][ll] for j in range(k - 1))
-          <= self.beta[ll]
-          for k in range(1, inst.n + 1)
-
+        gp.quicksum(inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k))
+        - gp.quicksum(inst.y[j][ll] for j in range(k - 1))
+        <= self.beta[ll]
+        for k in range(1, inst.n + 1)
       )
       # prefix greater than Alpha
       self.gurobi_model.addConstrs(
-
-          gp.quicksum(inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k))
-          - gp.quicksum(inst.y[j][ll] for j in range(k))
-          >= self.alpha[ll]
-          for k in range(1, inst.n + 1)
-
+        gp.quicksum(inst.x[i][ll] * self.z[i, j] for i in range(inst.n) for j in range(k))
+        - gp.quicksum(inst.y[j][ll] for j in range(k))
+        >= self.alpha[ll]
+        for k in range(1, inst.n + 1)
       )
 
   def initialize(self, inst: GeneralisedInstance) -> None:
@@ -155,7 +151,6 @@ class MyGenealisedModel:
   def solve(self) -> float:
     m = self.gurobi_model
     m.optimize()
-    # self.display_results()
     if m.Status != GRB.OPTIMAL:
       return float("inf")
     return m.ObjVal
@@ -211,12 +206,3 @@ def generate_instance_distinct(
       inst.y.append(diff)
       valid = True
   return inst
-
-
-# def genrate_lb_instance(k : int) -> BigInstance:
-#     inst = BigInstance()
-#     inst.x = list(it.chain.from_iterable([[2**k-2**(k-i) for _ in range(2**i)] for i in range(1, k)]))
-#     inst.x.extend([2**k for _ in range(2**k-1)] + [0])
-#     inst.y = list(it.chain.from_iterable([[2**k-2**(k-i) for _ in range(2**i)] for i in range(1, k+1)]))
-#     inst.n = len(inst.x)
-#     return inst

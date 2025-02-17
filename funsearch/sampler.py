@@ -18,7 +18,6 @@
 import re
 from collections.abc import Collection, Sequence
 
-# import llm
 import numpy as np
 
 from funsearch import evaluator, programs_database

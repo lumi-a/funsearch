@@ -249,7 +249,7 @@ class ProgramsDatabase:
       f"{'Failures':>8}",
       f"{'ok%':>3}",
     ]
-    output = ["", headers, "─".join("─" * len(x) for x in headers)]
+    output = ["", separator.join(headers), separator.join("─" * len(x) for x in headers)]
 
     for idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
       successes = self._success_counts[idx]

@@ -180,7 +180,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
 
     np.random.seed(0)
     database.reset_islands()
-    expected_kept = set([0, 2, 3, 4, 7])
+    expected_kept = {0, 2, 3, 4, 7}
     min_kept = min(expected_scores[i] for i in expected_kept)
     for i, score in enumerate(expected_scores):
       if i in expected_kept:

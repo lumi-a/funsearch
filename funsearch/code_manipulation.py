@@ -27,9 +27,12 @@ import ast
 import dataclasses
 import io
 import tokenize
-from collections.abc import Iterator, MutableSet, Sequence
 
 from absl import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from collections.abc import Iterator, MutableSet, Sequence
 
 
 @dataclasses.dataclass

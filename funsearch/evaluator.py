@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """Class for evaluating programs proposed by the Sampler."""
+from __future__ import annotations
 
 import ast
 import copy

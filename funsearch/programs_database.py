@@ -14,6 +14,7 @@
 # ==============================================================================
 
 """A programs database that implements the evolutionary algorithm."""
+from __future__ import annotations
 
 import copy
 import dataclasses

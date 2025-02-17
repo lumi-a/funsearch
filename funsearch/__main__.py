@@ -156,6 +156,7 @@ def run(
     ]
 
     # We send the initial implementation to be analysed by one of the evaluators.
+    # TODO: Only do this once for one evaluator
     initial = template.get_function(function_to_evolve).body
     evaluators[0].analyse(initial, island_id=None, version_generated=None, index=0)
     assert len(database._islands[0]._clusters) > 0, (

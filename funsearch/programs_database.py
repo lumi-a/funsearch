@@ -242,7 +242,6 @@ class ProgramsDatabase:
     score_width = max(5, *(len(str(x)) for x in scores))
     separator = "  "
 
-    output = []
     headers = [
       f"{'Isl':>3}",
       f"{'Score':>{score_width}}",
@@ -250,9 +249,7 @@ class ProgramsDatabase:
       f"{'Failures':>8}",
       f"{'ok%':>3}",
     ]
-    headers = separator.join(headers)
-    output.append(headers)
-    output.append("─" * len(headers))
+    output = ["", headers, "─".join("─" * len(x) for x in headers)]
 
     for idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
       successes = self._success_counts[idx]

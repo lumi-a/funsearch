@@ -99,7 +99,7 @@ def run(
   samplers,
   sandbox_type,
 ):
-  """Execute function-search algorithm:
+  r"""Execute function-search algorithm:
 
   \b
     SPEC_FILE is a python module that provides the basis of the LLM prompt as

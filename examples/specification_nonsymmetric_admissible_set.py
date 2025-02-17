@@ -7,7 +7,7 @@ import numpy as np
 import funsearch
 
 
-def block_children(scores, admissible_set, new_element):
+def block_children(scores, admissible_set, new_element) -> None:
   """Modifies `scores` to -inf for elements blocked by `new_element`."""
   n = admissible_set.shape[-1]
   powers = np.array([3**i for i in range(n - 1, -1, -1)], dtype=np.int32)

@@ -18,7 +18,7 @@ class GeneralisedInstance:
   def __str__(self) -> str:
     return self.x.__str__() + "\n" + self.y.__str__()
 
-  def init_model(self, name: str = "Model"):
+  def init_model(self, name: str = "Model") -> None:
     self.model = MyGenealisedModel(self.k)
     self.model.gurobi_model.ModelName = name
     self.model.initialize(self)
@@ -41,7 +41,7 @@ class GeneralisedInstance:
       res.append(c)
     return res
 
-  def add_noise(self, intensity: int):
+  def add_noise(self, intensity: int) -> None:
     valid = False
     while not valid:
       noise_x = [[0 for _ in range(self.k)] for _ in self.x]
@@ -165,7 +165,7 @@ class MyGenealisedModel:
           continue
     return res
 
-  def display_results(self):
+  def display_results(self) -> None:
     m = self.gurobi_model
     print("___ Resuts ___\n")  # noqa: T201
     print(f"Obj: {m.ObjVal:g}")  # noqa: T201

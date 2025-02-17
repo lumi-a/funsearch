@@ -60,7 +60,7 @@ def parse_input(filename_or_data: str):
 
 @click.group()
 @click.pass_context
-def main(ctx):
+def main(ctx) -> None:
   pass
 
 
@@ -97,7 +97,7 @@ def run(
   iterations,
   samplers,
   sandbox_type,
-):
+) -> None:
   r"""Execute function-search algorithm:
 
   \b
@@ -169,7 +169,7 @@ def run(
 
 @main.command()
 @click.argument("db_file", type=click.File("rb"), required=False)
-def ls(db_file):
+def ls(db_file) -> None:
   """List programs from a stored database (usually in data/backups/ ). If not provided, selects the most recent one from data/backups/."""
   if db_file is None:
     # Define the directory and file pattern

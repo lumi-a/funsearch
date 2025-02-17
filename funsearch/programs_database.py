@@ -132,7 +132,7 @@ class ProgramsDatabase:
       reverse=True,
     )
 
-  def save(self, file):
+  def save(self, file) -> None:
     """Save database to a file."""
     data = {}
     keys = [
@@ -145,13 +145,13 @@ class ProgramsDatabase:
       data[key] = getattr(self, key)
     pickle.dump(data, file)
 
-  def load(self, file):
+  def load(self, file) -> None:
     """Load previously saved database."""
     data = pickle.load(file)
     for key in data:
       setattr(self, key, data[key])
 
-  def backup(self):
+  def backup(self) -> None:
     filename = f"program_db_{self._function_to_evolve}_{self.identifier}_{self._backups_done}.pickle"
     p = pathlib.Path(self._config.backup_folder)
     if not p.exists():
@@ -237,7 +237,7 @@ class ProgramsDatabase:
       self._register_program_in_island(founder, island_id, founder_scores)
       # TODO: Should we carry over _success_count and _failure_counts?
 
-  def log_tabular(self, first_run):
+  def log_tabular(self, first_run) -> None:
     scores = self._best_score_per_island
     score_width = max(5, *(len(str(x)) for x in scores))
     separator = "  "

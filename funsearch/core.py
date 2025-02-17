@@ -36,7 +36,7 @@ def _extract_function_names(specification: str) -> tuple[str, str]:
   return evolve_functions[0], run_functions[0]
 
 
-def sampler_runner(sampler: Sampler, iterations: int):
+def sampler_runner(sampler: Sampler, iterations: int) -> None:
   try:
     if iterations < 0:
       while True:
@@ -48,7 +48,7 @@ def sampler_runner(sampler: Sampler, iterations: int):
     logging.info("Keyboard interrupt in sampler thread.")
 
 
-def run(samplers: list[Sampler], database: ProgramsDatabase, iterations: int = -1):
+def run(samplers: list[Sampler], database: ProgramsDatabase, iterations: int = -1) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
   threads = []
 

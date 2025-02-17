@@ -5,7 +5,7 @@ import pickle
 import sys
 
 
-def main(prog_file: str, input_file: str, output_file: str):
+def main(prog_file: str, input_file: str, output_file: str) -> None:
   """The method takes executable function as a cloudpickle file, then executes it with input data,
   and writes the output data to another file.
   """

@@ -69,5 +69,6 @@ ignore = [
     "ANN001", # Allow missing type-annotations in function-arguments
 ]
 "examples/**/*.py" = [
-    "EM101", # Allow raw-string-in-exception, hopefully focusing the LLM on more important things
+    "EM101",  # Allow raw-string-in-exception, hopefully focusing the LLM on more important things
+    "RET504", # Allow unnecessary-assign, the variable-names might mean something to the LLM
 ]

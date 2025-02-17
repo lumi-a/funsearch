@@ -152,7 +152,7 @@ class ExternalProcessSandbox(DummySandbox):
     return None, False
 
   @staticmethod
-  def _save_diagnostics(program: str, output_path: pathlib.Path):
+  def _save_diagnostics(program: str, output_path: pathlib.Path) -> None:
     filepath = output_path / "program.py"
     logging.debug(f"Writing program to {filepath}")
     with open(filepath, "w+") as f:

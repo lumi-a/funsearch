@@ -236,7 +236,7 @@ class ProgramsDatabase:
 
   def log_tabular(self, first_run):
     scores = self._best_score_per_island
-    score_width = max(5, max(len(str(x)) for x in scores))
+    score_width = max(5, *(len(str(x)) for x in scores))
     separator = "  "
 
     output = []

@@ -171,7 +171,7 @@ class ContainerSandbox(ExternalProcessSandbox):
   image_built = False
 
   @classmethod
-  def build_image(cls, extra_pip_packages):
+  def build_image(cls, extra_pip_packages) -> None:
     version = sys.version.split(" ")[0]
     ret = os.system("podman --version")
     if ret != 0:

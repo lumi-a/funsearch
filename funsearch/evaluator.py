@@ -45,7 +45,7 @@ class _FunctionLineVisitor(ast.NodeVisitor):
     return self._function_end_line
 
 
-def _find_method_implementation(generated_code: str, function_to_evolve: str) -> Tuple[str, str]:
+def _find_method_implementation(generated_code: str, function_to_evolve: str) -> tuple[str, str]:
   """Find the last 'def priority_vX()' method from generated code.
 
   Return the code and the name of the method.

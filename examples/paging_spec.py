@@ -35,7 +35,7 @@ def evaluate(_: int) -> float:
 
 
 @funsearch.evolve
-def replace(access_history: deque[int], pages: List[int], new_page: int) -> int:
+def replace(access_history: deque[int], pages: list[int], new_page: int) -> int:
   """Given a list of `pages` and a `new_page` not currently in `pages`, return
   the index of the page that `new_page` should replace in `pages`.
   `access_history` is the list of the past 1000 accesses, but excluding `new_page`.

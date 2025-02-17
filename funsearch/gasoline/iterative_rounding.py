@@ -31,7 +31,7 @@ class IterativeAlgo(abc.ABC):
   def run(self, instance: ins.Instance) -> tuple[Result, float]:
     pass
 
-  def approximation_ratio(self, xs: List[int], ys: List[int]) -> float:
+  def approximation_ratio(self, xs: list[int], ys: list[int]) -> float:
     n = len(xs)
     if len(ys) < n - 1:
       return 0

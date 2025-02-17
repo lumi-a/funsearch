@@ -35,7 +35,7 @@ def evaluate(n: int) -> float:
 
 
 @funsearch.evolve
-def gasoline(xs: List[int], ys: List[int]) -> tuple[int, int]:
+def gasoline(xs: list[int], ys: list[int]) -> tuple[int, int]:
   """Given a gasoline-problem specified by the list of x-values and y-values,
   return a new gasoline-problem, with one additional x-value and y-value.
   The integers are always non-negative.

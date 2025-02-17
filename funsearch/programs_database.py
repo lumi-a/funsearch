@@ -384,7 +384,7 @@ class Island:
 class Cluster:
   """A cluster of programs on the same island and with the same Signature."""
 
-  def __init__(self, score: float, implementation: code_manipulation.Function):
+  def __init__(self, score: float, implementation: code_manipulation.Function) -> None:
     self._score = score
     self._programs: list[code_manipulation.Function] = [implementation]
     self._lengths: list[int] = [len(str(implementation))]

@@ -103,7 +103,7 @@ class ProgramVisitor(ast.NodeVisitor):
   Note that we do not store function decorators.
   """
 
-  def __init__(self, sourcecode: str):
+  def __init__(self, sourcecode: str) -> None:
     self._codelines: list[str] = sourcecode.splitlines()
 
     self._preface: str = ""

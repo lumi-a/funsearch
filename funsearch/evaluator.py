@@ -143,7 +143,7 @@ class Evaluator:
     function_to_run: str,
     inputs: Sequence[Any],
     timeout_seconds: int = 30,
-  ):
+  ) -> None:
     self._database = database
     self._template = template
     self._function_to_evolve = function_to_evolve

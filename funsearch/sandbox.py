@@ -23,7 +23,7 @@ class DummySandbox:
 
   sandboxes = 0
 
-  def __init__(self, **kwargs):
+  def __init__(self, **kwargs) -> None:
     self.id = DummySandbox.sandboxes
 
     DummySandbox.sandboxes += 1
@@ -65,7 +65,7 @@ class ExternalProcessSandbox(DummySandbox):
     base_path: pathlib.Path,
     timeout_secs: int = 30,
     python_path: str = "python",
-  ):
+  ) -> None:
     super().__init__()
 
     self.output_path = pathlib.Path(base_path) / f"sandbox{self.id}"
@@ -199,7 +199,7 @@ class ContainerSandbox(ExternalProcessSandbox):
     base_path: pathlib.Path,
     extra_pip_packages: str = "numpy",
     timeout_secs=30,
-  ):
+  ) -> None:
     super().__init__(base_path, timeout_secs)
 
     if not ContainerSandbox.image_built:

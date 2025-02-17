@@ -20,6 +20,7 @@ import numpy as np
 from absl.testing import absltest, parameterized
 
 from funsearch import code_manipulation, config, programs_database
+import pytest
 
 _SKELETON = '''
 """Finds large cap sets."""
@@ -229,10 +230,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
     ]
   )
   def test_softmax_non_finite_error(self, logits):
-    with self.assertRaisesRegex(
-      ValueError,
-      r"`logits` contains non-finite value\(s\)",
-    ):
+    with pytest.raises(ValueError, match=r"`logits` contains non-finite value\(s\)"):
       programs_database._softmax(logits, temperature=1.0)
 
 

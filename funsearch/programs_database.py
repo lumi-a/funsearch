@@ -237,7 +237,7 @@ class ProgramsDatabase:
       self._register_program_in_island(founder, island_id, founder_scores)
       # TODO: Should we carry over _success_count and _failure_counts?
 
-  def log_tabular(self, first_run) -> None:
+  def log_tabular(self, first_run: bool) -> None:
     scores = self._best_score_per_island
     score_width = max(5, *(len(str(x)) for x in scores))
     separator = "  "

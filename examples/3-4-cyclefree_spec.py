@@ -40,12 +40,12 @@ def solve(total_vertex_count: int) -> set[tuple[int, int]]:
     neighbors[vertex_v].add(vertex_w)
     neighbors[vertex_w].add(vertex_v)
 
-  edges = set(
+  edges = {
     (vertex_v, vertex_w)
     for vertex_v in range(total_vertex_count)
     for vertex_w in neighbors[vertex_v]
     if vertex_w > vertex_v
-  )
+  }
   return edges
 
 

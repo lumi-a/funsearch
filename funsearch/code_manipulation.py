@@ -224,7 +224,7 @@ def rename_function_calls(code: str, source_name: str, target_name: str) -> str:
 
 def get_functions_called(code: str) -> MutableSet[str]:
   """Returns the set of all functions called in `code`."""
-  return set(token.string for token, is_call in _yield_token_and_is_call(code) if is_call)
+  return {token.string for token, is_call in _yield_token_and_is_call(code) if is_call}
 
 
 def yield_decorated(code: str, module: str, name: str) -> Iterator[str]:

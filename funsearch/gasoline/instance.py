@@ -169,7 +169,7 @@ class MyModel:
   def display_results(self):
     m = self.gurobi_model
     print("___ Resuts ___\n")
-    print("Obj: %g" % m.ObjVal)
+    print("Obj: {:g}".format(m.ObjVal))
     n = self.n
     vals = [[m.getVarByName(f"z[{i},{j}]").X for j in range(n)] for i in range(n)]
     for ll in vals:

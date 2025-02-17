@@ -15,9 +15,13 @@
 
 """Class for sampling new programs."""
 
+from __future__ import annotations
+
+import pathlib
 import re
 from collections.abc import Collection, Sequence
 
+import llm
 import numpy as np
 
 from funsearch import evaluator, programs_database
@@ -28,7 +32,7 @@ def reformat_to_two_spaces(code: str) -> str:
   pattern = r"^\s+"
 
   # Function to replace leading spaces with two spaces per indentation level
-  def replace_with_two_spaces(match):
+  def replace_with_two_spaces(match: re.Match[str]) -> str:
     space_count = len(match.group(0))
     return " " * (2 * (space_count // 4))  # Assumes original indentation was 4 spaces
 
@@ -40,13 +44,13 @@ def reformat_to_two_spaces(code: str) -> str:
 class LLM:
   """Language model that predicts continuation of provided source code."""
 
-  def __init__(self, samples_per_prompt: int, model, log_path=None) -> None:
+  def __init__(self, samples_per_prompt: int, model: llm.Model, log_path: pathlib.Path | None = None) -> None:
     self._samples_per_prompt = samples_per_prompt
     self.model = model
     self.prompt_count = 0
     self.log_path = log_path
 
-  def _draw_sample(self, prompt: str) -> (str, int):
+  def _draw_sample(self, prompt: str) -> tuple[str, int]:
     try:
       output_text = self.model.prompt(prompt).text()
     except Exception as e:
@@ -64,7 +68,7 @@ class LLM:
     """Returns multiple predicted continuations of `prompt`."""
     return [self._draw_sample(prompt) for _ in range(self._samples_per_prompt)]
 
-  def _log(self, prompt: str, response: str, index: int):
+  def _log(self, prompt: str, response: str, index: int) -> None:
     if self.log_path is not None:
       with open(self.log_path / f"prompt_{index}.log", "a") as f:
         f.write(prompt)
@@ -85,7 +89,7 @@ class Sampler:
     self._evaluators = evaluators
     self._llm = model
 
-  def sample(self):
+  def sample(self) -> None:
     """Continuously gets prompts, samples programs, sends them for analysis."""
     prompt = self._database.get_prompt()
     samples = self._llm.draw_samples(prompt.code)

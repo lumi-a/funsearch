@@ -5,7 +5,6 @@ Make only small code-changes.
 """
 
 from collections import deque
-from typing import List
 
 import funsearch
 from funsearch.paging import read_accesses

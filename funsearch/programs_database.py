@@ -22,7 +22,7 @@ import pathlib
 import pickle
 import time
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any, Tuple
+from typing import Any
 
 import numpy as np
 import scipy

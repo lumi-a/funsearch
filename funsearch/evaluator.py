@@ -19,7 +19,7 @@ from __future__ import annotations
 import ast
 import copy
 import re
-from typing import Any, Tuple, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from funsearch import code_manipulation, programs_database, sandbox
 

@@ -9,7 +9,7 @@ from funsearch.code_manipulation import Function
 from funsearch.programs_database import ProgramsDatabase
 
 BACKUP_DIR = Path("../data/backups")
-JSON_DIR = Path("json-data")
+JSON_DIR = Path("json-data")  # Also set this in script.js
 
 file_pattern = re.compile(r"program_db_(.*)_(\d+)_(\d+)\.pickle")
 

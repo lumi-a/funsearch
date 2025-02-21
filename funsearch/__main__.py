@@ -166,14 +166,10 @@ def run(
     logging.info(f"Writing logs to {log_path}")
 
   specification = spec_file.read()
-  function_to_evolve, function_to_run = core.extract_function_names(specification)
-  template = code_manipulation.text_to_program(specification)
 
   inputs = parse_input(inputs)
 
-  database = ProgramsDatabase(
-    conf.programs_database, template, function_to_evolve, function_to_run, inputs, identifier=timestamp
-  )
+  database = ProgramsDatabase(conf.programs_database, specification, inputs, timestamp)
 
   sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
 

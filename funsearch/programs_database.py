@@ -29,6 +29,7 @@ import numpy as np
 from absl import logging
 
 from funsearch import code_manipulation
+from funsearch.core import extract_function_names
 from funsearch import config as config_lib
 
 Signature = tuple[float, ...]
@@ -89,24 +90,24 @@ class ProgramsDatabase:
   def __init__(
     self,
     config: config_lib.ProgramsDatabaseConfig,
-    template: code_manipulation.Program,
-    function_to_evolve: str,
-    function_to_run: str,
+    specification: any,
     inputs: list[float | int] | list[str],
-    identifier: str = "",
+    identifier: str,
   ) -> None:
     self._config: config_lib.ProgramsDatabaseConfig = config
-    self.template: code_manipulation.Program = template
+    self.inputs = inputs
+
+    function_to_evolve, function_to_run = extract_function_names(specification)
     self.function_to_evolve: str = function_to_evolve
     self.function_to_run: str = function_to_run
-    self.inputs = inputs
+    self.template: code_manipulation.Program = code_manipulation.text_to_program(specification)
 
     # Initialize empty islands.
     self._islands: list[Island] = []
     for _ in range(config.num_islands):
       self._islands.append(
         Island(
-          template,
+          self.template,
           function_to_evolve,
           config.functions_per_prompt,
           config.cluster_sampling_temperature_init,

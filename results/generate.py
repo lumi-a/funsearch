@@ -34,6 +34,10 @@ for (function_name, timestamp), (idx, file) in files.items():
   database.load(file.open("rb"))
 
   with (JSON_DIR / f"{function_name}_{timestamp}.json").open("w") as f:
+    # As backups are indexed with timestamps, and we don't expect backups to change over time,
+    # keep the json minimal, without newlines (which otherwise would be neat for VCS)
     json.dump(
-      [{"function": str(fn), "score": score} for (fn, score) in database.get_best_programs_per_island()], f
+      [{"fn": str(fn), "score": score} for (fn, score) in database.get_best_programs_per_island()],
+      f,
+      separators=(",", ":"),
     )

@@ -10,7 +10,7 @@ from funsearch.programs_database import ProgramsDatabase
 BACKUP_DIR = Path("../data/backups")
 JSON_DIR = Path("json-data")  # Also set this in script.js
 
-file_pattern = re.compile(r".*_(.*)_(\d+)_(\d+)\.pickle")
+file_pattern = re.compile(r"(.*)_(\d+)_(\d+)\.pickle")
 
 # For each tuple of (function_name, timestamp), only keep
 # the (idx, path) one with the highest idx.
@@ -18,25 +18,25 @@ files: dict[tuple[str, int], tuple[int, Path]] = {}
 for f in BACKUP_DIR.glob("*.pickle"):
   match = file_pattern.match(f.name)
   if match:
-    function_name, timestamp, idx = match.groups()
+    specname, timestamp, idx = match.groups()
     try:
       timestamp, idx = int(timestamp), int(idx)
     except ValueError:
       continue
-    if (function_name, timestamp) not in files or idx > files[(function_name, timestamp)][0]:
-      files[(function_name, timestamp)] = (idx, f)
+    if (specname, timestamp) not in files or idx > files[(specname, timestamp)][0]:
+      files[(specname, timestamp)] = (idx, f)
 
 
 def _to_filename(function_name: str, timestamp: int) -> Path:
   return JSON_DIR / f"{function_name}_{timestamp}.json"
 
 
-for (function_name, timestamp), (idx, file) in files.items():
+for (specname, timestamp), (idx, file) in files.items():
   # TODO: This is a hack for now, we should read config and other params from the backup-database
   conf = config.Config(num_evaluators=1)
   database = ProgramsDatabase.load(file.open("rb"))
 
-  with _to_filename(function_name, timestamp).open("w") as f:
+  with _to_filename(specname, timestamp).open("w") as f:
     # As backups are indexed with timestamps, and we don't expect backups to change over time,
     # keep the json minimal, without newlines (which otherwise would be neat for VCS)
     json.dump(

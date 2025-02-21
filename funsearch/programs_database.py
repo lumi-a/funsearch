@@ -103,13 +103,14 @@ class ProgramsDatabase:
   def __init__(
     self,
     config: config_lib.ProgramsDatabaseConfig,
-    specification: any,
+    spec_path: pathlib.Path,
     inputs: list[float | int] | list[str],
     identifier: str,
   ) -> None:
     self._config: config_lib.ProgramsDatabaseConfig = config
     self.inputs = inputs
 
+    specification = spec_path.read()
     self._specification = specification
     function_to_evolve, function_to_run = _extract_function_names(specification)
     self.function_to_evolve: str = function_to_evolve
@@ -137,7 +138,7 @@ class ProgramsDatabase:
     self._last_reset_time: float = time.time()
     self._program_counter = 0
     self._backups_done = 0
-    self.identifier = identifier
+    self.identifier = spec_path.stem + "_" + identifier
 
   def increment_failure(self, island_id: int) -> None:
     self._failure_counts[island_id] += 1
@@ -189,7 +190,7 @@ class ProgramsDatabase:
     return database
 
   def backup(self) -> None:
-    filename = f"program_db_{self.function_to_evolve}_{self.identifier}_{self._backups_done}.pickle"
+    filename = f"{self.identifier}_{self._backups_done}.pickle"
     p = pathlib.Path(self._config.backup_folder)
     if not p.exists():
       p.mkdir(parents=True, exist_ok=True)

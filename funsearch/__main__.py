@@ -159,13 +159,11 @@ def run(
   """
   conf = config.Config()
 
-  specification = spec_file.read()
-
   inputs = parse_input(inputs)
 
   timestamp = str(int(time.time()))
 
-  database = ProgramsDatabase(conf.programs_database, specification, inputs, timestamp)
+  database = ProgramsDatabase(conf.programs_database, Path(spec_file.name), inputs, timestamp)
 
   log_path = pathlib.Path(output_path) / timestamp
   if not log_path.exists():

@@ -2,7 +2,36 @@ code {
     white-space: pre-wrap;
 }
 
+.problem-container {
+    width: 50em;
+    max-width: 100%;
+}
+
+.run-container {
+    margin: 0.5em;
+    border: 0.125em solid #888;
+    border-radius: 0.25em;
+    background: #8881;
+}
+
+.run-container-inner {
+    padding: 1em;
+}
+
+.run-container>summary {
+    cursor: pointer;
+    padding: 0.75em;
+    font-weight: bold;
+    background: #8881;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 .timestamp {
-    opacity: 0.5;
-    font: monospace;
+    font-family: monospace;
+    float: right;
 }

@@ -30,6 +30,7 @@ function getProblemContainer(problemName) {
 
     const div = document.createElement("div")
     div.id = "container-" + problemName
+    div.classList.add("problem-container")
     document.body.appendChild(div)
 
     const heading = document.createElement("h2")
@@ -43,6 +44,7 @@ function getRunContainer(problemContainer, problemName, inputs, timestamp) {
     const details = document.createElement("details")
     // Let's just hope these are unique.
     details.id = "run-" + timestamp
+    details.classList.add("run-container")
 
     const summary = document.createElement("summary")
 
@@ -58,14 +60,37 @@ function getRunContainer(problemContainer, problemName, inputs, timestamp) {
 
     details.appendChild(summary)
 
+    const containerInner = document.createElement("div")
+    containerInner.classList.add("run-container-inner")
+    details.appendChild(containerInner)
+
     problemContainer.appendChild(details)
 
-    return details
+    return containerInner
+}
+
+function appendDetails(container, title, content) {
+    const details = document.createElement("details")
+    const summary = document.createElement("summary")
+    summary.textContent = title
+    details.appendChild(summary)
+    details.appendChild(content)
+    container.appendChild(details)
+}
+
+function appendDetailsCode(container, title, code) {
+    const pre = document.createElement("pre")
+    const codeElement = document.createElement("code")
+    codeElement.classList.add("language-python")
+    codeElement.textContent = code
+    pre.appendChild(codeElement)
+    hljs.highlightElement(codeElement)
+    appendDetails(container, title, pre)
 }
 
 async function displayDatabase(database) {
     /*{
-        "config": vars(database._config),  # noqa: SLF001
+          "config": vars(database._config),  # noqa: SLF001
           "inputs": database.inputs,
         "specCode": database._specification,  # noqa: SLF001
         "failureCounts": database._failure_counts,  # noqa: SLF001
@@ -80,6 +105,9 @@ async function displayDatabase(database) {
 
     const runContainer = getRunContainer(problemContainer, problemName, database.inputs, database.timestamp)
 
+    appendDetailsCode(runContainer, "Spec", database.specCode)
+
+    appendDetailsCode(runContainer, "Config", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
 }
 
 async function main() {
@@ -91,14 +119,8 @@ hljs.addPlugin(new CopyButtonPlugin())
 
 window.addEventListener('load', () => {
     main().then(() => {
-        for (let i = 0; i < 100; i++) {
-            document.body.appendChild(document.createTextNode("br"))
-            document.body.appendChild(document.createElement("br"))
-        }
-
         const hash = window.location.hash.slice(1)
         if (hash) {
-            console.log(hash)
             const element = document.getElementById(hash)
             if (element) {
                 element.open = true

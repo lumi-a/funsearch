@@ -84,31 +84,36 @@ def _most_recent_backup() -> Path:
   return selected_file
 
 
-def _build_evaluators_and_samplers(database: ProgramsDatabase):
-  def construct_evaluators(sampler_ix: int) -> list[evaluator.Evaluator]:
-    evaluators: list[evaluator.Evaluator] = [
-      evaluator.Evaluator(
-        database,
-        sandbox_class(base_path=log_path / f"sampler-{sampler_ix}-evaluator-{i}", timeout_secs=30),
-        template,
-        function_to_evolve,
-        function_to_run,
-        inputs,
-      )
-      for i in range(conf.num_evaluators)
-    ]
-
-    return evaluators
-
+def _build_samplers(database: ProgramsDatabase) -> list[sampler.Sampler]:
   samplers: list[sampler.Sampler] = [
-    sampler.Sampler(database, construct_evaluators(i), lm) for i in range(samplers)
+    sampler.Sampler(
+      database,
+      [
+        evaluator.Evaluator(
+          database,
+          sandbox_class(
+            base_path=log_path / f"sampler-{sampler_ix}-evaluator-{evaluator_ix}", timeout_secs=30
+          ),
+          template,
+          function_to_evolve,
+          function_to_run,
+          inputs,
+        )
+        for evaluator_ix in range(conf.num_evaluators)
+      ],
+      lm,
+    )
+    for sampler_ix in range(samplers)
   ]
 
   initial = template.get_function(function_to_evolve).body
+
   samplers[0]._evaluators[0].analyse(initial, island_id=None, version_generated=None)  # noqa: SLF001
   if not len(database._islands[0]._clusters) > 0:  # noqa: SLF001
     msg = "Running initial function failed, see logs in output_path"
     raise RuntimeError(msg)
+
+  return samplers
 
 
 @click.group()
@@ -182,7 +187,7 @@ def run(
 
   sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
 
-  evaluators, samplers = _build_evaluators_and_samplers(database)
+  samplers = _build_samplers(database)
 
   core.run(samplers, database, iterations)
 

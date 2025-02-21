@@ -26,7 +26,6 @@ from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
 
 import numpy as np
-import scipy
 from absl import logging
 
 from funsearch import code_manipulation
@@ -45,10 +44,14 @@ def _softmax(logits: np.ndarray, temperature: float) -> np.ndarray:
   if not np.issubdtype(logits.dtype, np.floating):
     logits = np.array(logits, dtype=np.float32)
 
-  result = scipy.special.softmax(logits / temperature, axis=-1)
+  # Custom softmax to avoid scipy-dependency
+  scaled = logits / temperature
+  max_index = np.argmax(scaled, axis=1)
+  exp_scaled = np.exp(scaled - scaled[max_index])
+  result = exp_scaled / np.sum(exp_scaled, axis=1)
+
   # Ensure that probabilities sum to 1 to prevent error in `np.random.choice`.
-  index = np.argmax(result)
-  result[index] = 1 - np.sum(result[0:index]) - np.sum(result[index + 1 :])
+  result[max_index] = 1 - np.sum(result[0:max_index]) - np.sum(result[max_index + 1 :])
   return result
 
 

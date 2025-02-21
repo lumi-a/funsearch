@@ -13,7 +13,7 @@ import click
 import llm
 from dotenv import load_dotenv
 
-from funsearch import code_manipulation, config, core, evaluator, sampler, sandbox
+from funsearch import config, core, evaluator, sampler, sandbox
 from funsearch.programs_database import ProgramsDatabase
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()

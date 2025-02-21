@@ -18,7 +18,6 @@
 import logging
 import threading
 
-from funsearch import code_manipulation
 from funsearch.programs_database import ProgramsDatabase
 from funsearch.sampler import Sampler
 

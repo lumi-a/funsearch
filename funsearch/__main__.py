@@ -182,19 +182,19 @@ def ls(db_file: click.File | None) -> None:
     file_pattern = re.compile(r"program_db_.*_(\d+)_(\d+)\.pickle")
 
     # Find all matching files and extract (X, Y) values
-    matching_files = []
+    matching_files: list[tuple[int, int, Path]] = []
     for file in backup_dir.glob("program_db_*.pickle"):
       match = file_pattern.match(file.name)
       if match:
-        x, y = map(int, match.groups())
-        matching_files.append((x, y, file))
+        timestamp, id = map(int, match.groups())
+        matching_files.append((timestamp, id, file))
 
     # Select the file with lexicographically maximal (X, Y)
     if not matching_files:
       msg = "No matching backup files found in data/backups/"
       raise FileNotFoundError(msg)
-
     _, _, selected_file = max(matching_files)
+
     db_file = open(selected_file, "rb")
 
   # Load and process the database
@@ -212,7 +212,7 @@ def ls(db_file: click.File | None) -> None:
     prog.name += f"_{i}"
     print(prog)  # noqa: T201
     print("\n")  # noqa: T201
-  print(f"# Programs loaded from file: {selected_file}")  # noqa: T201
+  print(f"# Programs loaded from file: {db_file.name}")  # noqa: T201
 
 
 if __name__ == "__main__":

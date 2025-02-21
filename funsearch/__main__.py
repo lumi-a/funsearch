@@ -86,7 +86,7 @@ def _build_samplers(database: ProgramsDatabase) -> list[sampler.Sampler]:
           sandbox_class(
             base_path=log_path / f"sampler-{sampler_ix}-evaluator-{evaluator_ix}", timeout_secs=30
           ),
-          template,
+          database._template,
           function_to_evolve,
           function_to_run,
           inputs,
@@ -167,7 +167,9 @@ def run(
   template = code_manipulation.text_to_program(specification)
 
   conf = config.Config(num_evaluators=1)
-  database = ProgramsDatabase(conf.programs_database, template, function_to_evolve, identifier=timestamp)
+  database = ProgramsDatabase(
+    conf.programs_database, template, function_to_evolve, function_to_run, identifier=timestamp
+  )
 
   inputs = parse_input(inputs)
 

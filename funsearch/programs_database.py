@@ -91,11 +91,13 @@ class ProgramsDatabase:
     config: config_lib.ProgramsDatabaseConfig,
     template: code_manipulation.Program,
     function_to_evolve: str,
+    function_to_run: str,
     identifier: str = "",
   ) -> None:
     self._config: config_lib.ProgramsDatabaseConfig = config
     self._template: code_manipulation.Program = template
-    self._function_to_evolve: str = function_to_evolve
+    self.function_to_evolve: str = function_to_evolve
+    self.function_to_run: str = function_to_run
 
     # Initialize empty islands.
     self._islands: list[Island] = []
@@ -151,7 +153,7 @@ class ProgramsDatabase:
       setattr(self, key, data[key])
 
   def backup(self) -> None:
-    filename = f"program_db_{self._function_to_evolve}_{self.identifier}_{self._backups_done}.pickle"
+    filename = f"program_db_{self.function_to_evolve}_{self.identifier}_{self._backups_done}.pickle"
     p = pathlib.Path(self._config.backup_folder)
     if not p.exists():
       p.mkdir(parents=True, exist_ok=True)
@@ -218,7 +220,7 @@ class ProgramsDatabase:
     for island_id in reset_islands_ids:
       self._islands[island_id] = Island(
         self._template,
-        self._function_to_evolve,
+        self.function_to_evolve,
         self._config.functions_per_prompt,
         self._config.cluster_sampling_temperature_init,
         self._config.cluster_sampling_temperature_period,

@@ -1,11 +1,10 @@
 """Generate json-files from funsearch output."""  # noqa: INP001
 
 import json
-from pathlib import Path
 import re
+from pathlib import Path
 
 from funsearch import config
-from funsearch.code_manipulation import Function
 from funsearch.programs_database import ProgramsDatabase
 
 BACKUP_DIR = Path("../data/backups")

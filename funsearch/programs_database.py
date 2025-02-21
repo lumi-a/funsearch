@@ -46,9 +46,9 @@ def _softmax(logits: np.ndarray, temperature: float) -> np.ndarray:
 
   # Custom softmax to avoid scipy-dependency
   scaled = logits / temperature
-  max_index = np.argmax(scaled, axis=1)
+  max_index = np.argmax(scaled, axis=-1)
   exp_scaled = np.exp(scaled - scaled[max_index])
-  result = exp_scaled / np.sum(exp_scaled, axis=1)
+  result = exp_scaled / np.sum(exp_scaled, axis=-1)
 
   # Ensure that probabilities sum to 1 to prevent error in `np.random.choice`.
   result[max_index] = 1 - np.sum(result[0:max_index]) - np.sum(result[max_index + 1 :])

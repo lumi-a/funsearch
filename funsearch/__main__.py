@@ -164,12 +164,13 @@ def run(
   inputs = parse_input(inputs)
 
   timestamp = str(int(time.time()))
+
+  database = ProgramsDatabase(conf.programs_database, specification, inputs, timestamp)
+
   log_path = pathlib.Path(output_path) / timestamp
   if not log_path.exists():
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
-
-  database = ProgramsDatabase(conf.programs_database, specification, inputs, timestamp)
 
   sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
 
@@ -189,15 +190,35 @@ def run(
 @click.option(
   "--sandbox_type", default="ExternalProcessSandbox", type=click.Choice(SANDBOX_NAMES), help="Sandbox type"
 )
-def resume(db_file: click.File | None) -> None:
+def resume(
+  db_file: click.File | None,
+  model_name: str,
+  output_path: click.Path,
+  iterations: int,
+  samplers: int,
+  sandbox_type: str,
+) -> None:
   """Continue running FunSearch from a backup.
 
   If not provided, selects the most recent one from data/backups/.
   """
+  conf = config.Config()
+
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
-
   database = ProgramsDatabase.load(db_file)
+
+  timestamp = str(int(time.time()))
+  database.identifier = str(timestamp)
+
+  log_path = pathlib.Path(output_path) / timestamp
+  if not log_path.exists():
+    log_path.mkdir(parents=True)
+    logging.info(f"Writing logs to {log_path}")
+
+  sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
+
+  samplers = _build_samplers(database, sandbox_class, log_path, model_name, conf)
 
   core.run(samplers, database, iterations)
 

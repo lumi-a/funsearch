@@ -22,19 +22,50 @@ function strToPre(str) {
     return pre
 }
 
-function problemNameToContainer(problemName) {
-    const maybeExisting = document.getElementById(problemName + "-container")
+function getProblemContainer(problemName) {
+    const maybeExisting = document.getElementById("container-" + problemName)
     if (maybeExisting) {
         return maybeExisting
     }
 
+    const div = document.createElement("div")
+    div.id = "container-" + problemName
+    document.body.appendChild(div)
+
+    const heading = document.createElement("h2")
+    heading.textContent = problemName
+    div.appendChild(heading)
+
+    return div
+}
+
+function getRunContainer(problemName, inputs, timestamp) {
+    const maybeExisting = document.getElementById("run-details-" + timestamp)
+    if (maybeExisting) {
+        console.error("Duplicate run, this shouldn't happen.")
+        return maybeExisting
+    }
+    const link = document.createElement("a")
+    link.href = `#${timestamp}`
+
     const details = document.createElement("details")
-    details.id = problemName + "-container"
-    document.body.appendChild(details)
+    details.id = "run-details-" + timestamp
 
     const summary = document.createElement("summary")
-    summary.textContent = problemName
+
+    const problemSpan = document.createElement("span")
+    problemSpan.textContent = problemName + "(" + inputs.join(", ") + ")"
+    summary.appendChild(problemSpan)
+
+    const timestampSpan = document.createElement("span")
+    timestampSpan.classList.add("timestamp")
+    timestampSpan.textContent = timestamp
+    summary.appendChild(timestampSpan)
+
     details.appendChild(summary)
+
+    link.appendChild(details)
+    document.body.appendChild(link)
 
     return details
 }
@@ -42,19 +73,21 @@ function problemNameToContainer(problemName) {
 async function displayDatabase(database) {
     /*{
         "config": vars(database._config),  # noqa: SLF001
-        "inputs": database.inputs,
+          "inputs": database.inputs,
         "specCode": database._specification,  # noqa: SLF001
         "failureCounts": database._failure_counts,  # noqa: SLF001
         "successCounts": database._success_counts,  # noqa: SLF001
         "bestScorePerIsland": database._best_score_per_island,  # noqa: SLF001
         "bestProgramPerIsland": [str(p) for p in database._best_program_per_island],  # noqa: SLF001
-        "problemName": database.problem_name,
-        "timestamp": database.timestamp,
+          "problemName": database.problem_name,
+          "timestamp": database.timestamp,
     },*/
     const problemName = database.problemName
-    const container = problemNameToContainer(problemName)
+    const problemContainer = getProblemContainer(problemName)
 
-    // document.body.appendChild(pre)
+    const runContainer = getRunContainer(problemName, database.inputs, database.timestamp)
+
+    problemContainer.appendChild(runContainer)
 }
 
 async function main() {

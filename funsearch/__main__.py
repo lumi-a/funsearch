@@ -77,8 +77,13 @@ def _most_recent_backup() -> Path:
 
 
 def _build_samplers(
-  database: ProgramsDatabase, sandbox_class: any, log_path: Path, lm: sampler.LLM, conf: config.Config
+  database: ProgramsDatabase, sandbox_class: any, log_path: Path, model_name: str, conf: config.Config
 ) -> list[sampler.Sampler]:
+  load_dotenv()
+  model = llm.get_model(model_name)
+  model.key = model.get_key()
+  language_model = sampler.LLM(conf.samples_per_prompt, model, log_path)
+
   samplers: list[sampler.Sampler] = [
     sampler.Sampler(
       database,
@@ -95,7 +100,7 @@ def _build_samplers(
         )
         for evaluator_ix in range(conf.num_evaluators)
       ],
-      lm,
+      language_model,
     )
     for sampler_ix in range(conf.num_samplers)
   ]
@@ -152,7 +157,7 @@ def run(
                 8,9,10
                 ./specs/cap_set_input_data.json
   """
-  load_dotenv()
+  conf = config.Config()
 
   timestamp = str(int(time.time()))
   log_path = pathlib.Path(output_path) / timestamp
@@ -160,15 +165,10 @@ def run(
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
 
-  model = llm.get_model(model_name)
-  model.key = model.get_key()
-  lm = sampler.LLM(2, model, log_path)
-
   specification = spec_file.read()
   function_to_evolve, function_to_run = core.extract_function_names(specification)
   template = code_manipulation.text_to_program(specification)
 
-  conf = config.Config()
   inputs = parse_input(inputs)
 
   database = ProgramsDatabase(
@@ -177,7 +177,7 @@ def run(
 
   sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
 
-  samplers = _build_samplers(database, sandbox_class, log_path, lm, conf)
+  samplers = _build_samplers(database, sandbox_class, log_path, model_name, conf)
 
   core.run(samplers, database, iterations)
 

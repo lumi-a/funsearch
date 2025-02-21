@@ -2,7 +2,7 @@
 
 ## Setup
 
-This project uses [uv](https://docs.astral.sh/uv/), which automatically installs python and dependencies. Set your API-key using:
+This project uses [uv](https://docs.astral.sh/uv/), which automatically installs python and dependencies. Set your API-key:
 ```sh
 uv run llm keys set openai
 ```

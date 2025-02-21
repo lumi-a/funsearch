@@ -39,17 +39,10 @@ function getProblemContainer(problemName) {
     return div
 }
 
-function getRunContainer(problemName, inputs, timestamp) {
-    const maybeExisting = document.getElementById("run-details-" + timestamp)
-    if (maybeExisting) {
-        console.error("Duplicate run, this shouldn't happen.")
-        return maybeExisting
-    }
-    const link = document.createElement("a")
-    link.href = `#${timestamp}`
-
+function getRunContainer(problemContainer, problemName, inputs, timestamp) {
     const details = document.createElement("details")
-    details.id = "run-details-" + timestamp
+    // Let's just hope these are unique.
+    details.id = "run-" + timestamp
 
     const summary = document.createElement("summary")
 
@@ -57,15 +50,15 @@ function getRunContainer(problemName, inputs, timestamp) {
     problemSpan.textContent = problemName + "(" + inputs.join(", ") + ")"
     summary.appendChild(problemSpan)
 
-    const timestampSpan = document.createElement("span")
-    timestampSpan.classList.add("timestamp")
-    timestampSpan.textContent = timestamp
-    summary.appendChild(timestampSpan)
+    const timestampLink = document.createElement("a")
+    timestampLink.classList.add("timestamp")
+    timestampLink.href = `#run-${timestamp}`
+    timestampLink.textContent = timestamp
+    summary.appendChild(timestampLink)
 
     details.appendChild(summary)
 
-    link.appendChild(details)
-    document.body.appendChild(link)
+    problemContainer.appendChild(details)
 
     return details
 }
@@ -85,9 +78,8 @@ async function displayDatabase(database) {
     const problemName = database.problemName
     const problemContainer = getProblemContainer(problemName)
 
-    const runContainer = getRunContainer(problemName, database.inputs, database.timestamp)
+    const runContainer = getRunContainer(problemContainer, problemName, database.inputs, database.timestamp)
 
-    problemContainer.appendChild(runContainer)
 }
 
 async function main() {
@@ -96,4 +88,22 @@ async function main() {
 }
 
 hljs.addPlugin(new CopyButtonPlugin())
-main()
+
+window.addEventListener('load', () => {
+    main().then(() => {
+        for (let i = 0; i < 100; i++) {
+            document.body.appendChild(document.createTextNode("br"))
+            document.body.appendChild(document.createElement("br"))
+        }
+
+        const hash = window.location.hash.slice(1)
+        if (hash) {
+            console.log(hash)
+            const element = document.getElementById(hash)
+            if (element) {
+                element.open = true
+                element.scrollIntoView()
+            }
+        }
+    })
+})

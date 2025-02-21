@@ -200,7 +200,8 @@ def ls(db_file: click.File | None) -> None:
   # Load and process the database
   conf = config.Config(num_evaluators=1)
 
-  # A bit silly way to list programs. This probably does not work if config has changed any way
+  # TODO: Have ProgramsDatabase also include config and other parameters
+  # TODO: Also put success-counts and as many other attributes in there
   database = programs_database.ProgramsDatabase(conf.programs_database, None, "", identifier="")
   database.load(db_file)
 

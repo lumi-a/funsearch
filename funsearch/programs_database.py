@@ -307,11 +307,11 @@ class ProgramsDatabase:
       f"{total_success_rate:>2.0f}% ",
     ]
     output.append((" " * (2 * len(separator) + score_width - 5)) + " Total: " + separator.join(summary))
-    sys.stdout.write("\n".join(output) + "\n")
+    print("\n".join(output))  # noqa: T201
 
     if not last_run:
       lines_to_move = len(output)
-      sys.stdout.write(f"\033[{lines_to_move}A")
+      print(f"\033[{lines_to_move}A", end="", flush=True)  # noqa: T201
       sys.stdout.flush()
 
 

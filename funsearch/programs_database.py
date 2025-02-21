@@ -21,6 +21,7 @@ import copy
 import dataclasses
 import pathlib
 import pickle
+import sys
 import time
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
@@ -279,7 +280,7 @@ class ProgramsDatabase:
       f"{'Failures':>8}",
       f"{'ok%':>3}",
     ]
-    output = ["", separator.join(headers), separator.join("─" * len(x) for x in headers)]
+    output = [separator.join(headers), separator.join("─" * len(x) for x in headers)]
 
     for idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
       successes = self._success_counts[idx]
@@ -306,12 +307,12 @@ class ProgramsDatabase:
       f"{total_success_rate:>2.0f}% ",
     ]
     output.append((" " * (2 * len(separator) + score_width - 5)) + " Total: " + separator.join(summary))
-
-    print("\n".join(output))  # noqa: T201
+    sys.stdout.write("\n".join(output) + "\n")
 
     if not last_run:
       lines_to_move = len(output)
-      print(f"\033[{lines_to_move}A", end="", flush=True)  # noqa: T201
+      sys.stdout.write(f"\033[{lines_to_move}A")
+      sys.stdout.flush()
 
 
 class Island:

@@ -128,7 +128,7 @@ class ProgramsDatabase:
 
   def get_best_programs_per_island(
     self,
-  ) -> Iterable[tuple[code_manipulation.Function | None]]:
+  ) -> Iterable[tuple[code_manipulation.Function | None, float]]:
     return sorted(
       zip(self._best_program_per_island, self._best_score_per_island),
       key=lambda t: t[1],

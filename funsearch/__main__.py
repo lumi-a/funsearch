@@ -122,7 +122,7 @@ def run(
   \b
     SPEC_FILE is a python module that provides the basis of the LLM prompt as
               well as the evaluation metric.
-              See specs/cap_set_spec.py for an example.\n
+              See specs/cap-set.py for an example.\n
   \b
     INPUTS    input filename ending in .json or .pickle, or a comma-separated
               input data. The files are expected to contain a list with at least

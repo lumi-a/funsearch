@@ -112,7 +112,6 @@ class ProgramVisitor(ast.NodeVisitor):
 
     self._preface: str = ""
     self._functions: list[Function] = []
-    self._current_function: str | None = None
 
   def visit_FunctionDef(
     self,  # pylint: disable=invalid-name
@@ -120,7 +119,6 @@ class ProgramVisitor(ast.NodeVisitor):
   ) -> None:
     """Collects all information about the function being parsed."""
     if node.col_offset == 0:  # We only care about first level functions.
-      self._current_function = node.name
       if not self._functions:
         self._preface = "\n".join(self._codelines[: node.lineno - 1])
       function_end_line = node.end_lineno

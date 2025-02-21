@@ -38,10 +38,21 @@ for (specname, timestamp), (idx, file) in files.items():
     # As backups are indexed with timestamps, and we don't expect backups to change over time,
     # keep the json minimal, without newlines (which otherwise would be neat for VCS)
     json.dump(
-      [{"fn": str(fn), "score": score} for (fn, score) in database.get_best_programs_per_island()],
+      {
+        "config": vars(database._config),  # noqa: SLF001
+        "inputs": database.inputs,
+        "specCode": database._specification,  # noqa: SLF001
+        "failureCounts": database._failure_counts,  # noqa: SLF001
+        "successCounts": database._success_counts,  # noqa: SLF001
+        "bestScorePerIsland": database._best_score_per_island,  # noqa: SLF001
+        "bestProgramPerIsland": database._best_program_per_island,  # noqa: SLF001
+        "problemName": database.problem_name,
+        "timestamp": database.timestamp,
+      },
       f,
       separators=(",", ":"),
     )
+
 # Create the index of all json-files
 with (JSON_DIR / "index.json").open("w") as f:
   json.dump(

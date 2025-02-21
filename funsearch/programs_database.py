@@ -148,7 +148,7 @@ class ProgramsDatabase:
       data[key] = getattr(self, key)
     pickle.dump(data, file)
 
-  def load(self, file) -> None:
+  def load(file) -> ProgramsDatabase:
     """Load previously saved database."""
     data = pickle.load(file)
     for key in data:

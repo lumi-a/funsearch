@@ -77,7 +77,7 @@ def _most_recent_backup() -> Path:
 
 
 def _build_samplers(
-  database: ProgramsDatabase, sandbox_class: any, log_path: Path, lm: sampler.LLM
+  database: ProgramsDatabase, sandbox_class: any, log_path: Path, lm: sampler.LLM, conf: config.Config
 ) -> list[sampler.Sampler]:
   samplers: list[sampler.Sampler] = [
     sampler.Sampler(
@@ -97,10 +97,10 @@ def _build_samplers(
       ],
       lm,
     )
-    for sampler_ix in range(samplers)
+    for sampler_ix in range(conf.num_samplers)
   ]
 
-  initial = template.get_function(function_to_evolve).body
+  initial = database.template.get_function(database.function_to_evolve).body
 
   samplers[0]._evaluators[0].analyse(initial, island_id=None, version_generated=None)  # noqa: SLF001
   if not len(database._islands[0]._clusters) > 0:  # noqa: SLF001
@@ -168,7 +168,7 @@ def run(
   function_to_evolve, function_to_run = core._extract_function_names(specification)
   template = code_manipulation.text_to_program(specification)
 
-  conf = config.Config(num_evaluators=1)
+  conf = config.Config()
   inputs = parse_input(inputs)
 
   database = ProgramsDatabase(
@@ -177,7 +177,7 @@ def run(
 
   sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
 
-  samplers = _build_samplers(database, sandbox_class, log_path, lm)
+  samplers = _build_samplers(database, sandbox_class, log_path, lm, conf)
 
   core.run(samplers, database, iterations)
 

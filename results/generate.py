@@ -34,4 +34,6 @@ for (function_name, timestamp), (idx, file) in files.items():
   database.load(file.open("rb"))
 
   with (JSON_DIR / f"{function_name}_{timestamp}.json").open("w") as f:
-    json.dump([(str(fn), score) for (fn, score) in database.get_best_programs_per_island()], f)
+    json.dump(
+      [{"function": str(fn), "score": score} for (fn, score) in database.get_best_programs_per_island()], f
+    )

@@ -126,13 +126,9 @@ class ProgramsDatabase:
   def increment_success(self, island_id: int) -> None:
     self._success_counts[island_id] += 1
 
-  def get_best_programs_per_island(
-    self,
-  ) -> Iterable[tuple[code_manipulation.Function | None, float]]:
+  def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
     return sorted(
-      zip(self._best_program_per_island, self._best_score_per_island),
-      key=lambda t: t[1],
-      reverse=True,
+      zip(self._best_program_per_island, self._best_score_per_island), key=lambda t: t[1], reverse=True
     )
 
   def save(self, file) -> None:
@@ -173,10 +169,7 @@ class ProgramsDatabase:
     return Prompt(code, version_generated, island_id)
 
   def _register_program_in_island(
-    self,
-    program: code_manipulation.Function,
-    island_id: int,
-    scores_per_test: ScoresPerTest,
+    self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
   ) -> None:
     """Registers `program` in the specified island."""
     self._islands[island_id].register_program(program, scores_per_test)
@@ -188,10 +181,7 @@ class ProgramsDatabase:
       logging.info("✔ Best score of island %d increased to %s", island_id, score)
 
   def register_program(
-    self,
-    program: code_manipulation.Function,
-    island_id: int | None,
-    scores_per_test: ScoresPerTest,
+    self, program: code_manipulation.Function, island_id: int | None, scores_per_test: ScoresPerTest
   ) -> None:
     """Registers `program` in the database."""
     # In an asynchronous implementation we should consider the possibility of
@@ -307,11 +297,7 @@ class Island:
     self._clusters: dict[Signature, Cluster] = {}
     self._num_programs: int = 0
 
-  def register_program(
-    self,
-    program: code_manipulation.Function,
-    scores_per_test: ScoresPerTest,
-  ) -> None:
+  def register_program(self, program: code_manipulation.Function, scores_per_test: ScoresPerTest) -> None:
     """Stores a program on this island, in its appropriate cluster."""
     signature = _get_signature(scores_per_test)
     if signature not in self._clusters:

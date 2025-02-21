@@ -156,12 +156,7 @@ class Evaluator:
     self._timeout_seconds = timeout_seconds
     self._sandbox = sbox
 
-  def analyse(
-    self,
-    sample: str,
-    island_id: int | None,
-    version_generated: int | None,
-  ) -> None:
+  def analyse(self, sample: str, island_id: int | None, version_generated: int | None) -> None:
     """Compiles the sample into a program and executes it on test inputs."""
     new_function, program = _sample_to_program(
       sample, version_generated, self._template, self._function_to_evolve

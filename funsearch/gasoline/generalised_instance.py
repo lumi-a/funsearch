@@ -87,20 +87,10 @@ class MyGenealisedModel:
   def _init_vars(self, inst: GeneralisedInstance) -> None:
     for i in range(self.k):
       self.alpha.append(
-        self.gurobi_model.addVar(
-          vtype=GRB.INTEGER,
-          name=f"alpha_{i}",
-          lb=-float("inf"),
-          ub=float("inf"),
-        )
+        self.gurobi_model.addVar(vtype=GRB.INTEGER, name=f"alpha_{i}", lb=-float("inf"), ub=float("inf"))
       )
       self.beta.append(
-        self.gurobi_model.addVar(
-          vtype=GRB.INTEGER,
-          name=f"beta_{i}",
-          lb=-float("inf"),
-          ub=float("inf"),
-        )
+        self.gurobi_model.addVar(vtype=GRB.INTEGER, name=f"beta_{i}", lb=-float("inf"), ub=float("inf"))
       )
     ll = list(range(inst.n))
     self.z = self.gurobi_model.addVars(ll, ll, vtype=GRB.BINARY, name="z")
@@ -130,8 +120,7 @@ class MyGenealisedModel:
     self._init_vars(inst)
     self.__init_constrs(inst)
     self.gurobi_model.setObjective(
-      gp.quicksum(self.beta[ll] - self.alpha[ll] for ll in range(self.k)),
-      GRB.MINIMIZE,
+      gp.quicksum(self.beta[ll] - self.alpha[ll] for ll in range(self.k)), GRB.MINIMIZE
     )
     self.gurobi_model.setParam("OutputFlag", False)
 

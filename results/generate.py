@@ -47,7 +47,5 @@ for (function_name, timestamp), (idx, file) in files.items():
 # Create the index of all json-files
 with (JSON_DIR / "index.json").open("w") as f:
   json.dump(
-    sorted([_to_filename(function_name, timestamp).name for (function_name, timestamp) in files]),
-    f,
-    indent=2,
+    sorted([_to_filename(function_name, timestamp).name for (function_name, timestamp) in files]), f, indent=2
   )

@@ -84,10 +84,7 @@ class Sampler:
   """Node that samples program continuations and sends them for analysis."""
 
   def __init__(
-    self,
-    database: programs_database.ProgramsDatabase,
-    evaluators: Sequence[evaluator.Evaluator],
-    model: LLM,
+    self, database: programs_database.ProgramsDatabase, evaluators: Sequence[evaluator.Evaluator], model: LLM
   ) -> None:
     self._database = database
     self._evaluators = evaluators

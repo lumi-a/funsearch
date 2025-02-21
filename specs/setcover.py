@@ -35,10 +35,7 @@ def greedy_ratio(sets: list[set[int]]) -> float:
   x = [model.addVar(vtype=GRB.BINARY, name=f"x_{i}") for i in range(len(sets))]
   model.update()
   for element in universe:
-    model.addConstr(
-      sum(x[i] for i, s in enumerate(sets) if element in s) >= 1,
-      f"cover_{element}",
-    )
+    model.addConstr(sum(x[i] for i, s in enumerate(sets) if element in s) >= 1, f"cover_{element}")
   model.setObjective(sum(x), GRB.MINIMIZE)
   model.optimize()
 

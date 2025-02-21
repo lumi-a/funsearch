@@ -57,7 +57,7 @@ def get_capset_v0(n: int) -> set[tuple[int, ...]]:
   """
   capset = set()
   for i in range(n):
-    capset.add((0,) * i + (1,) + (0,) * (n - i - 1))
+    capset.add((0) * i + (1) + (0) * (n - i - 1))
   return capset
 
 
@@ -80,7 +80,7 @@ _FUNCTION_DOCSTRING: str = '  """One line docstring."""'
 _FUNCTION_BODY: str = """\
   capset = set()
   for i in range(n):
-    capset.add((0,) * i + (1,) + (0,) * (n - i - 1))
+    capset.add((0) * i + (1) + (0) * (n - i - 1))
   return capset
 """
 
@@ -164,7 +164,7 @@ class PromptSamplingTest(parameterized.TestCase):
       """\
         capset = set()
         for i in range(n):
-          capset.add((0,) * i + (1,) + (0,) * (n - i - 1))
+          capset.add((0) * i + (1) + (0) * (n - i - 1))
         return capset"""
     )
     expected_function_0 = code_manipulation.Function(
@@ -196,10 +196,7 @@ class PromptSamplingTest(parameterized.TestCase):
     # Make sure that one can convert Function to string and then back to a
     # function so that it remains the same.
     for i in range(2):
-      self.assertEqual(
-        program.functions[i],
-        code_manipulation.text_to_function(str(program.functions[i])),
-      )
+      self.assertEqual(program.functions[i], code_manipulation.text_to_function(str(program.functions[i])))
 
   def test_get_functions_called(self):
     code = textwrap.dedent("""\

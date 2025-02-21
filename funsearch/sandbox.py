@@ -28,13 +28,7 @@ class DummySandbox:
 
     DummySandbox.sandboxes += 1
 
-  def run(
-    self,
-    program: str,
-    function_to_run: str,
-    test_input,
-    timeout_seconds: int,
-  ) -> tuple[Any, bool]:
+  def run(self, program: str, function_to_run: str, test_input, timeout_seconds: int) -> tuple[Any, bool]:
     """Returns `function_to_run(test_input)` and whether execution succeeded."""
     # The same "program" seems to be now repeatedly parsed using AST and then compiled.
     # This could probably be simplified quite a bit.
@@ -60,12 +54,7 @@ class ExternalProcessSandbox(DummySandbox):
   funsearch algorithm. It might be easier to set up and thus nice environment to tune the prompts and other code.
   """
 
-  def __init__(
-    self,
-    base_path: pathlib.Path,
-    timeout_secs: int = 30,
-    python_path: str = "python",
-  ) -> None:
+  def __init__(self, base_path: pathlib.Path, timeout_secs: int = 30, python_path: str = "python") -> None:
     super().__init__()
 
     self.output_path = pathlib.Path(base_path) / f"sandbox{self.id}"
@@ -78,12 +67,7 @@ class ExternalProcessSandbox(DummySandbox):
       if not p.exists():
         p.mkdir(parents=True)
 
-  def _exec(
-    self,
-    call_data_path: pathlib.Path,
-    input_path: pathlib.Path,
-    error_file_path: pathlib.Path,
-  ):
+  def _exec(self, call_data_path: pathlib.Path, input_path: pathlib.Path, error_file_path: pathlib.Path):
     """Use podman/docker to execute python in a container.
     - The main.py shall execute the LLM generated method from prog.pickle file providing
       input.pickle as the input for the method.
@@ -109,13 +93,7 @@ class ExternalProcessSandbox(DummySandbox):
       logging.debug(f"Command failed with error: {e}")
       return 1
 
-  def run(
-    self,
-    program: str,
-    function_to_run: str,
-    test_input,
-    timeout_seconds: int,
-  ) -> tuple[Any, bool]:
+  def run(self, program: str, function_to_run: str, test_input, timeout_seconds: int) -> tuple[Any, bool]:
     call_data_folder = (self.output_path / f"call{self.call_count}").absolute()
     if not call_data_folder.exists():
       call_data_folder.mkdir()
@@ -195,23 +173,13 @@ class ContainerSandbox(ExternalProcessSandbox):
     os.system(cmd)
     cls.image_built = True
 
-  def __init__(
-    self,
-    base_path: pathlib.Path,
-    extra_pip_packages: str = "numpy",
-    timeout_secs=30,
-  ) -> None:
+  def __init__(self, base_path: pathlib.Path, extra_pip_packages: str = "numpy", timeout_secs=30) -> None:
     super().__init__(base_path, timeout_secs)
 
     if not ContainerSandbox.image_built:
       ContainerSandbox.build_image(extra_pip_packages)
 
-  def _exec(
-    self,
-    call_data_path: pathlib.Path,
-    input_path: pathlib.Path,
-    error_file_path: pathlib.Path,
-  ):
+  def _exec(self, call_data_path: pathlib.Path, input_path: pathlib.Path, error_file_path: pathlib.Path):
     """Use podman/docker to execute python in a container.
     - The main.py shall execute the LLM generated method from prog.pickle file providing
       input.pickle as the input for the method.

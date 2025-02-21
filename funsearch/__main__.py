@@ -13,14 +13,7 @@ import click
 import llm
 from dotenv import load_dotenv
 
-from funsearch import (
-  code_manipulation,
-  config,
-  core,
-  evaluator,
-  sampler,
-  sandbox,
-)
+from funsearch import code_manipulation, config, core, evaluator, sampler, sandbox
 from funsearch.programs_database import ProgramsDatabase
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
@@ -62,7 +55,6 @@ def parse_input(filename_or_data: str):
 
 def _most_recent_backup() -> Path:
   """Returns the most recent backup file."""
-
   # Define the directory and file pattern
   backup_dir = Path("data/backups")
   file_pattern = re.compile(r"program_db_.*_(\d+)_(\d+)\.pickle")
@@ -127,18 +119,12 @@ def main(ctx: click.Context) -> None:
 @click.argument("inputs")
 @click.option("--model_name", default="gpt-3.5-turbo", help="LLM model")
 @click.option(
-  "--output_path",
-  default="./data/",
-  type=click.Path(file_okay=False),
-  help="path for logs and data",
+  "--output_path", default="./data/", type=click.Path(file_okay=False), help="path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
 @click.option("--samplers", default=15, type=click.INT, help="Samplers")
 @click.option(
-  "--sandbox_type",
-  default="ExternalProcessSandbox",
-  type=click.Choice(SANDBOX_NAMES),
-  help="Sandbox type",
+  "--sandbox_type", default="ExternalProcessSandbox", type=click.Choice(SANDBOX_NAMES), help="Sandbox type"
 )
 def run(
   spec_file: click.File,
@@ -196,18 +182,12 @@ def run(
 @click.argument("db_file", type=click.File("rb"), required=False)
 @click.option("--model_name", default="gpt-3.5-turbo", help="LLM model")
 @click.option(
-  "--output_path",
-  default="./data/",
-  type=click.Path(file_okay=False),
-  help="path for logs and data",
+  "--output_path", default="./data/", type=click.Path(file_okay=False), help="path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
 @click.option("--samplers", default=15, type=click.INT, help="Samplers")
 @click.option(
-  "--sandbox_type",
-  default="ExternalProcessSandbox",
-  type=click.Choice(SANDBOX_NAMES),
-  help="Sandbox type",
+  "--sandbox_type", default="ExternalProcessSandbox", type=click.Choice(SANDBOX_NAMES), help="Sandbox type"
 )
 def resume(db_file: click.File | None) -> None:
   """Continue running FunSearch from a backup.

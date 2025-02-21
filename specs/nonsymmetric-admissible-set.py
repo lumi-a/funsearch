@@ -13,13 +13,13 @@ def block_children(scores, admissible_set, new_element) -> None:
   powers = np.array([3**i for i in range(n - 1, -1, -1)], dtype=np.int32)
 
   invalid_vals_raw = {
-    (0, 0): (0,),
-    (0, 1): (1,),
-    (0, 2): (2,),
-    (1, 0): (1,),
+    (0, 0): (0),
+    (0, 1): (1),
+    (0, 2): (2),
+    (1, 0): (1),
     (1, 1): (0, 1, 2),
     (1, 2): (1, 2),
-    (2, 0): (2,),
+    (2, 0): (2),
     (2, 1): (1, 2),
     (2, 2): (0, 1, 2),
   }
@@ -33,7 +33,7 @@ def block_children(scores, admissible_set, new_element) -> None:
 
   # Block elements disallowed by a pair of an extant point and `new_element`.
   for extant_element in admissible_set:
-    blocking = np.zeros(shape=(1,), dtype=np.int32)
+    blocking = np.zeros(shape=(1), dtype=np.int32)
     for e1, e2, power in zip(extant_element, new_element, powers):
       blocking = (blocking[:, None] + (invalid_vals[e1][e2] * power)[None, :]).ravel()
     scores[blocking] = -np.inf
@@ -59,7 +59,7 @@ def solve(n: int, w: int) -> np.ndarray:
   """
   children = np.array(list(itertools.product((0, 1, 2), repeat=n)), dtype=np.int32)
 
-  scores = -np.inf * np.ones((3**n,), dtype=np.float32)
+  scores = -np.inf * np.ones((3**n), dtype=np.float32)
   for child_index, child in enumerate(children):
     if sum(child == 0) == n - w:
       scores[child_index] = priority(np.array(child), n, w)

@@ -215,11 +215,7 @@ def rename_function_calls(code: str, source_name: str, target_name: str) -> str:
     if is_call and token.string == source_name:
       # Replace the function name token
       modified_token = tokenize.TokenInfo(
-        type=token.type,
-        string=target_name,
-        start=token.start,
-        end=token.end,
-        line=token.line,
+        type=token.type, string=target_name, start=token.start, end=token.end, line=token.line
       )
       modified_tokens.append(modified_token)
     else:

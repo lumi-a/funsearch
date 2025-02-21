@@ -94,15 +94,15 @@ function appendDetailsCode(container, title, code) {
 
 async function displayDatabase(database) {
     /*{
-          "config": vars(database._config),  # noqa: SLF001
-          "inputs": database.inputs,
-          "specCode": database._specification,  # noqa: SLF001
-        "failureCounts": database._failure_counts,  # noqa: SLF001
-        "successCounts": database._success_counts,  # noqa: SLF001
+        "config": vars(database._config),  # noqa: SLF001
+        "inputs": database.inputs,
+        "specCode": database._specification,  # noqa: SLF001
+            not displayed yet "failureCounts": database._failure_counts,  # noqa: SLF001
+            not displayed yet "successCounts": database._success_counts,  # noqa: SLF001
         "bestScorePerIsland": database._best_score_per_island,  # noqa: SLF001
         "bestProgramPerIsland": [str(p) for p in database._best_program_per_island],  # noqa: SLF001
-          "problemName": database.problem_name,
-          "timestamp": database.timestamp,
+        "problemName": database.problem_name,
+        "timestamp": database.timestamp,
     },*/
     const problemName = database.problemName
     const problemContainer = getProblemContainer(problemName)

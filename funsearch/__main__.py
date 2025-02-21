@@ -159,15 +159,15 @@ def run(
   """
   conf = config.Config()
 
+  specification = spec_file.read()
+
+  inputs = parse_input(inputs)
+
   timestamp = str(int(time.time()))
   log_path = pathlib.Path(output_path) / timestamp
   if not log_path.exists():
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
-
-  specification = spec_file.read()
-
-  inputs = parse_input(inputs)
 
   database = ProgramsDatabase(conf.programs_database, specification, inputs, timestamp)
 

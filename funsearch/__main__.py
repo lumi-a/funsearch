@@ -64,8 +64,8 @@ def _most_recent_backup() -> Path:
   for file in backup_dir.glob("program_db_*.pickle"):
     match = file_pattern.match(file.name)
     if match:
-      timestamp, id = map(int, match.groups())
-      matching_files.append((timestamp, id, file))
+      timestamp, idx = map(int, match.groups())
+      matching_files.append((timestamp, idx, file))
 
   # Select the file with lexicographically maximal (X, Y)
   if not matching_files:

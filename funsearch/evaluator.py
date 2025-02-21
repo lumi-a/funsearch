@@ -161,7 +161,6 @@ class Evaluator:
     sample: str,
     island_id: int | None,
     version_generated: int | None,
-    index: int,
   ) -> None:
     """Compiles the sample into a program and executes it on test inputs."""
     new_function, program = _sample_to_program(

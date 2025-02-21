@@ -60,6 +60,30 @@ def parse_input(filename_or_data: str):
   return data
 
 
+def _most_recent_backup() -> Path:
+  """Returns the most recent backup file."""
+
+  # Define the directory and file pattern
+  backup_dir = Path("data/backups")
+  file_pattern = re.compile(r"program_db_.*_(\d+)_(\d+)\.pickle")
+
+  # Find all matching files and extract (X, Y) values
+  matching_files: list[tuple[int, int, Path]] = []
+  for file in backup_dir.glob("program_db_*.pickle"):
+    match = file_pattern.match(file.name)
+    if match:
+      timestamp, id = map(int, match.groups())
+      matching_files.append((timestamp, id, file))
+
+  # Select the file with lexicographically maximal (X, Y)
+  if not matching_files:
+    msg = "No matching backup files found in data/backups/"
+    raise FileNotFoundError(msg)
+  _, _, selected_file = max(matching_files)
+
+  return selected_file
+
+
 @click.group()
 @click.pass_context
 def main(ctx: click.Context) -> None:
@@ -76,12 +100,6 @@ def main(ctx: click.Context) -> None:
   type=click.Path(file_okay=False),
   help="path for logs and data",
 )
-@click.option(
-  "--load_backup",
-  default=None,
-  type=click.File("rb"),
-  help="Use existing program database",
-)
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
 @click.option("--samplers", default=15, type=click.INT, help="Samplers")
 @click.option(
@@ -95,7 +113,6 @@ def run(
   inputs: str,
   model_name: str,
   output_path: click.Path,
-  load_backup: click.File | None,
   iterations: int,
   samplers: int,
   sandbox_type: str,
@@ -135,8 +152,6 @@ def run(
   database = programs_database.ProgramsDatabase(
     conf.programs_database, template, function_to_evolve, identifier=timestamp
   )
-  if load_backup is not None:
-    database.load(load_backup)
 
   inputs = parse_input(inputs)
 
@@ -171,31 +186,42 @@ def run(
 
 @main.command()
 @click.argument("db_file", type=click.File("rb"), required=False)
+def resume(db_file: click.File | None) -> None:
+  """Continue running FunSearch from a backup (usually in data/backups/).
+
+  If not provided, selects the most recent one from data/backups/.
+  """
+  if db_file is None:
+    db_file = _most_recent_backup().open("rb")
+
+  # Load and process the database
+  conf = config.Config(num_evaluators=1)
+
+  # TODO: Have ProgramsDatabase also include config and other parameters
+  # TODO: Also put success-counts and as many other attributes in there
+  database = programs_database.ProgramsDatabase(conf.programs_database, None, "", identifier="")
+  database.load(db_file)
+
+  progs = database.get_best_programs_per_island()
+  print(f"# Found {len(progs)} programs")  # noqa: T201
+  for ix, (prog, score) in enumerate(reversed(progs)):
+    i = len(progs) - 1 - ix
+    print(f"# {i}: Program with score {score}")  # noqa: T201
+    prog.name += f"_{i}"
+    print(prog)  # noqa: T201
+    print("\n")  # noqa: T201
+  print(f"# Programs loaded from file: {db_file.name}")  # noqa: T201
+
+
+@main.command()
+@click.argument("db_file", type=click.File("rb"), required=False)
 def ls(db_file: click.File | None) -> None:
   """List programs from a stored database (usually in data/backups/).
 
   If not provided, selects the most recent one from data/backups/.
   """
   if db_file is None:
-    # Define the directory and file pattern
-    backup_dir = Path("data/backups")
-    file_pattern = re.compile(r"program_db_.*_(\d+)_(\d+)\.pickle")
-
-    # Find all matching files and extract (X, Y) values
-    matching_files: list[tuple[int, int, Path]] = []
-    for file in backup_dir.glob("program_db_*.pickle"):
-      match = file_pattern.match(file.name)
-      if match:
-        timestamp, id = map(int, match.groups())
-        matching_files.append((timestamp, id, file))
-
-    # Select the file with lexicographically maximal (X, Y)
-    if not matching_files:
-      msg = "No matching backup files found in data/backups/"
-      raise FileNotFoundError(msg)
-    _, _, selected_file = max(matching_files)
-
-    db_file = open(selected_file, "rb")
+    db_file = _most_recent_backup().open("rb")
 
   # Load and process the database
   conf = config.Config(num_evaluators=1)

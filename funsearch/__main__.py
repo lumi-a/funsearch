@@ -194,23 +194,7 @@ def resume(db_file: click.File | None) -> None:
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
 
-  # Load and process the database
-  conf = config.Config(num_evaluators=1)
-
-  # TODO: Have ProgramsDatabase also include config and other parameters
-  # TODO: Also put success-counts and as many other attributes in there
-  database = programs_database.ProgramsDatabase(conf.programs_database, None, "", identifier="")
-  database.load(db_file)
-
-  progs = database.get_best_programs_per_island()
-  print(f"# Found {len(progs)} programs")  # noqa: T201
-  for ix, (prog, score) in enumerate(reversed(progs)):
-    i = len(progs) - 1 - ix
-    print(f"# {i}: Program with score {score}")  # noqa: T201
-    prog.name += f"_{i}"
-    print(prog)  # noqa: T201
-    print("\n")  # noqa: T201
-  print(f"# Programs loaded from file: {db_file.name}")  # noqa: T201
+  core.run(samplers, database, iterations)
 
 
 @main.command()

@@ -184,6 +184,21 @@ def run(
 
 @main.command()
 @click.argument("db_file", type=click.File("rb"), required=False)
+@click.option("--model_name", default="gpt-3.5-turbo", help="LLM model")
+@click.option(
+  "--output_path",
+  default="./data/",
+  type=click.Path(file_okay=False),
+  help="path for logs and data",
+)
+@click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
+@click.option("--samplers", default=15, type=click.INT, help="Samplers")
+@click.option(
+  "--sandbox_type",
+  default="ExternalProcessSandbox",
+  type=click.Choice(SANDBOX_NAMES),
+  help="Sandbox type",
+)
 def resume(db_file: click.File | None) -> None:
   """Continue running FunSearch from a backup.
 

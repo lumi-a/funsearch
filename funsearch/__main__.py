@@ -168,17 +168,18 @@ def run(
       for i in range(conf.num_evaluators)
     ]
 
-    # We send the initial implementation to be analysed by one of the evaluators.
-    # TODO: Only do this once for one evaluator
-    initial = template.get_function(function_to_evolve).body
-    evaluators[0].analyse(initial, island_id=None, version_generated=None)
-    assert len(database._islands[0]._clusters) > 0, (
-      "Initial analysis failed. Make sure that Sandbox works! See e.g. the error files under sandbox data."
-    )
-
     return evaluators
 
-  samplers = [sampler.Sampler(database, construct_evaluators(i), lm) for i in range(samplers)]
+  samplers: list[sampler.Sampler] = [
+    sampler.Sampler(database, construct_evaluators(i), lm) for i in range(samplers)
+  ]
+
+  initial = template.get_function(function_to_evolve).body
+  samplers[0]._evaluators[0].analyse(initial, island_id=None, version_generated=None)  # noqa: SLF001
+  if not len(database._islands[0]._clusters) > 0:  # noqa: SLF001
+    msg = "Running initial function failed, see logs in output_path"
+    raise RuntimeError(msg)
+
   core.run(samplers, database, iterations)
 
 

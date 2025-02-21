@@ -100,7 +100,7 @@ def run(
   samplers: int,
   sandbox_type: str,
 ) -> None:
-  r"""Execute function-search algorithm.
+  r"""Execute FunSearch algorithm.
 
   \b
     SPEC_FILE is a python module that provides the basis of the LLM prompt as
@@ -108,7 +108,7 @@ def run(
               See examples/cap_set_spec.py for an example.\n
   \b
     INPUTS    input filename ending in .json or .pickle, or a comma-separated
-              input data. The files are expected contain a list with at least
+              input data. The files are expected to contain a list with at least
               one element. Elements shall be passed to the solve() method
               one by one. Examples
                 8

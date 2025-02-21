@@ -69,14 +69,17 @@ function getRunContainer(problemContainer, problemName, inputs, timestamp) {
     return containerInner
 }
 
-function appendDetails(container, title, content) {
+function appendDetails(container, title, maybeContent) {
     const details = document.createElement("details")
     details.classList.add("inner-details")
     const summary = document.createElement("summary")
     summary.textContent = title
     details.appendChild(summary)
-    details.appendChild(content)
+    if (maybeContent) {
+        details.appendChild(maybeContent)
+    }
     container.appendChild(details)
+    return details
 }
 
 function appendDetailsCode(container, title, code) {
@@ -86,14 +89,14 @@ function appendDetailsCode(container, title, code) {
     codeElement.textContent = code
     pre.appendChild(codeElement)
     hljs.highlightElement(codeElement)
-    appendDetails(container, title, pre)
+    return appendDetails(container, title, pre)
 }
 
 async function displayDatabase(database) {
     /*{
           "config": vars(database._config),  # noqa: SLF001
           "inputs": database.inputs,
-        "specCode": database._specification,  # noqa: SLF001
+          "specCode": database._specification,  # noqa: SLF001
         "failureCounts": database._failure_counts,  # noqa: SLF001
         "successCounts": database._success_counts,  # noqa: SLF001
         "bestScorePerIsland": database._best_score_per_island,  # noqa: SLF001
@@ -107,6 +110,16 @@ async function displayDatabase(database) {
     const runContainer = getRunContainer(problemContainer, problemName, database.inputs, database.timestamp)
 
     appendDetailsCode(runContainer, "Spec", database.specCode)
+
+    const programsDetails = appendDetails(runContainer, "Best Programs", null)
+    const islands = database.bestScorePerIsland.map((score, i) => ({ ix: i, score: score, program: database.bestProgramPerIsland[i] }))
+    islands.sort((a, b) => b.score - a.score)
+    islands.forEach(({ ix, score, program }) => {
+        appendDetailsCode(programsDetails, `Score ${score} on Island ${ix}`, program)
+    })
+
+
+
 
     appendDetailsCode(runContainer, "Config", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
 }

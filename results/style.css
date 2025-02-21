@@ -7,10 +7,12 @@ code {
     max-width: 100%;
 }
 
+details {
+    border-left: 0.125em solid #8888;
+}
+
 .run-container {
     margin: 0.5em;
-    border: 0.125em solid #888;
-    border-radius: 0.25em;
     background: #8881;
 }
 
@@ -31,7 +33,7 @@ code {
     /* ??? */
 }
 
-.inner-details>pre {
+.inner-details>*:not(summary) {
     margin-left: 0.5em;
     margin-right: 0.5em;
     margin-bottom: 0.5em;

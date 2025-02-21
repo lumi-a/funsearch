@@ -27,7 +27,7 @@ for f in BACKUP_DIR.glob("program_db_*.pickle"):
       files[(function_name, timestamp)] = (idx, f)
 
 
-def to_filename(function_name: str, timestamp: int) -> Path:
+def _to_filename(function_name: str, timestamp: int) -> Path:
   return JSON_DIR / f"{function_name}_{timestamp}.json"
 
 
@@ -37,7 +37,7 @@ for (function_name, timestamp), (idx, file) in files.items():
   database = ProgramsDatabase(conf.programs_database, None, "", identifier="")
   database.load(file.open("rb"))
 
-  with to_filename(function_name, timestamp).open("w") as f:
+  with _to_filename(function_name, timestamp).open("w") as f:
     # As backups are indexed with timestamps, and we don't expect backups to change over time,
     # keep the json minimal, without newlines (which otherwise would be neat for VCS)
     json.dump(
@@ -48,7 +48,7 @@ for (function_name, timestamp), (idx, file) in files.items():
 # Create the index of all json-files
 with (JSON_DIR / "index.json").open("w") as f:
   json.dump(
-    sorted([to_filename(function_name, timestamp).name for (function_name, timestamp) in files]),
+    sorted([_to_filename(function_name, timestamp).name for (function_name, timestamp) in files]),
     f,
     indent=2,
   )

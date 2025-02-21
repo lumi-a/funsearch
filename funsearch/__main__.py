@@ -162,8 +162,8 @@ def run(
   inputs = parse_input(inputs)
 
   timestamp = str(int(time.time()))
-
-  database = ProgramsDatabase(conf.programs_database, Path(spec_file.name), inputs, timestamp)
+  problem_name = Path(spec_file.name).stem
+  database = ProgramsDatabase(conf.programs_database, spec_file.read(), inputs, problem_name, timestamp)
 
   log_path = pathlib.Path(output_path) / timestamp
   if not log_path.exists():
@@ -231,13 +231,7 @@ def ls(db_file: click.File | None) -> None:
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
 
-  # Load and process the database
-  conf = config.Config(num_evaluators=1)
-
-  # TODO: Have ProgramsDatabase also include config and other parameters
-  # TODO: Also put success-counts and as many other attributes in there
-  database = ProgramsDatabase(conf.programs_database, None, "", identifier="")
-  database.load(db_file)
+  database = ProgramsDatabase.load(db_file)
 
   progs = database.get_best_programs_per_island()
   print(f"# Found {len(progs)} programs")  # noqa: T201

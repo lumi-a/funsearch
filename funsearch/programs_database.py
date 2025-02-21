@@ -103,14 +103,14 @@ class ProgramsDatabase:
   def __init__(
     self,
     config: config_lib.ProgramsDatabaseConfig,
-    spec_path: pathlib.Path,
+    specification: any,
     inputs: list[float | int] | list[str],
-    identifier: str,
+    problem_name: str,
+    timestamp: int,
   ) -> None:
     self._config: config_lib.ProgramsDatabaseConfig = config
     self.inputs = inputs
 
-    specification = spec_path.read_text()
     self._specification = specification
     function_to_evolve, function_to_run = _extract_function_names(specification)
     self.function_to_evolve: str = function_to_evolve
@@ -138,7 +138,9 @@ class ProgramsDatabase:
     self._last_reset_time: float = time.time()
     self._program_counter = 0
     self._backups_done = 0
-    self.identifier = spec_path.stem + "_" + identifier
+
+    self.problem_name = problem_name
+    self.timestamp = timestamp
 
   def increment_failure(self, island_id: int) -> None:
     self._failure_counts[island_id] += 1
@@ -167,7 +169,8 @@ class ProgramsDatabase:
       "_last_reset_time",
       "_program_counter",
       "_backups_done",
-      "identifier",
+      "problem_name",
+      "timestamp",
     ]
     for key in keys:
       data[key] = getattr(self, key)
@@ -181,7 +184,8 @@ class ProgramsDatabase:
       config=data["_config"],
       specification=data["_specification"],
       inputs=data["inputs"],
-      identifier=data["identifier"],
+      problem_name=data["problem_name"],
+      timestamp=int(time.time()),
     )
 
     for key in data:
@@ -190,7 +194,7 @@ class ProgramsDatabase:
     return database
 
   def backup(self) -> None:
-    filename = f"{self.identifier}_{self._backups_done}.pickle"
+    filename = f"{self.problem_name}_{self.timestamp}_{self._backups_done}.pickle"
     p = pathlib.Path(self._config.backup_folder)
     if not p.exists():
       p.mkdir(parents=True, exist_ok=True)

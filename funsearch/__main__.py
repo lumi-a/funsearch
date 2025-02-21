@@ -187,7 +187,7 @@ def run(
 @main.command()
 @click.argument("db_file", type=click.File("rb"), required=False)
 def resume(db_file: click.File | None) -> None:
-  """Continue running FunSearch from a backup (usually in data/backups/).
+  """Continue running FunSearch from a backup.
 
   If not provided, selects the most recent one from data/backups/.
   """
@@ -200,7 +200,7 @@ def resume(db_file: click.File | None) -> None:
 @main.command()
 @click.argument("db_file", type=click.File("rb"), required=False)
 def ls(db_file: click.File | None) -> None:
-  """List programs from a stored database (usually in data/backups/).
+  """List programs from a stored database.
 
   If not provided, selects the most recent one from data/backups/.
   """

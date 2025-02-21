@@ -165,7 +165,7 @@ def run(
   lm = sampler.LLM(2, model, log_path)
 
   specification = spec_file.read()
-  function_to_evolve, function_to_run = core._extract_function_names(specification)
+  function_to_evolve, function_to_run = core.extract_function_names(specification)
   template = code_manipulation.text_to_program(specification)
 
   conf = config.Config()

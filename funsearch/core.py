@@ -23,7 +23,7 @@ from funsearch.programs_database import ProgramsDatabase
 from funsearch.sampler import Sampler
 
 
-def _extract_function_names(specification: str) -> tuple[str, str]:
+def extract_function_names(specification: str) -> tuple[str, str]:
   """Returns the name of the function to evolve and of the function to run."""
   run_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "run"))
   if len(run_functions) != 1:

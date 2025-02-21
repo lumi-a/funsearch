@@ -100,26 +100,26 @@ def capset(n: int):
 
 class FunsearchTest(parameterized.TestCase):
   def test_extract_function_names(self):
-    to_evolve, to_run = core._extract_function_names(_PY_PROMPT)
+    to_evolve, to_run = core.extract_function_names(_PY_PROMPT)
     self.assertEqual(to_run, "run")
     self.assertEqual(to_evolve, "capset")
 
   def test_extract_function_names_evolve_and_run(self):
-    to_evolve, to_run = core._extract_function_names(_PY_PROMPT_EVOLVE_RUN)
+    to_evolve, to_run = core.extract_function_names(_PY_PROMPT_EVOLVE_RUN)
     self.assertEqual(to_run, "capset")
     self.assertEqual(to_evolve, "capset")
 
   def test_extract_function_names_no_run(self):
     with pytest.raises(ValueError, match=r"Expected 1 function decorated with `@funsearch.run`."):
-      core._extract_function_names(_PY_PROMPT_NO_RUN)
+      core.extract_function_names(_PY_PROMPT_NO_RUN)
 
   def test_extract_function_names_no_evolve(self):
     with pytest.raises(ValueError, match=r"Expected 1 function decorated with `@funsearch.evolve`."):
-      core._extract_function_names(_PY_PROMPT_NO_EVOLVE)
+      core.extract_function_names(_PY_PROMPT_NO_EVOLVE)
 
   def test_extract_function_names_double_run(self):
     with pytest.raises(ValueError, match=r"Expected 1 function decorated with `@funsearch.run`."):
-      core._extract_function_names(_PY_PROMPT_DOUBLE_RUN)
+      core.extract_function_names(_PY_PROMPT_DOUBLE_RUN)
 
 
 if __name__ == "__main__":

@@ -34,8 +34,7 @@ def _to_filename(function_name: str, timestamp: int) -> Path:
 for (function_name, timestamp), (idx, file) in files.items():
   # TODO: This is a hack for now, we should read config and other params from the backup-database
   conf = config.Config(num_evaluators=1)
-  database = ProgramsDatabase(conf.programs_database, None, "", identifier="")
-  database.load(file.open("rb"))
+  database = ProgramsDatabase.load(file.open("rb"))
 
   with _to_filename(function_name, timestamp).open("w") as f:
     # As backups are indexed with timestamps, and we don't expect backups to change over time,

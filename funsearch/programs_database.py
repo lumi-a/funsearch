@@ -92,12 +92,14 @@ class ProgramsDatabase:
     template: code_manipulation.Program,
     function_to_evolve: str,
     function_to_run: str,
+    inputs: list[float | int] | list[str],
     identifier: str = "",
   ) -> None:
     self._config: config_lib.ProgramsDatabaseConfig = config
-    self._template: code_manipulation.Program = template
+    self.template: code_manipulation.Program = template
     self.function_to_evolve: str = function_to_evolve
     self.function_to_run: str = function_to_run
+    self.inputs = inputs
 
     # Initialize empty islands.
     self._islands: list[Island] = []
@@ -219,7 +221,7 @@ class ProgramsDatabase:
     keep_islands_ids = indices_sorted_by_score[num_islands_to_reset:]
     for island_id in reset_islands_ids:
       self._islands[island_id] = Island(
-        self._template,
+        self.template,
         self.function_to_evolve,
         self._config.functions_per_prompt,
         self._config.cluster_sampling_temperature_init,

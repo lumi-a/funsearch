@@ -34,7 +34,7 @@ SANDBOX_TYPES = [*get_all_subclasses(sandbox.DummySandbox), sandbox.DummySandbox
 SANDBOX_NAMES = [c.__name__ for c in SANDBOX_TYPES]
 
 
-def parse_input(filename_or_data: str):
+def parse_input(filename_or_data: str) -> list[float | int] | list[str]:
   if len(filename_or_data) == 0:
     msg = "No input data specified"
     raise Exception(msg)
@@ -76,7 +76,9 @@ def _most_recent_backup() -> Path:
   return selected_file
 
 
-def _build_samplers(database: ProgramsDatabase) -> list[sampler.Sampler]:
+def _build_samplers(
+  database: ProgramsDatabase, sandbox_class: any, log_path: Path, lm: sampler.LLM
+) -> list[sampler.Sampler]:
   samplers: list[sampler.Sampler] = [
     sampler.Sampler(
       database,
@@ -86,10 +88,10 @@ def _build_samplers(database: ProgramsDatabase) -> list[sampler.Sampler]:
           sandbox_class(
             base_path=log_path / f"sampler-{sampler_ix}-evaluator-{evaluator_ix}", timeout_secs=30
           ),
-          database._template,
-          function_to_evolve,
-          function_to_run,
-          inputs,
+          database.template,
+          database.function_to_evolve,
+          database.function_to_run,
+          database.inputs,
         )
         for evaluator_ix in range(conf.num_evaluators)
       ],
@@ -167,15 +169,15 @@ def run(
   template = code_manipulation.text_to_program(specification)
 
   conf = config.Config(num_evaluators=1)
-  database = ProgramsDatabase(
-    conf.programs_database, template, function_to_evolve, function_to_run, identifier=timestamp
-  )
-
   inputs = parse_input(inputs)
+
+  database = ProgramsDatabase(
+    conf.programs_database, template, function_to_evolve, function_to_run, inputs, identifier=timestamp
+  )
 
   sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
 
-  samplers = _build_samplers(database)
+  samplers = _build_samplers(database, sandbox_class, log_path, lm)
 
   core.run(samplers, database, iterations)
 

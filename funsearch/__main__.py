@@ -165,7 +165,7 @@ def run(
   problem_name = Path(spec_file.name).stem
   database = ProgramsDatabase(conf.programs_database, spec_file.read(), inputs, problem_name, timestamp)
 
-  log_path = pathlib.Path(output_path) / timestamp
+  log_path = pathlib.Path(output_path) / problem_name / timestamp
   if not log_path.exists():
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
@@ -209,7 +209,7 @@ def resume(
   timestamp = str(int(time.time()))
   database.identifier = str(timestamp)
 
-  log_path = pathlib.Path(output_path) / timestamp
+  log_path = pathlib.Path(output_path) / database.problem_name / timestamp
   if not log_path.exists():
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")

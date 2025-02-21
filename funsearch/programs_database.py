@@ -109,6 +109,7 @@ class ProgramsDatabase:
     self._config: config_lib.ProgramsDatabaseConfig = config
     self.inputs = inputs
 
+    self._specification = specification
     function_to_evolve, function_to_run = _extract_function_names(specification)
     self.function_to_evolve: str = function_to_evolve
     self.function_to_run: str = function_to_run
@@ -152,10 +153,19 @@ class ProgramsDatabase:
     """Save database to a file."""
     data = {}
     keys = [
+      "_config",
+      "inputs",
+      "_specification",
       "_islands",
+      "_failure_counts",
+      "_success_counts",
       "_best_score_per_island",
       "_best_program_per_island",
       "_best_scores_per_test_per_island",
+      "_last_reset_time",
+      "_program_counter",
+      "_backups_done",
+      "identifier",
     ]
     for key in keys:
       data[key] = getattr(self, key)
@@ -164,8 +174,18 @@ class ProgramsDatabase:
   def load(file) -> ProgramsDatabase:
     """Load previously saved database."""
     data = pickle.load(file)
+
+    database = ProgramsDatabase(
+      config=data["_config"],
+      specification=data["_specification"],
+      inputs=data["inputs"],
+      identifier=data["identifier"],
+    )
+
     for key in data:
-      setattr(self, key, data[key])
+      setattr(database, key, data[key])
+
+    return database
 
   def backup(self) -> None:
     filename = f"program_db_{self.function_to_evolve}_{self.identifier}_{self._backups_done}.pickle"

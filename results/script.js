@@ -48,7 +48,7 @@ function getRunContainer(problemContainer, problemName, inputs, timestamp) {
 
     const summary = document.createElement("summary")
 
-    const problemSpan = document.createElement("span")
+    const problemSpan = document.createElement("code")
     problemSpan.textContent = problemName + "(" + inputs.join(", ") + ")"
     summary.appendChild(problemSpan)
 
@@ -71,6 +71,7 @@ function getRunContainer(problemContainer, problemName, inputs, timestamp) {
 
 function appendDetails(container, title, content) {
     const details = document.createElement("details")
+    details.classList.add("inner-details")
     const summary = document.createElement("summary")
     summary.textContent = title
     details.appendChild(summary)

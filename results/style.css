@@ -3,7 +3,7 @@ code {
 }
 
 .problem-container {
-    width: 50em;
+    width: 64em;
     max-width: 100%;
 }
 
@@ -21,14 +21,35 @@ code {
 .run-container>summary {
     cursor: pointer;
     padding: 0.75em;
-    font-weight: bold;
     background: #8881;
+}
+
+.inner-details {
+    margin-bottom: 0.5em;
+    background: #8881;
+    padding-bottom: 0.1px;
+    /* ??? */
+}
+
+.inner-details>pre {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    margin-bottom: 0.5em;
+    margin-top: 0;
+}
+
+.inner-details>summary {
+    cursor: pointer;
+    padding: 0.5em;
+    font-weight: bold;
 }
 
 body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-family: sans-serif;
+    overflow-y: scroll;
 }
 
 .timestamp {

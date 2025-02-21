@@ -45,7 +45,7 @@ for (specname, timestamp), (idx, file) in files.items():
         "failureCounts": database._failure_counts,  # noqa: SLF001
         "successCounts": database._success_counts,  # noqa: SLF001
         "bestScorePerIsland": database._best_score_per_island,  # noqa: SLF001
-        "bestProgramPerIsland": database._best_program_per_island,  # noqa: SLF001
+        "bestProgramPerIsland": [str(p) for p in database._best_program_per_island],  # noqa: SLF001
         "problemName": database.problem_name,
         "timestamp": database.timestamp,
       },

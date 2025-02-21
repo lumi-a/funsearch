@@ -29,7 +29,7 @@ Eventually abort the search with `ctrl+c`. Print the best functions:
 # Inspect most recent backup:
 uv run funsearch ls
 # Inspect specific backup:
-uv run funsearch ls data/backups/program_db_priority_1731323471_0.pickle
+uv run funsearch ls data/backups/3-4-cyclefree_1731323471_0.pickle
 ```
 
 ---

@@ -10,12 +10,12 @@ from funsearch.programs_database import ProgramsDatabase
 BACKUP_DIR = Path("../data/backups")
 JSON_DIR = Path("json-data")  # Also set this in script.js
 
-file_pattern = re.compile(r"program_db_(.*)_(\d+)_(\d+)\.pickle")
+file_pattern = re.compile(r".*_(.*)_(\d+)_(\d+)\.pickle")
 
 # For each tuple of (function_name, timestamp), only keep
 # the (idx, path) one with the highest idx.
 files: dict[tuple[str, int], tuple[int, Path]] = {}
-for f in BACKUP_DIR.glob("program_db_*.pickle"):
+for f in BACKUP_DIR.glob("*.pickle"):
   match = file_pattern.match(f.name)
   if match:
     function_name, timestamp, idx = match.groups()

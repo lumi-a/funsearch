@@ -110,7 +110,7 @@ class ProgramsDatabase:
     self._config: config_lib.ProgramsDatabaseConfig = config
     self.inputs = inputs
 
-    specification = spec_path.read()
+    specification = spec_path.read_text()
     self._specification = specification
     function_to_evolve, function_to_run = _extract_function_names(specification)
     self.function_to_evolve: str = function_to_evolve

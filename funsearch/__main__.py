@@ -57,11 +57,11 @@ def _most_recent_backup() -> Path:
   """Returns the most recent backup file."""
   # Define the directory and file pattern
   backup_dir = Path("data/backups")
-  file_pattern = re.compile(r"program_db_.*_(\d+)_(\d+)\.pickle")
+  file_pattern = re.compile(r".*_(\d+)_(\d+)\.pickle")
 
   # Find all matching files and extract (X, Y) values
   matching_files: list[tuple[int, int, Path]] = []
-  for file in backup_dir.glob("program_db_*.pickle"):
+  for file in backup_dir.glob("*.pickle"):
     match = file_pattern.match(file.name)
     if match:
       timestamp, idx = map(int, match.groups())

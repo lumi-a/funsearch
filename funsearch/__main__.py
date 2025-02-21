@@ -18,10 +18,10 @@ from funsearch import (
   config,
   core,
   evaluator,
-  programs_database,
   sampler,
   sandbox,
 )
+from funsearch.programs_database import ProgramsDatabase
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
@@ -149,9 +149,7 @@ def run(
   template = code_manipulation.text_to_program(specification)
 
   conf = config.Config(num_evaluators=1)
-  database = programs_database.ProgramsDatabase(
-    conf.programs_database, template, function_to_evolve, identifier=timestamp
-  )
+  database = ProgramsDatabase(conf.programs_database, template, function_to_evolve, identifier=timestamp)
 
   inputs = parse_input(inputs)
 
@@ -194,6 +192,8 @@ def resume(db_file: click.File | None) -> None:
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
 
+  database = ProgramsDatabase.load(db_file)
+
   core.run(samplers, database, iterations)
 
 
@@ -212,7 +212,7 @@ def ls(db_file: click.File | None) -> None:
 
   # TODO: Have ProgramsDatabase also include config and other parameters
   # TODO: Also put success-counts and as many other attributes in there
-  database = programs_database.ProgramsDatabase(conf.programs_database, None, "", identifier="")
+  database = ProgramsDatabase(conf.programs_database, None, "", identifier="")
   database.load(db_file)
 
   progs = database.get_best_programs_per_island()

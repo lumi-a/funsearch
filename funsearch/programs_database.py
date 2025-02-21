@@ -100,23 +100,6 @@ class Prompt:
 class ProgramsDatabase:
   """A collection of programs, organized as islands."""
 
-  BACKUP_KEYS = (
-    "_config",
-    "inputs",
-    "_specification",
-    "_islands",
-    "_failure_counts",
-    "_success_counts",
-    "_best_score_per_island",
-    "_best_program_per_island",
-    "_best_scores_per_test_per_island",
-    "_last_reset_time",
-    "_program_counter",
-    "_backups_done",
-    "problem_name",
-    "timestamp",
-  )
-
   def __init__(
     self,
     config: config_lib.ProgramsDatabaseConfig,
@@ -173,7 +156,23 @@ class ProgramsDatabase:
   def save(self, file) -> None:
     """Save database to a file."""
     data = {}
-    for key in ProgramsDatabase.BACKUP_KEYS:
+    keys = [
+      "_config",
+      "inputs",
+      "_specification",
+      "_islands",
+      "_failure_counts",
+      "_success_counts",
+      "_best_score_per_island",
+      "_best_program_per_island",
+      "_best_scores_per_test_per_island",
+      "_last_reset_time",
+      "_program_counter",
+      "_backups_done",
+      "problem_name",
+      "timestamp",
+    ]
+    for key in keys:
       data[key] = getattr(self, key)
     pickle.dump(data, file)
 

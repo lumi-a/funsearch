@@ -17,9 +17,26 @@
 
 import logging
 import threading
+from typing import TYPE_CHECKING
 
-from funsearch.programs_database import ProgramsDatabase
+from funsearch import code_manipulation
 from funsearch.sampler import Sampler
+
+if TYPE_CHECKING:
+  from funsearch.programs_database import ProgramsDatabase
+
+
+def extract_function_names(specification: str) -> tuple[str, str]:
+  """Returns the name of the function to evolve and of the function to run."""
+  run_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "run"))
+  if len(run_functions) != 1:
+    msg = "Expected 1 function decorated with `@funsearch.run`."
+    raise ValueError(msg)
+  evolve_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "evolve"))
+  if len(evolve_functions) != 1:
+    msg = "Expected 1 function decorated with `@funsearch.evolve`."
+    raise ValueError(msg)
+  return evolve_functions[0], run_functions[0]
 
 
 def sampler_runner(sampler: Sampler, iterations: int) -> None:
@@ -34,7 +51,7 @@ def sampler_runner(sampler: Sampler, iterations: int) -> None:
     logging.info("Keyboard interrupt in sampler thread.")
 
 
-def run(samplers: list[Sampler], database: ProgramsDatabase, iterations: int = -1) -> None:
+def run(samplers: list[Sampler], database: "ProgramsDatabase", iterations: int = -1) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
   threads = []
 

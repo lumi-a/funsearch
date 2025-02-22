@@ -134,7 +134,7 @@ class PromptSamplingTest(parameterized.TestCase):
       name="test", args="", return_type="np.ndarray", body="  return np.zeros(1)"
     )
     assert expected_function == program.functions[0]
-    assert _SMALL_PROGRAM + "\n" == str(program)
+    assert str(program) == _SMALL_PROGRAM + "\n"
 
     # Assert that we do not add one more '\n' each time we convert to program.
     program_again = code_manipulation.text_to_program(str(program))

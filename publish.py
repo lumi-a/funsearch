@@ -10,14 +10,16 @@ Neither the website nor this script claims to be robust, they're just
 an easy "move things, break fast" way of sharing results with others.
 """
 
+from __future__ import annotations
+
 import json
 import re
 from pathlib import Path
 
 from funsearch.programs_database import ProgramsDatabase
 
-BACKUP_DIR = Path("../data/backups")
-JSON_DIR = Path("json-data")  # Also set this in script.js
+BACKUP_DIR = Path("data/backups")
+JSON_DIR = Path("docs/json-data")  # Also set this in script.js
 
 file_pattern = re.compile(r"(.*)_(\d+)_(\d+)\.pickle")
 
@@ -40,10 +42,15 @@ def _to_filename(function_name: str, timestamp: int) -> Path:
   return JSON_DIR / f"{function_name}_{timestamp}.json"
 
 
+# Save small descriptions of each json-file in index.json
+# Has schema (title, inputs, message, timestamp, filepath)
+index_json: list[tuple[str, list[float | int] | list[str], str, int, str]] = []
 for (specname, timestamp), (idx, file) in files.items():
   database = ProgramsDatabase.load(file.open("rb"))
 
   with _to_filename(specname, timestamp).open("w") as f:
+    index_json.append((database.problem_name, database.inputs, database.message, timestamp, f.name))
+
     # As backups are indexed with timestamps, and we don't expect backups to change over time,
     # keep the json minimal, without newlines (which otherwise would be neat for VCS)
     json.dump(
@@ -66,10 +73,14 @@ for (specname, timestamp), (idx, file) in files.items():
       },
       f,
       separators=(",", ":"),
+      indent=2,
     )
 
 # Create the index of all json-files
 with (JSON_DIR / "index.json").open("w") as f:
   json.dump(
-    sorted([_to_filename(function_name, timestamp).name for (function_name, timestamp) in files]), f, indent=2
+    sorted(index_json),
+    f,
+    separators=(",", ":"),
+    indent=2,
   )

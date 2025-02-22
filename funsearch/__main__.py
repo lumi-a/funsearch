@@ -186,8 +186,8 @@ def start(
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
 @click.option("--samplers", default=15, type=click.INT, help="Number of parallel samplers")
 @click.option(
-  "--sandbox_type",
-  default=sandbox.ExternalProcessSandbox,
+  "--sandbox-type",
+  default="ExternalProcessSandbox",
   type=click.Choice(list(SANDBOXES.keys())),
   help="Sandbox type",
 )

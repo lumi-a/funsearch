@@ -128,7 +128,6 @@ SANDBOXES: dict[str, type[sandbox.DummySandbox]] = {
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-@click.option("--samplers", default=15, type=click.INT, help="Number of parallel samplers")
 @click.option(
   "--sandbox-type",
   default="ExternalProcessSandbox",
@@ -142,7 +141,6 @@ def start(
   llm: str,
   output_path: click.Path,
   iterations: int,
-  samplers: int,
   sandbox_type: str,
 ) -> None:
   """Execute FunSearch algorithm.
@@ -184,7 +182,6 @@ def start(
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-@click.option("--samplers", default=15, type=click.INT, help="Number of parallel samplers")
 @click.option(
   "--sandbox-type",
   default="ExternalProcessSandbox",
@@ -196,7 +193,6 @@ def resume(
   llm: str,
   output_path: click.Path,
   iterations: int,
-  samplers: int,
   sandbox_type: str,
 ) -> None:
   """Continue running FunSearch from a backup.

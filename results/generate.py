@@ -38,10 +38,11 @@ for (specname, timestamp), (idx, file) in files.items():
     # keep the json minimal, without newlines (which otherwise would be neat for VCS)
     json.dump(
       {
-        "config": vars(database._config),  # noqa: SLF001
-        "inputs": database.inputs,
-        "specCode": database._specification,  # noqa: SLF001
         "problemName": database.problem_name,
+        "inputs": database.inputs,
+        "message": database.message,
+        "config": vars(database._config),  # noqa: SLF001
+        "specCode": database._specification,  # noqa: SLF001
         "timestamp": database.timestamp,
         "islands": [
           {

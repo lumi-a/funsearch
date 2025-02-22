@@ -69,7 +69,7 @@ function getRunContainer(problemContainer, problemName, inputs, timestamp) {
     return containerInner
 }
 
-function appendDetails(container, title, maybeContent) {
+function details(title, maybeContent) {
     const details = document.createElement("details")
     details.classList.add("inner-details")
     const summary = document.createElement("summary")
@@ -78,22 +78,21 @@ function appendDetails(container, title, maybeContent) {
     if (maybeContent) {
         details.appendChild(maybeContent)
     }
-    container.appendChild(details)
     return details
 }
 
-function appendDetailsCode(container, title, code) {
+function detailsCode(title, code) {
     const pre = document.createElement("pre")
     const codeElement = document.createElement("code")
     codeElement.classList.add("language-python")
     codeElement.textContent = code
     pre.appendChild(codeElement)
     hljs.highlightElement(codeElement)
-    return appendDetails(container, title, pre)
+    return details(title, pre)
 }
 
 async function displayDatabase(database) {
-    /* Schema from generate.py
+    /* Schema from generate.py (might be outdated)
 
      {
         "config": vars(database._config),  # noqa: SLF001
@@ -104,7 +103,7 @@ async function displayDatabase(database) {
         "islands": [
           {
             "runs": island._runs,  # noqa: SLF001
-            "improvements": {ix: str(program) for ix, program in island._improvements.items()},  # noqa: SLF001
+            "improvements": [(ix, str(program)) for ix, program in island._improvements],  # noqa: SLF001
             "successCount": island._success_count,  # noqa: SLF001
             "failureCount": island._failure_count,  # noqa: SLF001
           }
@@ -118,16 +117,36 @@ async function displayDatabase(database) {
 
     const runContainer = getRunContainer(problemContainer, problemName, database.inputs, database.timestamp)
 
-    appendDetailsCode(runContainer, "Spec", database.specCode)
+    runContainer.appendChild(detailsCode("Spec", database.specCode))
 
-    const islands = database.islands.map((island, i) => ({ ix: i, island }))
-    islands.sort((a, b) => b.island.successCount - a.island.successCount)
-    islands.forEach(({ island }) => {
-        island.
+    const islands = database.islands.map((island, i) => {
+        const lastImprovement = island.improvements[island.improvements.length - 1]
+        island.bestScore = island.runs[lastImprovement[0]]
+        island.ix = i
+        return island
+    })
+    islands.sort((a, b) => b.bestScore - a.bestScore)
+    const bestProgramsDetails = details("Best Programs", null)
+    runContainer.appendChild(bestProgramsDetails)
+    islands.forEach(island => {
+        const lastCode = island.improvements[island.improvements.length - 1][1]
+        bestProgramsDetails.appendChild(detailsCode(`Score ${island.bestScore}, Island ${island.ix}`, lastCode))
+    })
+    const improvementsDetails = details("Improvements over Time", null)
+    runContainer.appendChild(improvementsDetails)
+    islands.forEach(island => {
+        const islandDetails = details(`Island ${island.ix}`, null)
+        improvementsDetails.appendChild(islandDetails)
+        for (let imp_ix = island.improvements.length - 1; imp_ix >= 0; imp_ix--) {
+            const score = island.runs[imp_ix]
+            const run = island.improvements[imp_ix][0]
+            const program = island.improvements[imp_ix][1]
+            islandDetails.appendChild(detailsCode(`Run ${run}, Score ${score}`, program))
+        }
     })
 
 
-    appendDetailsCode(runContainer, "Config", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
+    detailsCode(runContainer, "Config", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
 }
 
 async function main() {

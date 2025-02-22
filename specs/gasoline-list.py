@@ -24,9 +24,8 @@ def evaluate(n: int) -> float:
   if (xs, ys) != gasoline(n):
     return 0
 
-  # Assert non-negativity
-  if any(x < 0 for x in xs) or any(y < 0 for y in ys):
-    return 0
+  xs = [max(0, min(2**31 - 1, x)) for x in xs]
+  ys = [max(0, min(2**31 - 1, y)) for y in ys]
 
   return SlotOrdered().approximation_ratio(xs, ys)
 
@@ -34,7 +33,7 @@ def evaluate(n: int) -> float:
 @funsearch.evolve
 def gasoline(n: int) -> tuple[list[int], list[int]]:
   """Return a new gasoline-problem, specified by the list of x-values and y-values.
-  The integers are always non-negative.
+  The integers will be clamped to [0, 2**31 - 1].
   """
   xs = []
   for i in range(1, n):

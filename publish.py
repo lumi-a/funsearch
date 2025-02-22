@@ -39,7 +39,7 @@ for f in BACKUP_DIR.glob("*.pickle"):
 
 
 def _to_filename(function_name: str, timestamp: int) -> Path:
-  return JSON_DIR / f"{function_name}_{timestamp}.json"
+  return f"{function_name}_{timestamp}.json"
 
 
 # Save small descriptions of each json-file in index.json
@@ -48,8 +48,7 @@ index_json: list[tuple[str, list[float | int] | list[str], float, str, int, str]
 for (specname, timestamp), (idx, file) in files.items():
   database = ProgramsDatabase.load(file.open("rb"))
 
-  path = _to_filename(specname, timestamp)
-  with path.open("w") as f:
+  with (JSON_DIR / _to_filename(specname, timestamp)).open("w") as f:
     # Trim message to 255 "characters"
     # This is bad practice, something something graphemes, but it will be cut off on the website anyway.
     index_json.append(
@@ -59,7 +58,7 @@ for (specname, timestamp), (idx, file) in files.items():
         max(database._best_score_per_island),  # noqa: SLF001
         database.message[:255],
         timestamp,
-        path.stem,
+        _to_filename(specname, timestamp),
       )
     )
 

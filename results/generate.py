@@ -4,7 +4,6 @@ import json
 import re
 from pathlib import Path
 
-from funsearch import config
 from funsearch.programs_database import ProgramsDatabase
 
 BACKUP_DIR = Path("../data/backups")

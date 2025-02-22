@@ -20,21 +20,7 @@ LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
 
 
-def get_all_subclasses(cls):
-  all_subclasses = []
-
-  for subclass in cls.__subclasses__():
-    all_subclasses.append(subclass)
-    all_subclasses.extend(get_all_subclasses(subclass))
-
-  return all_subclasses
-
-
-SANDBOX_TYPES = [*get_all_subclasses(sandbox.DummySandbox), sandbox.DummySandbox]
-SANDBOX_NAMES = [c.__name__ for c in SANDBOX_TYPES]
-
-
-def parse_input(filename_or_data: str) -> list[float | int] | list[str]:
+def _parse_input(filename_or_data: str) -> list[float | int] | list[str]:
   if len(filename_or_data) == 0:
     msg = "No input data specified"
     raise Exception(msg)
@@ -77,12 +63,13 @@ def _most_recent_backup() -> Path:
 
 
 def _build_samplers(
-  database: ProgramsDatabase, sandbox_class: any, log_path: Path, model_name: str, conf: config.Config
+  database: ProgramsDatabase, sandbox_name: str, log_path: Path, model_name: str, conf: config.Config
 ) -> list[sampler.Sampler]:
   load_dotenv()
   model = llm.get_model(model_name)
   model.key = model.get_key()
   language_model = sampler.LLM(conf.samples_per_prompt, model, log_path)
+  sandbox_class = SANDBOXES[sandbox_name]
 
   samplers: list[sampler.Sampler] = [
     sampler.Sampler(
@@ -121,45 +108,57 @@ def main(ctx: click.Context) -> None:
   pass
 
 
-@main.command()
+def _get_all_subclasses(cls: type) -> set[type]:
+  return set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in _get_all_subclasses(c)])
+
+
+# TODO: Once click 8.2.0 releases, use better click.Choice
+MODELS: list[str] = list(llm.get_model_aliases().keys())
+SANDBOXES: dict[str, type[sandbox.DummySandbox]] = {
+  c.__name__: c for c in [sandbox.DummySandbox, *_get_all_subclasses(sandbox.DummySandbox)]
+}
+
+
+@main.command(context_settings={"show_default": True})
 @click.argument("spec_file", type=click.File("r"))
-@click.argument("inputs")
-@click.option("--model_name", default="gpt-3.5-turbo", help="LLM model")
+@click.argument("inputs", type=_parse_input)
+@click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
-  "--output_path", default="./data/", type=click.Path(file_okay=False), help="path for logs and data"
+  "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-@click.option("--samplers", default=15, type=click.INT, help="Samplers")
+@click.option("--samplers", default=15, type=click.INT, help="Number of parallel samplers")
 @click.option(
-  "--sandbox_type", default="ExternalProcessSandbox", type=click.Choice(SANDBOX_NAMES), help="Sandbox type"
+  "--sandbox-type",
+  default="ExternalProcessSandbox",
+  type=click.Choice(list(SANDBOXES.keys())),
+  help="Sandbox type",
 )
 def start(
   spec_file: click.File,
-  inputs: str,
+  inputs: list[float | int] | list[str],
   model_name: str,
   output_path: click.Path,
   iterations: int,
   samplers: int,
   sandbox_type: str,
 ) -> None:
-  r"""Execute FunSearch algorithm.
+  """Execute FunSearch algorithm.
 
   \b
-    SPEC_FILE is a python module that provides the basis of the LLM prompt as
-              well as the evaluation metric.
+    SPEC_FILE is a python module that provides the basis of the LLM prompt
+              as well as the evaluation metric.
               See specs/cap-set.py for an example.\n
   \b
-    INPUTS    input filename ending in .json or .pickle, or a comma-separated
-              input data. The files are expected to contain a list with at least
-              one element. Elements shall be passed to the solve() method
-              one by one. Examples
+    INPUTS    is a filename ending in .json or .pickle, or comma-separated
+              input data. The files are expected to contain a list with at
+              least one element. Elements shall be passed to the solve()
+              method one by one. Examples:
                 8
                 8,9,10
                 ./specs/cap_set_input_data.json
-  """
+  """  # noqa: D301
   conf = config.Config()
-
-  inputs = parse_input(inputs)
 
   timestamp = str(int(time.time()))
   problem_name = Path(spec_file.name).stem
@@ -169,24 +168,24 @@ def start(
   if not log_path.exists():
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
-
-  sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
-
-  samplers = _build_samplers(database, sandbox_class, log_path, model_name, conf)
+  samplers = _build_samplers(database, sandbox_type, log_path, model_name, conf)
 
   core.run(samplers, database, iterations)
 
 
-@main.command()
+@main.command(context_settings={"show_default": True})
 @click.argument("db_file", type=click.File("rb"), required=False)
-@click.option("--model_name", default="gpt-3.5-turbo", help="LLM model")
+@click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
-  "--output_path", default="./data/", type=click.Path(file_okay=False), help="path for logs and data"
+  "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-@click.option("--samplers", default=15, type=click.INT, help="Samplers")
+@click.option("--samplers", default=15, type=click.INT, help="Number of parallel samplers")
 @click.option(
-  "--sandbox_type", default="ExternalProcessSandbox", type=click.Choice(SANDBOX_NAMES), help="Sandbox type"
+  "--sandbox_type",
+  default=sandbox.ExternalProcessSandbox,
+  type=click.Choice(list(SANDBOXES.keys())),
+  help="Sandbox type",
 )
 def resume(
   db_file: click.File | None,
@@ -214,9 +213,7 @@ def resume(
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
 
-  sandbox_class = next(c for c in SANDBOX_TYPES if c.__name__ == sandbox_type)
-
-  samplers = _build_samplers(database, sandbox_class, log_path, model_name, conf)
+  samplers = _build_samplers(database, sandbox_type, log_path, model_name, conf)
 
   core.run(samplers, database, iterations)
 

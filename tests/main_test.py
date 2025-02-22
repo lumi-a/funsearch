@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from funsearch.__main__ import main, parse_input
+from funsearch.__main__ import _parse_input, main
 
 ROOT_DIR = Path(__file__).parent.parent
 
@@ -48,9 +48,9 @@ class TestMain(unittest.TestCase):
 
 
 def test_parse_input():
-  assert parse_input("1") == [1]
-  assert parse_input("1,2,3") == [1, 2, 3]
-  assert parse_input(str(ROOT_DIR / "examples" / "cap_set_input_data.json")) == [
+  assert _parse_input("1") == [1]
+  assert _parse_input("1,2,3") == [1, 2, 3]
+  assert _parse_input(str(ROOT_DIR / "examples" / "cap_set_input_data.json")) == [
     8,
     9,
     10,

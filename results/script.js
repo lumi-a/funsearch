@@ -22,21 +22,32 @@ function strToPre(str) {
     return pre
 }
 
-function improvementCanvas(islands) {
+function improvementCanvas(islands, highestRunIndex) {
     const improvementsCanvas = document.createElement("canvas")
     new Chart(
         improvementsCanvas,
         {
             type: 'scatter',
             data: {
-                datasets: islands.map(island => ({
-                    label: `Island ${island.ix}`,
-                    data: island.improvements.map(improvement => ({ x: improvement[0], y: improvement[1] })),
-                    borderColor: colors[island.ix % colors.length],
-                    pointRadius: 0,
-                    stepped: true,
-                })
-                )
+                datasets: islands.map(island => {
+                    // Manually create step chart
+                    let x = island.improvements[0][0]
+                    let y = island.improvements[0][1]
+                    let data = [{ x, y }]
+                    for (let i = 1; i < island.improvements.length; i++) {
+                        x = island.improvements[i][0]
+                        data.push({ x, y }) // [sic], creates step-chart
+                        y = island.improvements[i][1]
+                        data.push({ x, y })
+                    }
+                    data.push({ x: highestRunIndex, y })
+                    return {
+                        label: `Island ${island.ix}`,
+                        data: data,
+                        showLine: true,
+                    }
+                }
+                ),
             },
             options: {
                 scales: {
@@ -126,6 +137,7 @@ async function displayDatabase(database) {
         "config": vars(database._config),  # noqa: SLF001
         "specCode": database._specification,  # noqa: SLF001
         "timestamp": database.timestamp,
+        "highestRunIndex": max(len(island._runs.keys()) for island in database._islands),  # noqa: SLF001
         "islands": [
           {
             "improvements": [(ix, island._runs[ix], str(program)) for ix, program in island._improvements],  # noqa: SLF001
@@ -160,7 +172,7 @@ async function displayDatabase(database) {
         detailsCode("Spec", "Specification-file for this problem and run", database.specCode),
         details("Best Programs", "Best program of each island", ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][2])
         )),
-        details("Improvements over Time", "Improvement-steps of each island", document.createTextNode(`Total failure-rate: ${totalRate}%`), improvementCanvas(islands),
+        details("Improvements over Time", "Improvement-steps of each island", document.createTextNode(`Total failure-rate: ${totalRate}%`), improvementCanvas(islands, database.highestRunIndex),
             ...islands.map(island => details(`Score ${island.bestScore}`, `Island ${island.ix}, failure-rate ${island.rate}%`,
                 ...island.improvements.toReversed().map(improvement => detailsCode(`Score ${improvement[1]}`, `Run ${improvement[0]}`, improvement[2])))
             )),

@@ -44,6 +44,7 @@ for (specname, timestamp), (idx, file) in files.items():
         "config": vars(database._config),  # noqa: SLF001
         "specCode": database._specification,  # noqa: SLF001
         "timestamp": database.timestamp,
+        "highestRunIndex": max(len(island._runs) for island in database._islands),  # noqa: SLF001
         "islands": [
           {
             "improvements": [(ix, island._runs[ix], str(program)) for ix, program in island._improvements],  # noqa: SLF001

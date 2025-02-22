@@ -218,6 +218,8 @@ async function main() {
                     runDetailsInner.textContent = ''
 
                     displayDatabase(database, runDetailsInner)
+
+                    loadedRunIds.add(id)
                 } catch (error) {
                     console.error('Error loading content:', error)
                     runDetailsInner.textContent = 'Error loading content'

@@ -189,11 +189,7 @@ def start(
   help="Sandbox type",
 )
 def resume(
-  db_file: click.File | None,
-  llm: str,
-  output_path: click.Path,
-  iterations: int,
-  sandbox_type: str,
+  db_file: click.File | None, llm: str, output_path: click.Path, iterations: int, sandbox_type: str
 ) -> None:
   """Continue running FunSearch from a backup.
 
@@ -254,12 +250,7 @@ def change_db_message(db_file: click.File | None) -> None:
   database = ProgramsDatabase.load(db_file)
   old_message = database.message
 
-  database.message = click.prompt(
-    "New message",
-    type=str,
-    default=old_message,
-    show_default=True,
-  )
+  database.message = click.prompt("New message", type=str, default=old_message, show_default=True)
 
   db_file.seek(0)
   db_file.truncate()

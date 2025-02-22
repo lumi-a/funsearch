@@ -249,7 +249,6 @@ class ProgramsDatabase:
 
   def register_failure(self, island_id: int) -> None:
     """Registers a failure in the database."""
-
     if island_id is not None:
       self._islands[island_id].register_failure()
 

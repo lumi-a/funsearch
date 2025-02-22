@@ -89,9 +89,4 @@ for (specname, timestamp), (idx, file) in files.items():
 
 # Create the index of all json-files
 with (JSON_DIR / "index.json").open("w") as f:
-  json.dump(
-    sorted(index_json),
-    f,
-    separators=(",", ":"),
-    indent=2,
-  )
+  json.dump(sorted(index_json), f, separators=(",", ":"), indent=2)

@@ -155,8 +155,6 @@ class ProgramsDatabase:
       "inputs",
       "_specification",
       "_islands",
-      "_failure_counts",
-      "_success_counts",
       "_best_score_per_island",
       "_best_program_per_island",
       "_best_scores_per_test_per_island",
@@ -289,14 +287,14 @@ class ProgramsDatabase:
     ]
     output = [separator.join(headers), separator.join("─" * len(x) for x in headers)]
 
-    for idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
-      successes = self._success_counts[idx]
-      failures = self._failure_counts[idx]
+    for island_idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
+      successes = self._islands[island_idx]._success_count[island_idx]  # noqa: SLF001
+      failures = self._islands[island_idx]._failure_count[island_idx]  # noqa: SLF001
       attempts = successes + failures
       success_rate = int(100 * successes / attempts if attempts > 0 else 0)
 
       columns = [
-        f"{idx:>3}",
+        f"{island_idx:>3}",
         f"{score:>{score_width}}",
         f"{attempts:>7}",
         f"{failures:>8}",
@@ -341,6 +339,8 @@ class Island:
 
     # The island-runs over time. None means a failure, otherwise a float representing the score.
     self._runs: list[float | None] = []
+    self._success_count: int = []  # This should always equal len([x for x in self._runs if x is not None])
+    self._failure_count: int = []  # This should always equal len([x for x in self._runs if x is None])
     # For each improvement, keep track of the program that caused the improvement.
     self._improvements: dict[int, code_manipulation.Function] = {}
 
@@ -364,10 +364,12 @@ class Island:
   def register_failure(self) -> None:
     """Register a failure on this island."""
     self._runs.append(None)
+    self._failure_count += 1
 
   def register_success(self, score: float) -> None:
     """Register a success on this island."""
     self._runs.append(score)
+    self._success_count += 1
 
   def get_prompt(self) -> tuple[str, int]:
     """Constructs a prompt containing functions from this island."""

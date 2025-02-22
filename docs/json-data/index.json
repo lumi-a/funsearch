@@ -4,6 +4,7 @@
     [
       15
     ],
+    26,
     "Upper Bound == 26",
     1740228505,
     "docs\\json-data\\3-4-cyclefree_1740228505.json"
@@ -13,6 +14,7 @@
     [
       3
     ],
+    1.6521739130434783,
     "Perturb Lucas' optimal function\n\nChanges from:\n  u_i = 2**n * (1 - 2 ** (-i))\nto:\n  u_i = 2*n / i\nAnd, to not give too much away, the final 2**n sequence to 2*n.",
     1740234412,
     "docs\\json-data\\gasoline-list_1740234412.json"
@@ -22,6 +24,7 @@
     [
       3
     ],
+    1110010.0099940917,
     "Perturb Lucas' solution by simply removing the ys",
     1740242660,
     "docs\\json-data\\gasoline-list_1740242660.json"

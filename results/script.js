@@ -169,7 +169,7 @@ async function displayDatabase(database) {
 
 
     const runDetails = details(`${problemName}(${database.inputs.join(', ')}) → ${maxScore}`, database.message,
-        detailsCode("Spec", "Specification-file for this problem and run", database.specCode),
+        detailsCode("Spec", "Specification-file and seed-function", database.specCode),
         details("Best Programs", "Best program of each island", ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][2])
         )),
         details("Improvements over Time", "Improvement-steps of each island", document.createTextNode(`Total failure-rate: ${totalRate}%`), improvementCanvas(islands, database.highestRunIndex),

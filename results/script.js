@@ -93,17 +93,26 @@ function appendDetailsCode(container, title, code) {
 }
 
 async function displayDatabase(database) {
-    /*{
+    /* Schema from generate.py
+
+     {
         "config": vars(database._config),  # noqa: SLF001
         "inputs": database.inputs,
         "specCode": database._specification,  # noqa: SLF001
-            not displayed yet "failureCounts": database._failure_counts,  # noqa: SLF001
-            not displayed yet "successCounts": database._success_counts,  # noqa: SLF001
-        "bestScorePerIsland": database._best_score_per_island,  # noqa: SLF001
-        "bestProgramPerIsland": [str(p) for p in database._best_program_per_island],  # noqa: SLF001
         "problemName": database.problem_name,
         "timestamp": database.timestamp,
-    },*/
+        "islands": [
+          {
+            "runs": island._runs,  # noqa: SLF001
+            "improvements": {ix: str(program) for ix, program in island._improvements.items()},  # noqa: SLF001
+            "successCount": island._success_count,  # noqa: SLF001
+            "failureCount": island._failure_count,  # noqa: SLF001
+          }
+          for island in database._islands  # noqa: SLF001
+        ],
+      },
+    
+    */
     const problemName = database.problemName
     const problemContainer = getProblemContainer(problemName)
 
@@ -111,14 +120,11 @@ async function displayDatabase(database) {
 
     appendDetailsCode(runContainer, "Spec", database.specCode)
 
-    const programsDetails = appendDetails(runContainer, "Best Programs", null)
-    const islands = database.bestScorePerIsland.map((score, i) => ({ ix: i, score: score, program: database.bestProgramPerIsland[i] }))
-    islands.sort((a, b) => b.score - a.score)
-    islands.forEach(({ ix, score, program }) => {
-        appendDetailsCode(programsDetails, `Score ${score} on Island ${ix}`, program)
+    const islands = database.islands.map((island, i) => ({ ix: i, island }))
+    islands.sort((a, b) => b.island.successCount - a.island.successCount)
+    islands.forEach(({ island }) => {
+        island.
     })
-
-
 
 
     appendDetailsCode(runContainer, "Config", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))

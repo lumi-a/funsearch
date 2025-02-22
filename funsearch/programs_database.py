@@ -348,7 +348,7 @@ class Island:
     self._success_count: int = 0  # This should always equal len([x for x in self._runs if x is not None])
     self._failure_count: int = 0  # This should always equal len([x for x in self._runs if x is None])
     # For each improvement, keep track of the program that caused the improvement.
-    self._improvements: dict[int, code_manipulation.Function] = {}
+    self._improvements: [tuple[int, code_manipulation.Function]] = []
 
     self._clusters: dict[Signature, Cluster] = {}
     self._num_programs_peroidic: int = 0
@@ -365,7 +365,7 @@ class Island:
 
   def register_improvement(self, program: code_manipulation.Function) -> None:
     """Register the program that caused the latest improvement."""
-    self._improvements[len(self._runs) - 1] = program
+    self._improvements.append((len(self._runs) - 1, program))
 
   def register_failure(self) -> None:
     """Register a failure on this island."""

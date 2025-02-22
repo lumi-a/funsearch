@@ -38,11 +38,11 @@ def gasoline(n: int) -> tuple[list[int], list[int]]:
   """
   xs, ys = [], []
   for i in range(1, n):
-    u = int(2**n * (1 - 2 ** (-i)))
+    u = int(2 * n / i)
     xs.extend([u for _ in range(2**i)])
     ys.extend([u for _ in range(2**i)])
-  xs.extend([int(2**n) for _ in range(2**n - 1)])
+  xs.extend([int(2 * n) for _ in range(2**n - 1)])
   xs.append(0)
-  u = int(2**n * (1 - 2 ** (-n)))
+  u = int(2 * n / i)
   ys.extend([u for _ in range(2**n)])
   return xs, ys

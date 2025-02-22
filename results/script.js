@@ -40,7 +40,7 @@ function getProblemContainer(problemName) {
     return div
 }
 
-function getRunContainer(problemContainer, problemName, inputs, timestamp) {
+function getRunContainer(problemContainer, problemName, inputs, maxScore, timestamp) {
     const details = document.createElement("details")
     // Let's just hope these are unique.
     details.id = "run-" + timestamp
@@ -48,8 +48,8 @@ function getRunContainer(problemContainer, problemName, inputs, timestamp) {
 
     const summary = document.createElement("summary")
 
-    const problemSpan = document.createElement("code")
-    problemSpan.textContent = problemName + "(" + inputs.join(", ") + ")"
+    const problemSpan = document.createElement("span")
+    problemSpan.textContent = `${problemName}(${inputs.join(', ')}) → ${maxScore}`
     summary.appendChild(problemSpan)
 
     const timestampLink = document.createElement("a")
@@ -117,10 +117,6 @@ async function displayDatabase(database) {
     */
     const problemName = database.problemName
     const problemContainer = getProblemContainer(problemName)
-
-    const runContainer = getRunContainer(problemContainer, problemName, database.inputs, database.timestamp)
-    runContainer.appendChild(document.createTextNode(database.message))
-
     const islands = database.islands.map((island, i) => {
         const lastImprovement = island.improvements[island.improvements.length - 1]
         island.bestScore = island.runs[lastImprovement[0]]
@@ -134,6 +130,11 @@ async function displayDatabase(database) {
         return island
     })
     islands.sort((a, b) => b.bestScore - a.bestScore)
+    const maxScore = islands[0].bestScore
+
+    const runContainer = getRunContainer(problemContainer, problemName, database.inputs, maxScore, database.timestamp)
+    runContainer.appendChild(document.createTextNode(database.message))
+
 
     runContainer.appendChild(detailsCode("Spec", database.specCode))
 

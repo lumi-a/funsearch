@@ -1,4 +1,14 @@
-"""Generate json-files from funsearch output."""  # noqa: INP001
+"""Generate json-files from funsearch output.
+
+This loads all databases in ./data/backups and converts them to json-files in the
+./docs/json-data directory, where they can be read by ./docs/index.html.
+After pushing the json-files to main, they are displayed on github-pages:
+
+  https://lumi-a.github.io/funsearch
+
+Neither the website nor this script claims to be robust, they're just
+an easy "move things, break fast" way of sharing results with others.
+"""
 
 import json
 import re

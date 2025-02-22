@@ -48,7 +48,8 @@ index_json: list[tuple[str, list[float | int] | list[str], float, str, int, str]
 for (specname, timestamp), (idx, file) in files.items():
   database = ProgramsDatabase.load(file.open("rb"))
 
-  with _to_filename(specname, timestamp).open("w") as f:
+  path = _to_filename(specname, timestamp)
+  with path.open("w") as f:
     # Trim message to 255 "characters"
     # This is bad practice, something something graphemes, but it will be cut off on the website anyway.
     index_json.append(
@@ -58,7 +59,7 @@ for (specname, timestamp), (idx, file) in files.items():
         max(database._best_score_per_island),  # noqa: SLF001
         database.message[:255],
         timestamp,
-        f.name,
+        path.stem,
       )
     )
 

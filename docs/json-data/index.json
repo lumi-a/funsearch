@@ -24,6 +24,16 @@
     [
       3
     ],
+    1.7777777777777777,
+    "Perturb Lucas' solution by removing the ys, and clamp both lists to [0, 2**31 - 1].",
+    1740263394,
+    "gasoline-list_1740263394.json"
+  ],
+  [
+    "gasoline-list",
+    [
+      3
+    ],
     1110010.0099940917,
     "Perturb Lucas' solution by simply removing the ys",
     1740242660,

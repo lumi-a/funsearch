@@ -22,6 +22,83 @@ function strToPre(str) {
     return pre
 }
 
+function improvementCanvas(islands) {
+    const timelabels = [...Array(Math.max(...islands.map(island => island.runs.length))).keys()]
+    const improvementsCanvas = document.createElement("canvas")
+    new Chart(
+        improvementsCanvas,
+        {
+            type: 'line',
+            data: {
+                labels: timelabels,
+                datasets: islands.map(island => ({
+                    label: `Island ${island.ix}`,
+                    data: island.runningMaximum,
+                    borderColor: colors[island.ix % colors.length],
+                    pointRadius: 0,
+                })
+                )
+            },
+            options: {
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: "Run Index"
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: "Running Max Score"
+                        }
+                    }
+                }
+            }
+        }
+    )
+    return improvementsCanvas
+}
+
+function errorCanvas(islands) {
+    const errorCanvas = document.createElement("canvas")
+    new Chart(
+        errorCanvas,
+        {
+            type: 'scatter',
+            data: {
+                datasets: islands.map(island => ({
+                    label: `Island ${island.ix}`,
+                    data: island.runs.map((run, ix) => run ? null : ({ x: ix, y: island.ix })).filter(x => x),
+                    borderColor: colors[island.ix % colors.length],
+                })
+                )
+            },
+            options: {
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: "Run Index"
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: "Island"
+                        }
+                    }
+                }
+            }
+        }
+    )
+    return errorCanvas
+}
+
 function getProblemContainer(problemName) {
     const maybeExisting = document.getElementById(`container-{problemName}`)
     if (maybeExisting) {
@@ -61,7 +138,7 @@ function getRunContainer(problemContainer, problemName, inputs, maxScore, timest
     details.appendChild(summary)
 
     const containerInner = document.createElement("div")
-    containerInner.classList.add("run-container-inner")
+    containerInner.classList.add(".details-inner")
     details.appendChild(containerInner)
 
     problemContainer.appendChild(details)
@@ -69,15 +146,19 @@ function getRunContainer(problemContainer, problemName, inputs, maxScore, timest
     return containerInner
 }
 
-function details(title, maybeContent) {
+function details(title, ...content) {
     const details = document.createElement("details")
-    details.classList.add("inner-details")
     const summary = document.createElement("summary")
     summary.textContent = title
+
+    const containerInner = document.createElement("div")
+    containerInner.classList.add(".details-inner")
+    details.appendChild(containerInner)
+
     details.appendChild(summary)
-    if (maybeContent) {
-        details.appendChild(maybeContent)
-    }
+    content.forEach((elem) => {
+        details.appendChild(elem)
+    })
     return details
 }
 
@@ -138,62 +219,19 @@ async function displayDatabase(database) {
 
     runContainer.appendChild(detailsCode("Spec", database.specCode))
 
-    const bestProgramsDetails = details("Best Programs", null)
-    runContainer.appendChild(bestProgramsDetails)
-    islands.forEach(island => {
-        const lastCode = island.improvements[island.improvements.length - 1][1]
-        bestProgramsDetails.appendChild(detailsCode(`Score ${island.bestScore}, Island ${island.ix}`, lastCode))
-    })
+    runContainer.appendChild(details("Best Programs", ...islands.map(island => detailsCode(`Score ${island.bestScore}, Island ${island.ix}`, island.improvements[island.improvements.length - 1][1])
+    )))
 
-    const improvementsDetails = details("Improvements over Time", null)
-    runContainer.appendChild(improvementsDetails)
-    const canvas = document.createElement("canvas")
-    improvementsDetails.appendChild(canvas)
-    const timelabels = [...Array(Math.max(...islands.map(island => island.runs.length))).keys()]
-    new Chart(
-        canvas,
-        {
-            type: 'line',
-            data: {
-                labels: timelabels,
-                datasets: islands.map(island => ({
-                    label: `Island ${island.ix}`,
-                    data: island.runningMaximum,
-                    borderColor: colors[island.ix % colors.length],
-                    pointRadius: 0,
-                })
-                )
-            },
-            options: {
-                scales: {
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: "Run Index"
-                        }
-                    },
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: "Running Max Score"
-                        }
-                    }
-                }
-            }
-        }
-    );
-    islands.forEach(island => {
-        const islandDetails = details(`Island ${island.ix}`, null)
-        improvementsDetails.appendChild(islandDetails)
-        for (let imp_ix = island.improvements.length - 1; imp_ix >= 0; imp_ix--) {
-            const run = island.improvements[imp_ix][0]
-            const score = island.runs[run]
-            const program = island.improvements[imp_ix][1]
-            islandDetails.appendChild(detailsCode(`Run ${run}, Score ${score}`, program))
-        }
-    })
+
+    runContainer.appendChild(details("Improvements over Time", improvementCanvas(islands)),
+        ...islands.map(island => details(`Island ${island.ix}`,
+            ...island.improvements.map(improvement => detailsCode(`Run ${improvement[0]}, Score ${island.runs[improvement[0]]}`, improvement[1])))
+        ))
+
+    const totalSuccesses = islands.reduce((acc, island) => acc + island.successCount, 0)
+    const totalFailures = islands.reduce((acc, island) => acc + island.failureCount, 0)
+    const totalRate = Math.round(100 * totalSuccesses / (totalSuccesses + totalFailures))
+    runContainer.appendChild(details(`Error-rates (Total ${totalRate}% = ${totalSuccesses}/${totalSuccesses + totalFailures})`, errorCanvas(islands)))
 
 
     detailsCode(runContainer, "Config", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))

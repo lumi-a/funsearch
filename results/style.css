@@ -11,16 +11,16 @@ details {
     border-left: 0.125em solid #8888;
 }
 
-.run-container {
+details {
     margin: 0.5em;
     background: #8881;
 }
 
-.run-container-inner {
+.details-inner {
     padding: 1em;
 }
 
-.run-container>summary {
+summary {
     cursor: pointer;
     padding: 0.75em;
     background: #8881;

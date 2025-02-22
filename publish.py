@@ -49,7 +49,9 @@ for (specname, timestamp), (idx, file) in files.items():
   database = ProgramsDatabase.load(file.open("rb"))
 
   with _to_filename(specname, timestamp).open("w") as f:
-    index_json.append((database.problem_name, database.inputs, database.message, timestamp, f.name))
+    # Trim message to 255 "characters"
+    # This is bad practice, something something graphemes, but it will be cut off on the website anyway.
+    index_json.append((database.problem_name, database.inputs, database.message[:255], timestamp, f.name))
 
     # As backups are indexed with timestamps, and we don't expect backups to change over time,
     # keep the json minimal, without newlines (which otherwise would be neat for VCS)

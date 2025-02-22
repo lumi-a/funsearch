@@ -24,8 +24,8 @@ def evaluate(n: int) -> float:
   if (xs, ys) != gasoline(n):
     return 0
 
-  xs = [max(0, min(2**31 - 1, x)) for x in xs]
-  ys = [max(0, min(2**31 - 1, y)) for y in ys]
+  xs = [max(0, min(2**31 - 1, int(x))) for x in xs]
+  ys = [max(0, min(2**31 - 1, int(y))) for y in ys]
 
   return SlotOrdered().approximation_ratio(xs, ys)
 

@@ -47,6 +47,8 @@ for (specname, timestamp), (idx, file) in files.items():
           {
             "runs": island._runs,  # noqa: SLF001
             "improvements": island._improvements,  # noqa: SLF001
+            "successCount": island._success_count,  # noqa: SLF001
+            "failureCount": island._failure_count,  # noqa: SLF001
           }
           for island in database._islands  # noqa: SLF001
         ],

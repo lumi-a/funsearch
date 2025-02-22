@@ -133,7 +133,7 @@ def main(ctx: click.Context) -> None:
 @click.option(
   "--sandbox_type", default="ExternalProcessSandbox", type=click.Choice(SANDBOX_NAMES), help="Sandbox type"
 )
-def run(
+def start(
   spec_file: click.File,
   inputs: str,
   model_name: str,

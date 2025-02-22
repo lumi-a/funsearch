@@ -256,11 +256,20 @@ def change_db_message(db_file: click.File | None) -> None:
     db_file = _most_recent_backup().open("rb+")
 
   database = ProgramsDatabase.load(db_file)
-  print("Current message:\n" + database.message)  # noqa: T201
+  old_message = database.message
 
-  database.message = input("New message:\n")
+  database.message = click.prompt(
+    "New message",
+    type=str,
+    default=old_message,
+    show_default=True,
+  )
 
+  db_file.seek(0)
+  db_file.truncate()
   database.save(db_file)
+
+  db_file.close()
 
 
 if __name__ == "__main__":

@@ -119,6 +119,7 @@ async function displayDatabase(database) {
     const problemContainer = getProblemContainer(problemName)
 
     const runContainer = getRunContainer(problemContainer, problemName, database.inputs, database.timestamp)
+    runContainer.appendChild(document.createTextNode(database.message))
 
     const islands = database.islands.map((island, i) => {
         const lastImprovement = island.improvements[island.improvements.length - 1]

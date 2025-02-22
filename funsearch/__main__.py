@@ -139,7 +139,7 @@ def start(
   spec_file: click.File,
   inputs: list[float | int] | list[str],
   message: str,
-  model_name: str,
+  llm: str,
   output_path: click.Path,
   iterations: int,
   samplers: int,
@@ -172,7 +172,7 @@ def start(
   if not log_path.exists():
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
-  samplers = _build_samplers(database, sandbox_type, log_path, model_name, conf)
+  samplers = _build_samplers(database, sandbox_type, log_path, llm, conf)
 
   core.run(samplers, database, iterations)
 
@@ -193,7 +193,7 @@ def start(
 )
 def resume(
   db_file: click.File | None,
-  model_name: str,
+  llm: str,
   output_path: click.Path,
   iterations: int,
   samplers: int,
@@ -217,7 +217,7 @@ def resume(
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
 
-  samplers = _build_samplers(database, sandbox_type, log_path, model_name, conf)
+  samplers = _build_samplers(database, sandbox_type, log_path, llm, conf)
 
   core.run(samplers, database, iterations)
 

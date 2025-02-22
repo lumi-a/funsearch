@@ -100,7 +100,7 @@ function errorCanvas(islands) {
 }
 
 function getProblemContainer(problemName) {
-    const maybeExisting = document.getElementById(`container-{problemName}`)
+    const maybeExisting = document.getElementById(`container-${problemName}`)
     if (maybeExisting) {
         return maybeExisting
     }
@@ -117,57 +117,39 @@ function getProblemContainer(problemName) {
     return div
 }
 
-function getRunContainer(problemContainer, problemName, inputs, maxScore, timestamp) {
+function details(title, description, ...content) {
     const details = document.createElement("details")
-    // Let's just hope these are unique.
-    details.id = `run-${timestamp}`
-    details.classList.add("run-container")
-
     const summary = document.createElement("summary")
-
-    const problemSpan = document.createElement("span")
-    problemSpan.textContent = `${problemName}(${inputs.join(', ')}) → ${maxScore}`
-    summary.appendChild(problemSpan)
-
-    const timestampLink = document.createElement("a")
-    timestampLink.classList.add("timestamp")
-    timestampLink.href = `#run-${timestamp}`
-    timestampLink.textContent = `#${timestamp}`
-    summary.appendChild(timestampLink)
-
     details.appendChild(summary)
 
     const containerInner = document.createElement("div")
-    containerInner.classList.add(".details-inner")
+    containerInner.classList.add("details-inner")
     details.appendChild(containerInner)
 
-    problemContainer.appendChild(details)
+    const titleSpan = document.createElement("span")
+    titleSpan.textContent = title
+    titleSpan.classList.add("title")
+    summary.appendChild(titleSpan)
 
-    return containerInner
-}
+    if (description) {
+        const descriptionSpan = document.createElement("span")
+        descriptionSpan.textContent = description
+        descriptionSpan.classList.add("description")
+        summary.appendChild(descriptionSpan)
+    }
 
-function details(title, ...content) {
-    const details = document.createElement("details")
-    const summary = document.createElement("summary")
-    summary.textContent = title
-
-    const containerInner = document.createElement("div")
-    containerInner.classList.add(".details-inner")
-    details.appendChild(containerInner)
-
-    details.appendChild(summary)
-    content.forEach(elem => details.appendChild(elem))
+    content.forEach(elem => containerInner.appendChild(elem))
     return details
 }
 
-function detailsCode(title, code) {
+function detailsCode(title, description, code) {
     const pre = document.createElement("pre")
     const codeElement = document.createElement("code")
     codeElement.classList.add("language-python")
     codeElement.textContent = code
     pre.appendChild(codeElement)
     hljs.highlightElement(codeElement)
-    return details(title, pre)
+    return details(title, description, pre)
 }
 
 // Paul Tol's discrete rainbow color scheme, from https://personal.sron.nl/~pault/
@@ -215,28 +197,36 @@ async function displayDatabase(database) {
     const totalFailures = islands.reduce((acc, island) => acc + island.failureCount, 0)
     const totalRate = Math.round(100 * totalSuccesses / (totalSuccesses + totalFailures))
 
-    const runContainer = getRunContainer(problemContainer, problemName, database.inputs, maxScore, database.timestamp)
+
+    const runDetails = details(`${problemName}(${database.inputs.join(', ')}) → ${maxScore}`, database.message,
+        detailsCode("Spec", "Specification-file for this problem and run", database.specCode),
+        details("Best Programs", "Best program of each island", ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][1])
+        )),
+        details("Improvements over Time", "Improvement-steps of each island", improvementCanvas(islands),
+            ...islands.map(island => details(`Score ${island.bestScore}`, `Island ${island.ix}`,
+                ...island.improvements.toReversed().map(improvement => detailsCode(`Score ${island.runs[improvement[0]]}`, `Run ${improvement[0]}`, improvement[1])))
+            )),
+        details(`Error-rates`, `Total ${totalRate}% = ${totalSuccesses}/${totalSuccesses + totalFailures})`, errorCanvas(islands)),
+        detailsCode("Config", "Config-file for this run", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n")),
+    )
+    problemContainer.appendChild(runDetails)
+
+    // Let's just hope these are unique.
+    runDetails.id = `run-${database.timestamp}`
+    runDetails.classList.add("run-container")
 
     const messageSpan = document.createElement("span")
     messageSpan.textContent = database.message
-    messageSpan.classList.add("message")
-    runContainer.appendChild(messageSpan)
+    messageSpan.classList.add("pre-wrap")
+    const runDetailsInner = runDetails.querySelector(".details-inner")
+    runDetailsInner.insertBefore(messageSpan.cloneNode(true), runDetailsInner.firstChild)
 
-    runContainer.appendChild(detailsCode("Spec", database.specCode))
-
-    runContainer.appendChild(details("Best Programs", ...islands.map(island => detailsCode(`Score ${island.bestScore}, Island ${island.ix}`, island.improvements[island.improvements.length - 1][1])
-    )))
-
-
-    runContainer.appendChild(details("Improvements over Time", improvementCanvas(islands),
-        ...islands.map(island => details(`Island ${island.ix}`,
-            ...island.improvements.toReversed().map(improvement => detailsCode(`Run ${improvement[0]}, Score ${island.runs[improvement[0]]}`, improvement[1])))
-        )))
-
-    runContainer.appendChild(details(`Error-rates (Total ${totalRate}% = ${totalSuccesses}/${totalSuccesses + totalFailures})`, errorCanvas(islands)))
-
-
-    detailsCode(runContainer, "Config", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
+    const timestampLink = document.createElement("a")
+    timestampLink.classList.add("timestamp")
+    const href = `#run-${problemName}-${database.timestamp}`
+    timestampLink.href = href
+    timestampLink.textContent = href
+    runDetails.querySelector("summary").appendChild(timestampLink)
 }
 
 async function main() {

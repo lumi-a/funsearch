@@ -9,21 +9,39 @@ code {
 
 details {
     border-left: 0.125em solid #8888;
-}
-
-details {
-    margin: 0.5em;
+    border-radius: 0.25em;
     background: #8881;
 }
 
 .details-inner {
     padding: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
 }
 
 summary {
     cursor: pointer;
     padding: 0.75em;
     background: #8881;
+    display: flex;
+    gap: 1em;
+}
+
+summary>.title {
+    flex-shrink: 1;
+    font-weight: bold;
+}
+
+summary>.description {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+summary>a {
+    flex-shrink: 0;
 }
 
 body {
@@ -39,7 +57,7 @@ body {
     float: right;
 }
 
-.message {
+.pre-wrap {
     white-space: pre-wrap;
 }
 

@@ -50,8 +50,5 @@ class TestMain(unittest.TestCase):
 def test_parse_input():
   assert _parse_input("1") == [1]
   assert _parse_input("1,2,3") == [1, 2, 3]
-  assert _parse_input(str(ROOT_DIR / "examples" / "cap_set_input_data.json")) == [
-    8,
-    9,
-    10,
-  ]
+  assert _parse_input(str(ROOT_DIR / "tests" / "fixtures" / "inputs-numeric.json")) == [9, 10, 11]
+  assert _parse_input(str(ROOT_DIR / "tests" / "fixtures" / "inputs-string.json")) == ["a", "bc", "def"]

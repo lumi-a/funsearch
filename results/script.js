@@ -23,19 +23,18 @@ function strToPre(str) {
 }
 
 function improvementCanvas(islands) {
-    const timelabels = [...Array(Math.max(...islands.map(island => island.runs.length))).keys()]
     const improvementsCanvas = document.createElement("canvas")
     new Chart(
         improvementsCanvas,
         {
-            type: 'line',
+            type: 'scatter',
             data: {
-                labels: timelabels,
                 datasets: islands.map(island => ({
                     label: `Island ${island.ix}`,
-                    data: island.runningMaximum,
+                    data: island.improvements.map(improvement => ({ x: improvement[0], y: improvement[1] })),
                     borderColor: colors[island.ix % colors.length],
                     pointRadius: 0,
+                    stepped: true,
                 })
                 )
             },
@@ -139,29 +138,32 @@ async function displayDatabase(database) {
     */
     const problemName = database.problemName
     const problemContainer = getProblemContainer(problemName)
+
+    let totalSuccesses = 0
+    let totalFailures = 0
     const islands = database.islands.map((island, i) => {
         const lastImprovement = island.improvements[island.improvements.length - 1]
         island.bestScore = lastImprovement[1]
         island.ix = i
+        totalSuccesses += island.successCount
+        totalFailures += island.failureCount
+        island.rate = (island.successCount + island.failureCount) > 0 ? Math.round(100 * island.failureCount / (island.successCount + island.failureCount)) : 0
 
         return island
     })
+    const totalRate = (totalSuccesses + totalFailures) > 0 ? Math.round(100 * totalFailures / (totalSuccesses + totalFailures)) : 0
     islands.sort((a, b) => b.bestScore - a.bestScore)
     const maxScore = islands[0].bestScore
-    const totalSuccesses = islands.reduce((acc, island) => acc + island.successCount, 0)
-    const totalFailures = islands.reduce((acc, island) => acc + island.failureCount, 0)
-    const totalRate = Math.round(100 * totalSuccesses / (totalSuccesses + totalFailures))
 
 
     const runDetails = details(`${problemName}(${database.inputs.join(', ')}) → ${maxScore}`, database.message,
         detailsCode("Spec", "Specification-file for this problem and run", database.specCode),
         details("Best Programs", "Best program of each island", ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][2])
         )),
-        details("Improvements over Time", "Improvement-steps of each island", improvementCanvas(islands),
-            ...islands.map(island => details(`Score ${island.bestScore}`, `Island ${island.ix}`,
+        details("Improvements over Time", "Improvement-steps of each island", document.createTextNode(`Total failure-rate: ${totalRate}%`), improvementCanvas(islands),
+            ...islands.map(island => details(`Score ${island.bestScore}`, `Island ${island.ix}, failure-rate ${island.rate}%`,
                 ...island.improvements.toReversed().map(improvement => detailsCode(`Score ${improvement[1]}`, `Run ${improvement[0]}`, improvement[2])))
             )),
-        details(`Error-rates`, `Total ${totalRate}%`, errorCanvas(islands)),
         detailsCode("Config", "Config-file for this run", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n")),
     )
     problemContainer.appendChild(runDetails)

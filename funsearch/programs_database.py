@@ -271,7 +271,6 @@ class ProgramsDatabase:
       founder = self._best_program_per_island[founder_island_id]
       founder_scores = self._best_scores_per_test_per_island[founder_island_id]
       self._register_program_in_island(founder, island_id, founder_scores)
-      # TODO: Should we carry over _success_count and _failure_counts?
 
   def log_tabular(self, last_run: bool) -> None:
     scores = self._best_score_per_island
@@ -287,9 +286,14 @@ class ProgramsDatabase:
     ]
     output = [separator.join(headers), separator.join("─" * len(x) for x in headers)]
 
+    total_successes = 0
+    total_failures = 0
     for island_idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
       successes = self._islands[island_idx]._success_count[island_idx]  # noqa: SLF001
       failures = self._islands[island_idx]._failure_count[island_idx]  # noqa: SLF001
+      total_successes += successes
+      total_failures += failures
+
       attempts = successes + failures
       success_rate = int(100 * successes / attempts if attempts > 0 else 0)
 
@@ -302,8 +306,6 @@ class ProgramsDatabase:
       ]
       output.append(separator.join(columns))
 
-    total_successes = sum(self._success_counts)
-    total_failures = sum(self._failure_counts)
     total_attempts = total_successes + total_failures
     total_success_rate = int(100 * total_successes / total_attempts if total_attempts > 0 else 0)
     summary = [

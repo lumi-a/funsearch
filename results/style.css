@@ -26,26 +26,6 @@ summary {
     background: #8881;
 }
 
-.inner-details {
-    margin-top: 0.5em;
-    background: #8881;
-    padding-bottom: 0.1px;
-    /* ??? */
-}
-
-.inner-details>*:not(summary) {
-    margin-left: 0.5em;
-    margin-right: 0.5em;
-    margin-bottom: 0.5em;
-    margin-top: 0;
-}
-
-.inner-details>summary {
-    cursor: pointer;
-    padding: 0.5em;
-    font-weight: bold;
-}
-
 body {
     display: flex;
     flex-direction: column;
@@ -57,6 +37,10 @@ body {
 .timestamp {
     font-family: monospace;
     float: right;
+}
+
+.message {
+    white-space: pre-wrap;
 }
 
 .math {

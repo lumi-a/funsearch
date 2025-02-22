@@ -132,7 +132,7 @@ function getRunContainer(problemContainer, problemName, inputs, maxScore, timest
     const timestampLink = document.createElement("a")
     timestampLink.classList.add("timestamp")
     timestampLink.href = `#run-${timestamp}`
-    timestampLink.textContent = `#timestamp`
+    timestampLink.textContent = `#${timestamp}`
     summary.appendChild(timestampLink)
 
     details.appendChild(summary)
@@ -156,9 +156,7 @@ function details(title, ...content) {
     details.appendChild(containerInner)
 
     details.appendChild(summary)
-    content.forEach((elem) => {
-        details.appendChild(elem)
-    })
+    content.forEach(elem => details.appendChild(elem))
     return details
 }
 
@@ -178,11 +176,12 @@ const colors = ['#CC6677', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255'
 async function displayDatabase(database) {
     /* Schema from generate.py (might be outdated)
  
-     {
-        "config": vars(database._config),  # noqa: SLF001
-        "inputs": database.inputs,
-        "specCode": database._specification,  # noqa: SLF001
+      {
         "problemName": database.problem_name,
+        "inputs": database.inputs,
+        "message": database.message,
+        "config": vars(database._config),  # noqa: SLF001
+        "specCode": database._specification,  # noqa: SLF001
         "timestamp": database.timestamp,
         "islands": [
           {
@@ -212,10 +211,16 @@ async function displayDatabase(database) {
     })
     islands.sort((a, b) => b.bestScore - a.bestScore)
     const maxScore = islands[0].bestScore
+    const totalSuccesses = islands.reduce((acc, island) => acc + island.successCount, 0)
+    const totalFailures = islands.reduce((acc, island) => acc + island.failureCount, 0)
+    const totalRate = Math.round(100 * totalSuccesses / (totalSuccesses + totalFailures))
 
     const runContainer = getRunContainer(problemContainer, problemName, database.inputs, maxScore, database.timestamp)
-    runContainer.appendChild(document.createTextNode(database.message))
 
+    const messageSpan = document.createElement("span")
+    messageSpan.textContent = database.message
+    messageSpan.classList.add("message")
+    runContainer.appendChild(messageSpan)
 
     runContainer.appendChild(detailsCode("Spec", database.specCode))
 
@@ -223,14 +228,11 @@ async function displayDatabase(database) {
     )))
 
 
-    runContainer.appendChild(details("Improvements over Time", improvementCanvas(islands)),
+    runContainer.appendChild(details("Improvements over Time", improvementCanvas(islands),
         ...islands.map(island => details(`Island ${island.ix}`,
-            ...island.improvements.map(improvement => detailsCode(`Run ${improvement[0]}, Score ${island.runs[improvement[0]]}`, improvement[1])))
-        ))
+            ...island.improvements.toReversed().map(improvement => detailsCode(`Run ${improvement[0]}, Score ${island.runs[improvement[0]]}`, improvement[1])))
+        )))
 
-    const totalSuccesses = islands.reduce((acc, island) => acc + island.successCount, 0)
-    const totalFailures = islands.reduce((acc, island) => acc + island.failureCount, 0)
-    const totalRate = Math.round(100 * totalSuccesses / (totalSuccesses + totalFailures))
     runContainer.appendChild(details(`Error-rates (Total ${totalRate}% = ${totalSuccesses}/${totalSuccesses + totalFailures})`, errorCanvas(islands)))
 
 

@@ -122,6 +122,7 @@ SANDBOXES: dict[str, type[sandbox.DummySandbox]] = {
 @main.command(context_settings={"show_default": True})
 @click.argument("spec_file", type=click.File("r"))
 @click.argument("inputs", type=_parse_input)
+@click.argument("message", type=str, default="")
 @click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
@@ -137,6 +138,7 @@ SANDBOXES: dict[str, type[sandbox.DummySandbox]] = {
 def start(
   spec_file: click.File,
   inputs: list[float | int] | list[str],
+  message: str,
   model_name: str,
   output_path: click.Path,
   iterations: int,
@@ -162,7 +164,9 @@ def start(
 
   timestamp = str(int(time.time()))
   problem_name = Path(spec_file.name).stem
-  database = ProgramsDatabase(conf.programs_database, spec_file.read(), inputs, problem_name, timestamp)
+  database = ProgramsDatabase(
+    conf.programs_database, spec_file.read(), inputs, problem_name, timestamp, message
+  )
 
   log_path = pathlib.Path(output_path) / problem_name / timestamp
   if not log_path.exists():

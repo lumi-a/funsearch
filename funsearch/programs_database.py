@@ -107,6 +107,7 @@ class ProgramsDatabase:
     inputs: list[float | int] | list[str],
     problem_name: str,
     timestamp: int,
+    message: str,
   ) -> None:
     self._config: config_lib.ProgramsDatabaseConfig = config
     self.inputs = inputs
@@ -141,6 +142,7 @@ class ProgramsDatabase:
 
     self.problem_name = problem_name
     self.timestamp = timestamp
+    self.message = message
 
   def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
     return sorted(
@@ -163,6 +165,7 @@ class ProgramsDatabase:
       "_backups_done",
       "problem_name",
       "timestamp",
+      "message",
     ]
     for key in keys:
       data[key] = getattr(self, key)

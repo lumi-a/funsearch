@@ -117,15 +117,42 @@ async function displayDatabase(database) {
 
     const runContainer = getRunContainer(problemContainer, problemName, database.inputs, database.timestamp)
 
-    runContainer.appendChild(detailsCode("Spec", database.specCode))
-
     const islands = database.islands.map((island, i) => {
         const lastImprovement = island.improvements[island.improvements.length - 1]
         island.bestScore = island.runs[lastImprovement[0]]
         island.ix = i
+
+        island.runningMaximum = island.runs.reduce((acc, score) => {
+            const currentMax = score ? Math.max(acc[acc.length - 1] || 0, score) : acc[acc.length - 1] || 0
+            return [...acc, currentMax]
+        }, [])
+
         return island
     })
     islands.sort((a, b) => b.bestScore - a.bestScore)
+
+    const canvas = document.createElement("canvas")
+    runContainer.appendChild(canvas)
+    const timelabels = [...Array(Math.max(...islands.map(island => island.runs.length))).keys()]
+
+    new Chart(
+        canvas,
+        {
+            type: 'line',
+            data: {
+                labels: timelabels,
+                datasets: islands.map(island => {
+                    return {
+                        label: `Island ${island.ix}`,
+                        data: island.runningMaximum,
+                    }
+                })
+            }
+        }
+    );
+
+    runContainer.appendChild(detailsCode("Spec", database.specCode))
+
     const bestProgramsDetails = details("Best Programs", null)
     runContainer.appendChild(bestProgramsDetails)
     islands.forEach(island => {

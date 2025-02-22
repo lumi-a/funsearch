@@ -5,7 +5,7 @@ async function loadAllData() {
     const files = await indexResponse.json()
 
     const datasets = await Promise.all(files.map(async (file) => {
-        const response = await fetch(jsonDir + "/" + file)
+        const response = await fetch(`${jsonDir}/${file}`)
         return response.json()
     }))
 
@@ -23,13 +23,13 @@ function strToPre(str) {
 }
 
 function getProblemContainer(problemName) {
-    const maybeExisting = document.getElementById("container-" + problemName)
+    const maybeExisting = document.getElementById(`container-{problemName}`)
     if (maybeExisting) {
         return maybeExisting
     }
 
     const div = document.createElement("div")
-    div.id = "container-" + problemName
+    div.id = `container-${problemName}`
     div.classList.add("problem-container")
     document.body.appendChild(div)
 
@@ -43,7 +43,7 @@ function getProblemContainer(problemName) {
 function getRunContainer(problemContainer, problemName, inputs, maxScore, timestamp) {
     const details = document.createElement("details")
     // Let's just hope these are unique.
-    details.id = "run-" + timestamp
+    details.id = `run-${timestamp}`
     details.classList.add("run-container")
 
     const summary = document.createElement("summary")
@@ -55,7 +55,7 @@ function getRunContainer(problemContainer, problemName, inputs, maxScore, timest
     const timestampLink = document.createElement("a")
     timestampLink.classList.add("timestamp")
     timestampLink.href = `#run-${timestamp}`
-    timestampLink.textContent = timestamp
+    timestampLink.textContent = `#timestamp`
     summary.appendChild(timestampLink)
 
     details.appendChild(summary)
@@ -144,6 +144,7 @@ async function displayDatabase(database) {
         const lastCode = island.improvements[island.improvements.length - 1][1]
         bestProgramsDetails.appendChild(detailsCode(`Score ${island.bestScore}, Island ${island.ix}`, lastCode))
     })
+
     const improvementsDetails = details("Improvements over Time", null)
     runContainer.appendChild(improvementsDetails)
     const canvas = document.createElement("canvas")

@@ -344,8 +344,8 @@ class Island:
 
     # The island-runs over time. None means a failure, otherwise a float representing the score.
     self._runs: list[float | None] = []
-    self._success_count: int = []  # This should always equal len([x for x in self._runs if x is not None])
-    self._failure_count: int = []  # This should always equal len([x for x in self._runs if x is None])
+    self._success_count: int = 0  # This should always equal len([x for x in self._runs if x is not None])
+    self._failure_count: int = 0  # This should always equal len([x for x in self._runs if x is None])
     # For each improvement, keep track of the program that caused the improvement.
     self._improvements: dict[int, code_manipulation.Function] = {}
 

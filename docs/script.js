@@ -115,13 +115,13 @@ function detailsCode(title, description, code) {
 }
 
 function runToId(problemName, timestamp) {
-    return `#run-${problemName}-${database.timestamp}`
+    return `run-${problemName}-${timestamp}`
 }
 
 // Paul Tol's discrete rainbow color scheme, from https://personal.sron.nl/~pault/
 const colors = ['#CC6677', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255', '#44AA99', '#999933', '#AA4499', '#888']
 
-async function displayDatabase(database) {
+async function displayDatabase(database, runDetailsInner) {
     /* Schema from generate.py (might be outdated)
       {
         "problemName": database.problem_name,
@@ -141,9 +141,6 @@ async function displayDatabase(database) {
         ],
       },
     */
-
-    const runDetails = document.getElementById()
-
     let totalSuccesses = 0
     let totalFailures = 0
     const islands = database.islands.map((island, i) => {
@@ -158,10 +155,13 @@ async function displayDatabase(database) {
     })
     const totalRate = (totalSuccesses + totalFailures) > 0 ? Math.round(100 * totalFailures / (totalSuccesses + totalFailures)) : 0
     islands.sort((a, b) => b.bestScore - a.bestScore)
-    const maxScore = islands[0].bestScore
 
+    const messageSpan = document.createElement("span")
+    messageSpan.textContent = database.message
+    messageSpan.classList.add("pre-wrap")
 
-    const runDetails = details(`${problemName}(${database.inputs.join(', ')}) → ${maxScore}`, database.message,
+    const children = [
+        messageSpan,
         detailsCode("Spec", "Specification-file and seed-function", database.specCode),
         details("Best Programs", "Best program of each island", ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][2])
         )),
@@ -169,27 +169,12 @@ async function displayDatabase(database) {
             ...islands.map(island => details(`Score ${island.bestScore}`, `Island ${island.ix}, failure-rate ${island.rate}%`,
                 ...island.improvements.toReversed().map(improvement => detailsCode(`Score ${improvement[1]}`, `Run ${improvement[0]}`, improvement[2])))
             )),
-        detailsCode("Config", "Config-file for this run", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n")),
-    )
-    problemContainer.appendChild(runDetails)
-
-    // Let's just hope these are unique.
-    runDetails.id = `run-${database.timestamp}`
-    runDetails.classList.add("run-container")
-
-    const messageSpan = document.createElement("span")
-    messageSpan.textContent = database.message
-    messageSpan.classList.add("pre-wrap")
-    const runDetailsInner = runDetails.querySelector(".details-inner")
-    runDetailsInner.insertBefore(messageSpan.cloneNode(true), runDetailsInner.firstChild)
-
-    const timestampLink = document.createElement("a")
-    timestampLink.classList.add("timestamp")
-    const href = runToId(problemName, database.timestamp)
-    timestampLink.href = href
-    timestampLink.textContent = href
-    runDetails.querySelector("summary").appendChild(timestampLink)
+        detailsCode("Config", "Config-file for this run", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
+    ]
+    children.forEach(child => runDetailsInner.appendChild(child))
 }
+
+const loadedRunIds = new Set()
 
 async function main() {
     const index = await fetch(jsonDir + "/index.json")
@@ -203,19 +188,46 @@ async function main() {
         const message = file[3]
         const timestamp = file[4]
         const filepath = file[5]
+        const id = runToId(problemName, timestamp)
 
         const problemContainer = getProblemContainer(problemName)
 
-        const runDetails = details(`${problemName}(${inputs.join(', ')}) → ${maxScore}`, file.message
-        runToId(problemName, database.timestamp)
+        const runDetails = details(`${problemName}(${inputs.join(', ')}) → ${maxScore}`, message)
+        problemContainer.appendChild(runDetails)
+        runDetails.id = id
+        runDetails.classList.add("run-container")
 
+        const timestampLink = document.createElement("a")
+        timestampLink.classList.add("timestamp")
+        const href = `#${id}`
+        timestampLink.href = href
+        timestampLink.textContent = href
+        runDetails.querySelector("summary").appendChild(timestampLink)
+
+        const runDetailsInner = runDetails.querySelector(".details-inner")
+
+        runDetails.addEventListener('toggle', async () => {
+            // Check if the details is being opened and hasn't been loaded yet
+            if (runDetails.open && !loadedRunIds.has(id)) {
+                try {
+                    runDetailsInner.textContent = 'Loading...'
+
+                    await new Promise(r => setTimeout(r, 800))
+
+                    const response = await fetch(`${jsonDir}/${filepath}`)
+                    const database = await response.json()
+
+                    runDetailsInner.textContent = ''
+
+                    displayDatabase(database, runDetailsInner)
+                } catch (error) {
+                    console.error('Error loading content:', error)
+                    runDetailsInner.textContent = 'Error loading content'
+                }
+            }
+        })
 
     })
-
-    return datasets
-
-    const databases = await loadAllData()
-    databases.forEach(displayDatabase)
 }
 
 hljs.addPlugin(new CopyButtonPlugin())

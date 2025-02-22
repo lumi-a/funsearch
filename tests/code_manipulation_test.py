@@ -113,17 +113,17 @@ class PromptSamplingTest(parameterized.TestCase):
   @parameterized.parameters(list(itertools.product([False, True], repeat=2)))
   def test_text_to_function(self, has_return_type: bool, has_docstring: bool):
     function = code_manipulation.text_to_function(create_test_function(has_return_type, has_docstring))
-    self.assertEqual(function.name, "get_capset_v0")
-    self.assertEqual(function.args, "n: int")
+    assert function.name == "get_capset_v0"
+    assert function.args == "n: int"
     if has_return_type:
-      self.assertEqual(function.return_type, "set[tuple[int, ...]]")
+      assert function.return_type == "set[tuple[int, ...]]"
     else:
-      self.assertIsNone(function.return_type)
+      assert function.return_type is None
     if has_docstring:
-      self.assertEqual(function.docstring, "One line docstring.")
+      assert function.docstring == "One line docstring."
     else:
-      self.assertIsNone(function.docstring)
-    self.assertEqual(function.body, _FUNCTION_BODY.rstrip())
+      assert function.docstring is None
+    assert function.body == _FUNCTION_BODY.rstrip()
 
   def test_small_text_to_program(self):
     program = code_manipulation.text_to_program(_SMALL_PROGRAM)
@@ -133,12 +133,12 @@ class PromptSamplingTest(parameterized.TestCase):
     expected_function = code_manipulation.Function(
       name="test", args="", return_type="np.ndarray", body="  return np.zeros(1)"
     )
-    self.assertEqual(expected_function, program.functions[0])
-    self.assertEqual(_SMALL_PROGRAM + "\n", str(program))
+    assert expected_function == program.functions[0]
+    assert _SMALL_PROGRAM + "\n" == str(program)
 
     # Assert that we do not add one more '\n' each time we convert to program.
     program_again = code_manipulation.text_to_program(str(program))
-    self.assertEqual(str(program), str(program_again))
+    assert str(program) == str(program_again)
 
   @parameterized.parameters(list(itertools.product([False, True], repeat=3)))
   def test_text_to_program(self, has_imports: bool, has_class: bool, has_assignment: bool):
@@ -184,19 +184,19 @@ class PromptSamplingTest(parameterized.TestCase):
     if not has_imports and not has_class and not has_assignment:
       self.assertEmpty(program.preface)
     if has_imports:
-      self.assertIn(_IMPORTS.rstrip(), program.preface)
+      assert _IMPORTS.rstrip() in program.preface
     if has_class:
-      self.assertIn(_CLASS.strip(), program.preface)
+      assert _CLASS.strip() in program.preface
     if has_assignment:
-      self.assertIn(_ASSIGNMENT.strip(), program.preface)
-    self.assertEqual(expected_function_0, program.functions[0])
-    self.assertEqual(expected_function_1, program.functions[1])
-    self.assertEqual(code, str(program))
+      assert _ASSIGNMENT.strip() in program.preface
+    assert expected_function_0 == program.functions[0]
+    assert expected_function_1 == program.functions[1]
+    assert code == str(program)
 
     # Make sure that one can convert Function to string and then back to a
     # function so that it remains the same.
     for i in range(2):
-      self.assertEqual(program.functions[i], code_manipulation.text_to_function(str(program.functions[i])))
+      assert program.functions[i] == code_manipulation.text_to_function(str(program.functions[i]))
 
   def test_get_functions_called(self):
     code = textwrap.dedent("""\
@@ -209,7 +209,7 @@ class PromptSamplingTest(parameterized.TestCase):
           g()
           return f(n - 1)
         """)
-    self.assertEqual(code_manipulation.get_functions_called(code), {"a", "b", "f", "g"})
+    assert code_manipulation.get_functions_called(code) == {"a", "b", "f", "g"}
 
 
 if __name__ == "__main__":

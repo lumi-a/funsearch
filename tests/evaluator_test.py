@@ -36,7 +36,7 @@ class EvaluatorTest(parameterized.TestCase):
 
 """
     actual = evaluator._trim_function_body(code)
-    self.assertEqual(desired, actual)
+    assert desired == actual
 
   def test_trim_function_body_function(self):
     code = """\
@@ -47,13 +47,13 @@ def new_f():"""
 
 """
     actual = evaluator._trim_function_body(code)
-    self.assertEqual(desired, actual)
+    assert desired == actual
 
   def test_trim_function_body_empty(self):
     code = """  return 0\n"""
     desired = """  return 0\n\n"""
     actual = evaluator._trim_function_body(code)
-    self.assertEqual(desired, actual)
+    assert desired == actual
 
   def test_trim_function_indentation_corner_case(self):
     code = textwrap.dedent(
@@ -70,7 +70,7 @@ def new_f():"""
         """
     )
     actual = evaluator._trim_function_body(code)
-    self.assertEqual(desired, actual)
+    assert desired == actual
 
   def test_trim_function_backlash_corner_case(self):
     code = textwrap.dedent(
@@ -83,7 +83,7 @@ def new_f():"""
         """
     )
     actual = evaluator._trim_function_body(code)
-    self.assertEqual(actual, code)
+    assert actual == code
 
   def test_trim_function_other_llms(self):
     files = list((TESTS_FOLDER / "example_responses").glob("*.txt"))
@@ -93,7 +93,7 @@ def new_f():"""
       response = f.read_text()
       actual = evaluator._trim_function_body(response)
       expected = (TESTS_FOLDER / "example_response_parsed" / name).read_text()
-      self.assertEqual(expected, actual, f"{name}: Parsed code does not match")
+      assert expected == actual, f"{name}: Parsed code does not match"
 
 
 if __name__ == "__main__":

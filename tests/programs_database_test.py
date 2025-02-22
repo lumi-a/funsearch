@@ -117,7 +117,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
       program=template.get_function(function_to_evolve), island_id=None, scores_per_test={"unused": -1}
     )
     # Verify the first prompt.
-    self.assertEqual(database.get_prompt().code, _EXPECTED_INITIAL_PROMPT)
+    assert database.get_prompt().code == _EXPECTED_INITIAL_PROMPT
 
     # Test saving database
     with tempfile.TemporaryFile() as f:
@@ -131,7 +131,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
       )
       # Make sure the loaded database works as the original
       db2.load(f)
-      self.assertEqual(db2.get_prompt().code, _EXPECTED_INITIAL_PROMPT)
+      assert db2.get_prompt().code == _EXPECTED_INITIAL_PROMPT
 
   def test_generate_prompt(self):
     """Tests that we build the prompt shown in the paper."""
@@ -149,7 +149,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
     sample_b = copy.deepcopy(template.get_function(function_to_evolve))
     sample_b.body = _SAMPLE_B
     prompt = island._generate_prompt([sample_a, sample_b])
-    self.assertEqual(prompt, _EXPECTED_PROMPT)
+    assert prompt == _EXPECTED_PROMPT
 
   def test_destroy_islands(self):
     template = code_manipulation.text_to_program(_SKELETON)
@@ -179,9 +179,9 @@ class ProgramsDatabaseTest(parameterized.TestCase):
     min_kept = min(expected_scores[i] for i in expected_kept)
     for i, score in enumerate(expected_scores):
       if i in expected_kept:
-        self.assertEqual(database._best_score_per_island[i], score)
+        assert database._best_score_per_island[i] == score
       else:
-        self.assertGreaterEqual(database._best_score_per_island[i], min_kept)
+        assert database._best_score_per_island[i] >= min_kept
 
   @parameterized.parameters(
     [
@@ -193,17 +193,17 @@ class ProgramsDatabaseTest(parameterized.TestCase):
   def test_softmax(self, logits: np.ndarray):
     probs_lower_temp = programs_database._softmax(logits, temperature=1.0)
     self.assertAlmostEqual(np.sum(probs_lower_temp), 1.0, places=6)
-    self.assertTrue(np.all(probs_lower_temp >= 0))
-    self.assertTrue(np.all(probs_lower_temp <= 1))
+    assert np.all(probs_lower_temp >= 0)
+    assert np.all(probs_lower_temp <= 1)
 
     probs_higher_temp = programs_database._softmax(logits, temperature=5.0)
     self.assertAlmostEqual(np.sum(probs_higher_temp), 1.0, places=6)
-    self.assertTrue(np.all(probs_higher_temp >= 0))
-    self.assertTrue(np.all(probs_higher_temp <= 1))
+    assert np.all(probs_higher_temp >= 0)
+    assert np.all(probs_higher_temp <= 1)
 
     if not np.all(logits == logits[0]):
       # The lower the temperature, the more confident we are on our top choice.
-      self.assertGreater(np.max(probs_lower_temp), np.max(probs_higher_temp))
+      assert np.max(probs_lower_temp) > np.max(probs_higher_temp)
 
   @parameterized.parameters(
     [

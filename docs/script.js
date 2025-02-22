@@ -212,8 +212,6 @@ async function main() {
                 try {
                     runDetailsInner.textContent = 'Loading...'
 
-                    await new Promise(r => setTimeout(r, 800))
-
                     const response = await fetch(`${jsonDir}/${filepath}`)
                     const database = await response.json()
 

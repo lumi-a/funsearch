@@ -246,14 +246,14 @@ def ls(db_file: click.File | None) -> None:
 
 
 @main.command()
-@click.argument("db_file", type=click.File("rb"), required=False)
+@click.argument("db_file", type=click.File("rb+"), required=False)
 def change_db_message(db_file: click.File | None) -> None:
   """Change the message of a database.
 
   If not provided, selects the most recent one from data/backups/.
   """
   if db_file is None:
-    db_file = _most_recent_backup().open("rb")
+    db_file = _most_recent_backup().open("rb+")
 
   database = ProgramsDatabase.load(db_file)
   print("Current message:\n" + database.message)  # noqa: T201

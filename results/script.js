@@ -62,43 +62,6 @@ function improvementCanvas(islands) {
     return improvementsCanvas
 }
 
-function errorCanvas(islands) {
-    const errorCanvas = document.createElement("canvas")
-    new Chart(
-        errorCanvas,
-        {
-            type: 'scatter',
-            data: {
-                datasets: islands.map(island => ({
-                    label: `Island ${island.ix}`,
-                    data: island.runs.map((run, ix) => run ? null : ({ x: ix, y: island.ix })).filter(x => x),
-                    borderColor: colors[island.ix % colors.length],
-                })
-                )
-            },
-            options: {
-                scales: {
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: "Run Index"
-                        }
-                    },
-                    y: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: "Island"
-                        }
-                    }
-                }
-            }
-        }
-    )
-    return errorCanvas
-}
-
 function getProblemContainer(problemName) {
     const maybeExisting = document.getElementById(`container-${problemName}`)
     if (maybeExisting) {
@@ -157,7 +120,6 @@ const colors = ['#CC6677', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255'
 
 async function displayDatabase(database) {
     /* Schema from generate.py (might be outdated)
- 
       {
         "problemName": database.problem_name,
         "inputs": database.inputs,
@@ -167,27 +129,20 @@ async function displayDatabase(database) {
         "timestamp": database.timestamp,
         "islands": [
           {
-            "runs": island._runs,  # noqa: SLF001
-            "improvements": [(ix, str(program)) for ix, program in island._improvements],  # noqa: SLF001
+            "improvements": [(ix, island._runs[ix], str(program)) for ix, program in island._improvements],  # noqa: SLF001
             "successCount": island._success_count,  # noqa: SLF001
             "failureCount": island._failure_count,  # noqa: SLF001
           }
           for island in database._islands  # noqa: SLF001
         ],
       },
-    
     */
     const problemName = database.problemName
     const problemContainer = getProblemContainer(problemName)
     const islands = database.islands.map((island, i) => {
         const lastImprovement = island.improvements[island.improvements.length - 1]
-        island.bestScore = island.runs[lastImprovement[0]]
+        island.bestScore = lastImprovement[1]
         island.ix = i
-
-        island.runningMaximum = island.runs.reduce((acc, score) => {
-            const currentMax = score ? Math.max(acc[acc.length - 1] || 0, score) : acc[acc.length - 1] || 0
-            return [...acc, currentMax]
-        }, [])
 
         return island
     })
@@ -200,13 +155,13 @@ async function displayDatabase(database) {
 
     const runDetails = details(`${problemName}(${database.inputs.join(', ')}) → ${maxScore}`, database.message,
         detailsCode("Spec", "Specification-file for this problem and run", database.specCode),
-        details("Best Programs", "Best program of each island", ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][1])
+        details("Best Programs", "Best program of each island", ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][2])
         )),
         details("Improvements over Time", "Improvement-steps of each island", improvementCanvas(islands),
             ...islands.map(island => details(`Score ${island.bestScore}`, `Island ${island.ix}`,
-                ...island.improvements.toReversed().map(improvement => detailsCode(`Score ${island.runs[improvement[0]]}`, `Run ${improvement[0]}`, improvement[1])))
+                ...island.improvements.toReversed().map(improvement => detailsCode(`Score ${improvement[1]}`, `Run ${improvement[0]}`, improvement[2])))
             )),
-        details(`Error-rates`, `Total ${totalRate}% = ${totalSuccesses}/${totalSuccesses + totalFailures})`, errorCanvas(islands)),
+        details(`Error-rates`, `Total ${totalRate}%`, errorCanvas(islands)),
         detailsCode("Config", "Config-file for this run", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n")),
     )
     problemContainer.appendChild(runDetails)

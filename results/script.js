@@ -91,9 +91,12 @@ function detailsCode(title, code) {
     return details(title, pre)
 }
 
+// Paul Tol's discrete rainbow color scheme, from https://personal.sron.nl/~pault/
+const colors = ['#CC6677', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255', '#44AA99', '#999933', '#AA4499', '#888']
+
 async function displayDatabase(database) {
     /* Schema from generate.py (might be outdated)
-
+ 
      {
         "config": vars(database._config),  # noqa: SLF001
         "inputs": database.inputs,
@@ -131,26 +134,6 @@ async function displayDatabase(database) {
     })
     islands.sort((a, b) => b.bestScore - a.bestScore)
 
-    const canvas = document.createElement("canvas")
-    runContainer.appendChild(canvas)
-    const timelabels = [...Array(Math.max(...islands.map(island => island.runs.length))).keys()]
-
-    new Chart(
-        canvas,
-        {
-            type: 'line',
-            data: {
-                labels: timelabels,
-                datasets: islands.map(island => {
-                    return {
-                        label: `Island ${island.ix}`,
-                        data: island.runningMaximum,
-                    }
-                })
-            }
-        }
-    );
-
     runContainer.appendChild(detailsCode("Spec", database.specCode))
 
     const bestProgramsDetails = details("Best Programs", null)
@@ -161,12 +144,49 @@ async function displayDatabase(database) {
     })
     const improvementsDetails = details("Improvements over Time", null)
     runContainer.appendChild(improvementsDetails)
+    const canvas = document.createElement("canvas")
+    improvementsDetails.appendChild(canvas)
+    const timelabels = [...Array(Math.max(...islands.map(island => island.runs.length))).keys()]
+    new Chart(
+        canvas,
+        {
+            type: 'line',
+            data: {
+                labels: timelabels,
+                datasets: islands.map(island => ({
+                    label: `Island ${island.ix}`,
+                    data: island.runningMaximum,
+                    borderColor: colors[island.ix % colors.length],
+                    pointRadius: 0,
+                })
+                )
+            },
+            options: {
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: "Run Index"
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: "Running Max Score"
+                        }
+                    }
+                }
+            }
+        }
+    );
     islands.forEach(island => {
         const islandDetails = details(`Island ${island.ix}`, null)
         improvementsDetails.appendChild(islandDetails)
         for (let imp_ix = island.improvements.length - 1; imp_ix >= 0; imp_ix--) {
-            const score = island.runs[imp_ix]
             const run = island.improvements[imp_ix][0]
+            const score = island.runs[run]
             const program = island.improvements[imp_ix][1]
             islandDetails.appendChild(detailsCode(`Run ${run}, Score ${score}`, program))
         }

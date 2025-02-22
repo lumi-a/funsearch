@@ -1,16 +1,5 @@
 const jsonDir = "json-data"
 
-async function loadAllData() {
-    const indexResponse = await fetch(jsonDir + "/index.json")
-    const files = await indexResponse.json()
-
-    const datasets = await Promise.all(files.map(async (file) => {
-        const response = await fetch(`${jsonDir}/${file}`)
-        return response.json()
-    }))
-
-    return datasets
-}
 
 function strToPre(str) {
     pre = document.createElement("pre")
@@ -125,6 +114,10 @@ function detailsCode(title, description, code) {
     return details(title, description, pre)
 }
 
+function runToId(problemName, timestamp) {
+    return `#run-${problemName}-${database.timestamp}`
+}
+
 // Paul Tol's discrete rainbow color scheme, from https://personal.sron.nl/~pault/
 const colors = ['#CC6677', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255', '#44AA99', '#999933', '#AA4499', '#888']
 
@@ -148,8 +141,8 @@ async function displayDatabase(database) {
         ],
       },
     */
-    const problemName = database.problemName
-    const problemContainer = getProblemContainer(problemName)
+
+    const runDetails = document.getElementById()
 
     let totalSuccesses = 0
     let totalFailures = 0
@@ -192,13 +185,35 @@ async function displayDatabase(database) {
 
     const timestampLink = document.createElement("a")
     timestampLink.classList.add("timestamp")
-    const href = `#run-${problemName}-${database.timestamp}`
+    const href = runToId(problemName, database.timestamp)
     timestampLink.href = href
     timestampLink.textContent = href
     runDetails.querySelector("summary").appendChild(timestampLink)
 }
 
 async function main() {
+    const index = await fetch(jsonDir + "/index.json")
+    const files = await index.json()
+
+    files.map(file => {
+        // Has schema (problemName, inputs, maxScore, message, timestamp, filepath)
+        const problemName = file[0]
+        const inputs = file[1]
+        const maxScore = file[2]
+        const message = file[3]
+        const timestamp = file[4]
+        const filepath = file[5]
+
+        const problemContainer = getProblemContainer(problemName)
+
+        const runDetails = details(`${problemName}(${inputs.join(', ')}) → ${maxScore}`, file.message
+        runToId(problemName, database.timestamp)
+
+
+    })
+
+    return datasets
+
     const databases = await loadAllData()
     databases.forEach(displayDatabase)
 }

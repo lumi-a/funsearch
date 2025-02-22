@@ -43,15 +43,24 @@ def _to_filename(function_name: str, timestamp: int) -> Path:
 
 
 # Save small descriptions of each json-file in index.json
-# Has schema (title, inputs, message, timestamp, filepath)
-index_json: list[tuple[str, list[float | int] | list[str], str, int, str]] = []
+# Has schema (problemName, inputs, maxScore, message, timestamp, filepath)
+index_json: list[tuple[str, list[float | int] | list[str], float, str, int, str]] = []
 for (specname, timestamp), (idx, file) in files.items():
   database = ProgramsDatabase.load(file.open("rb"))
 
   with _to_filename(specname, timestamp).open("w") as f:
     # Trim message to 255 "characters"
     # This is bad practice, something something graphemes, but it will be cut off on the website anyway.
-    index_json.append((database.problem_name, database.inputs, database.message[:255], timestamp, f.name))
+    index_json.append(
+      (
+        database.problem_name,
+        database.inputs,
+        max(database._best_score_per_island),  # noqa: SLF001
+        database.message[:255],
+        timestamp,
+        f.name,
+      )
+    )
 
     # As backups are indexed with timestamps, and we don't expect backups to change over time,
     # keep the json minimal, without newlines (which otherwise would be neat for VCS)

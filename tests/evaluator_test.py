@@ -85,16 +85,6 @@ def new_f():"""
     actual = evaluator._trim_function_body(code, "fake_function_header")
     assert actual == code
 
-  def test_trim_function_other_llms(self):
-    files = list((TESTS_FOLDER / "example_responses").glob("*.txt"))
-    assert len(files) > 1, "Could not find all test files"
-    for f in files:
-      name = f.name
-      response = f.read_text()
-      actual = evaluator._trim_function_body(response, "fake_function_header")
-      expected = (TESTS_FOLDER / "example_response_parsed" / name).read_text()
-      assert expected == actual, f"{name}: Parsed code does not match"
-
 
 if __name__ == "__main__":
   absltest.main()

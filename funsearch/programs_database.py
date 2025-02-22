@@ -129,8 +129,8 @@ class ProgramsDatabase:
           config.cluster_sampling_temperature_period,
         )
       )
-    self._failure_counts: list[int] = [0] * config.num_islands
-    self._success_counts: list[int] = [0] * config.num_islands
+
+    # TODO: Why not move these to Island?
     self._best_score_per_island: list[float] = [-float("inf")] * config.num_islands
     self._best_program_per_island: list[code_manipulation.Function | None] = [None] * config.num_islands
     self._best_scores_per_test_per_island: list[ScoresPerTest | None] = [None] * config.num_islands
@@ -141,12 +141,6 @@ class ProgramsDatabase:
 
     self.problem_name = problem_name
     self.timestamp = timestamp
-
-  def increment_failure(self, island_id: int) -> None:
-    self._failure_counts[island_id] += 1
-
-  def increment_success(self, island_id: int) -> None:
-    self._success_counts[island_id] += 1
 
   def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
     return sorted(
@@ -217,10 +211,12 @@ class ProgramsDatabase:
     """Registers `program` in the specified island."""
     self._islands[island_id].register_program(program, scores_per_test)
     score = _reduce_score(scores_per_test)
+    self._islands[island_id].register_success(score)
     if score > self._best_score_per_island[island_id]:
       self._best_program_per_island[island_id] = program
       self._best_scores_per_test_per_island[island_id] = scores_per_test
       self._best_score_per_island[island_id] = score
+      self._islands[island_id].register_improvement(program)
       logging.info("✔ Best score of island %d increased to %s", island_id, score)
 
   def register_program(
@@ -248,6 +244,12 @@ class ProgramsDatabase:
       if self._program_counter > self._config.backup_period:
         self._program_counter = 0
         self.backup()
+
+  def register_failure(self, island_id: int) -> None:
+    """Registers a failure in the database."""
+
+    if island_id is not None:
+      self._islands[island_id].register_failure()
 
   def reset_islands(self) -> None:
     """Resets the weaker half of islands."""
@@ -337,8 +339,13 @@ class Island:
     self._cluster_sampling_temperature_init = cluster_sampling_temperature_init
     self._cluster_sampling_temperature_period = cluster_sampling_temperature_period
 
+    # The island-runs over time. None means a failure, otherwise a float representing the score.
+    self._runs: list[float | None] = []
+    # For each improvement, keep track of the program that caused the improvement.
+    self._improvements: dict[int, code_manipulation.Function] = {}
+
     self._clusters: dict[Signature, Cluster] = {}
-    self._num_programs: int = 0
+    self._num_programs_peroidic: int = 0
 
   def register_program(self, program: code_manipulation.Function, scores_per_test: ScoresPerTest) -> None:
     """Stores a program on this island, in its appropriate cluster."""
@@ -348,7 +355,19 @@ class Island:
       self._clusters[signature] = Cluster(score, program)
     else:
       self._clusters[signature].register_program(program)
-    self._num_programs += 1
+    self._num_programs_peroidic += 1
+
+  def register_improvement(self, program: code_manipulation.Function) -> None:
+    """Register the program that caused the latest improvement."""
+    self._improvements[len(self._runs) - 1] = program
+
+  def register_failure(self) -> None:
+    """Register a failure on this island."""
+    self._runs.append(None)
+
+  def register_success(self, score: float) -> None:
+    """Register a success on this island."""
+    self._runs.append(score)
 
   def get_prompt(self) -> tuple[str, int]:
     """Constructs a prompt containing functions from this island."""
@@ -357,7 +376,9 @@ class Island:
 
     # Convert scores to probabilities using softmax with temperature schedule.
     period = self._cluster_sampling_temperature_period
-    temperature = self._cluster_sampling_temperature_init * (1 - (self._num_programs % period) / period)
+    temperature = self._cluster_sampling_temperature_init * (
+      1 - (self._num_programs_peroidic % period) / period
+    )
     probabilities = _softmax(cluster_scores, temperature)
 
     # At the beginning of an experiment when we have few clusters, place fewer
@@ -416,6 +437,7 @@ class Cluster:
   """A cluster of programs on the same island and with the same Signature."""
 
   def __init__(self, score: float, implementation: code_manipulation.Function) -> None:
+    # TODO: This is never used?
     self._score = score
     self._programs: list[code_manipulation.Function] = [implementation]
     self._lengths: list[int] = [len(str(implementation))]

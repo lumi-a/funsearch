@@ -293,7 +293,8 @@ class ProgramsDatabase:
     total_successes = 0
     total_failures = 0
     for island_idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
-      successes = self._islands[island_idx]._success_count  # noqa: SLF001
+      # Subtract one to account for the program that was added at the beginning.
+      successes = self._islands[island_idx]._success_count - 1  # noqa: SLF001
       failures = self._islands[island_idx]._failure_count  # noqa: SLF001
       total_successes += successes
       total_failures += failures

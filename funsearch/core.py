@@ -19,9 +19,8 @@ import logging
 import queue
 import threading
 import time
-from typing import TYPE_CHECKING
-
 from concurrent import futures
+from typing import TYPE_CHECKING
 
 from funsearch import code_manipulation
 from funsearch.sampler import LLM, Sampler

@@ -21,7 +21,6 @@ import copy
 import dataclasses
 import pathlib
 import pickle
-import sys
 import threading
 import time
 from collections.abc import Iterable, Mapping, Sequence
@@ -231,7 +230,6 @@ class ProgramsDatabase:
     self, program: code_manipulation.Function, island_id: int | None, scores_per_test: ScoresPerTest
   ) -> None:
     """Registers `program` in the database."""
-
     with self.lock:
       # In an asynchronous implementation we should consider the possibility of
       # registering a program on an island that had been reset after the prompt

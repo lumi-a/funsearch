@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from funsearch.__main__ import _parse_input, start, resume, ls
+from funsearch.__main__ import _parse_input, start
 
 ROOT_DIR = Path(__file__).parent.parent
 

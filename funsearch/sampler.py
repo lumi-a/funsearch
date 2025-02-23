@@ -24,7 +24,7 @@ import numpy as np
 
 if TYPE_CHECKING:
   import pathlib
-  from collections.abc import Collection, Sequence
+  from collections.abc import Sequence
 
   import llm
 

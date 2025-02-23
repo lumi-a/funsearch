@@ -48,8 +48,7 @@ def reformat_to_two_spaces(code: str) -> str:
 class LLM:
   """Language model that predicts continuation of provided source code."""
 
-  def __init__(self, samples_per_prompt: int, model: llm.Model, log_path: pathlib.Path | None = None) -> None:
-    self._samples_per_prompt = samples_per_prompt
+  def __init__(self, model: llm.Model, log_path: pathlib.Path | None = None) -> None:
     self.model = model
     self.prompt_count = 0
     self.log_path = log_path
@@ -69,10 +68,6 @@ class LLM:
     self._log(prompt, response, self.prompt_count)
     self.prompt_count += 1
     return response
-
-  def draw_samples(self, prompt: str) -> Collection[str]:
-    """Returns multiple predicted continuations of `prompt`."""
-    return [self._draw_sample(prompt) for _ in range(self._samples_per_prompt)]
 
   def _log(self, prompt: str, response: str, index: int) -> None:
     if self.log_path is not None:

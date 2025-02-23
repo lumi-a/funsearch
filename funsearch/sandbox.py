@@ -33,7 +33,7 @@ class ExternalProcessSandbox:
   """
 
   def __init__(self, base_path: Path, timeout_secs: int = 30) -> None:
-    self.output_path = Path(base_path) / f"sandbox{self.id}"
+    self.output_path = Path(base_path) / "sandbox"
     self.timeout_secs = timeout_secs
 
     self.input_path = self.output_path / "inputs"

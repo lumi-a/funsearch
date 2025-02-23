@@ -36,6 +36,31 @@ if TYPE_CHECKING:
   from funsearch.programs_database import ProgramsDatabase
 
 
+class IterationManager:
+  """Keeps track of how many iterations we've run so far."""
+
+  def __init__(self, max_iterations: int) -> None:
+    """Keeps track of how many iterations we've run so far."""
+    self._max_iterations = max_iterations
+    # Keep track of how many llm requests you made, to not
+    # exceed `max_iterations` (TODO: rename parameter, also on callsites of `run`)
+    # and to pass to the llm-prompting to make logging to files safe
+    self._index = 0
+    self._index_lock = threading.Lock()
+
+  def get_next_index(self) -> int | None:
+    """Returns the next index, or None if we're done."""
+    with self._index_lock:
+      if self._max_iterations != -1 and self._index >= self.M:
+        return None
+      index = self._index
+      self._index += 1
+    return index
+
+  def is_done(self) -> bool:
+    return self._max_iterations != -1 and self._index >= self._max_iterations
+
+
 # We pass in llm_name because there doesn't seem to be a good way of getting the class of
 # a model from its string. You could do:
 # |  a = get_model(llm_name)
@@ -61,26 +86,16 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
   # degrades the quality of the algorithm.
   max_stored_responses = 20
 
-  # Keep track of how many llm requests you made, to not
-  # exceed `iterations` (TODO: rename parameter, also on callsites of `run`)
-  # and to pass to the llm-prompting to make logging to files safe
-  llm_prompt_index = 0
-  llm_prompt_index_lock = threading.Lock()
-
-  def llm_response_worker(stop_event: threading.Event, llm: LLM) -> None:
+  def llm_response_worker(iteration_manager: IterationManager, stop_event: threading.Event, llm: LLM) -> None:
     """Worker thread that continuously makes web requests as long as we haven't reached `iterations`.
 
     Waits if the output queue has size >= dynamic_max_queue_size.
     """
-    global llm_prompt_index
-
     while not stop_event.is_set():
       # Check if we've reached the maximum number of web requests (if applicable)
-      with llm_prompt_index_lock:
-        if iterations != -1 and llm_prompt_index >= iterations:
-          break
-        current_index = llm_prompt_index
-        llm_prompt_index += 1
+      current_index = iteration_manager.get_next_index()
+      if current_index is None:
+        break
 
       # Check dynamic max queue size and wait if needed
       while llm_responses.qsize() >= max_stored_responses and not stop_event.is_set():
@@ -94,9 +109,10 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
 
     logging.info("LLM response worker stopped.")
 
-  def analysation_dispatcher(stop_event: threading.Event, executor: futures.ProcessPoolExecutor) -> None:
+  def analysation_dispatcher(
+    iteration_manager: IterationManager, stop_event: threading.Event, executor: futures.ProcessPoolExecutor
+  ) -> None:
     """Dispatcher thread that pulls web results from the queue and submits CPU tasks to the process pool."""
-    # TODO: What a waste of an evaluator and sandbox. Can't we have one per thread?
     evaluator = Evaluator(
       ExternalProcessSandbox(log_path),
       database.template,
@@ -108,11 +124,8 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
       try:
         sample, island_id, version_generated, current_index = llm_responses.get(timeout=0.1)
       except queue.Empty:
-        with llm_prompt_index_lock:
-          # If `iterations` is reached, we can exit now
-          # TODO: Do we really need to check llm_responses.empty() here again?
-          if iterations != -1 and llm_prompt_index >= iterations and llm_responses.empty():
-            break
+        if iteration_manager.is_done():
+          break
         continue
 
       future = executor.submit(evaluator.analyse, sample, version_generated, current_index)
@@ -136,6 +149,7 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
     logging.info("Analysation-dispatcher exiting.")
 
   stop_event = threading.Event()
+  iteration_manager = IterationManager(iterations)
 
   # TODO: Consider passing `max_workers=os.cpu_count()` to ProcessPoolExecutor.
   # This might help because the cpu-heavy task involves a subprocess-call itself.
@@ -146,12 +160,16 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
     llm_threads: list[threading.Thread] = []
     for _ in range(num_llm_workers):
       model = llm.get_model(llm_name)
-      t = threading.Thread(target=llm_response_worker, args=(stop_event, LLM(model, log_path)))
+      t = threading.Thread(
+        target=llm_response_worker, args=(iteration_manager, stop_event, LLM(model, log_path))
+      )
       t.start()
       llm_threads.append(t)
 
     # Start the dispatcher thread.
-    dispatcher_thread = threading.Thread(target=analysation_dispatcher, args=(stop_event, executor))
+    dispatcher_thread = threading.Thread(
+      iteration_manager, target=analysation_dispatcher, args=(stop_event, executor)
+    )
     dispatcher_thread.start()
     try:
       # Wait for web request workers to finish (if M is finite, they will eventually stop)

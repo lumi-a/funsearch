@@ -263,7 +263,7 @@ class ProgramsDatabase:
       founder_scores = self._best_scores_per_test_per_island[founder_island_id]
       self._register_program_in_island(founder, island_id, founder_scores)
 
-  def log_tabular(self, last_run: bool) -> None:
+  def print_status(self) -> None:
     scores = self._best_score_per_island
     score_width = max(5, *(len(str(x)) for x in scores))
     separator = "  "
@@ -379,6 +379,7 @@ class Island:
 
     # At the beginning of an experiment when we have few clusters, place fewer
     # programs into the prompt.
+    # TODO: Why?
     functions_per_prompt = min(len(self._clusters), self._functions_per_prompt)
 
     idx = np.random.choice(len(signatures), size=functions_per_prompt, p=probabilities)

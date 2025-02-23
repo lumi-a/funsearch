@@ -13,7 +13,7 @@ import click
 import llm
 from dotenv import load_dotenv
 
-from funsearch import config, core, evaluator, sampler, sandbox
+from funsearch import config, core, evaluator, sampler
 from funsearch.programs_database import ProgramsDatabase
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
@@ -63,11 +63,10 @@ def _most_recent_backup() -> Path:
 
 
 def _build_samplers(
-  database: ProgramsDatabase, sandbox_name: str, log_path: Path, model_name: str, conf: config.Config
+  database: ProgramsDatabase, log_path: Path, model_name: str, conf: config.Config
 ) -> list[sampler.Sampler]:
   load_dotenv()
   model = llm.get_model(model_name)
-  sandbox_class = SANDBOXES[sandbox_name]
 
   samplers: list[sampler.Sampler] = [
     sampler.Sampler(
@@ -112,9 +111,6 @@ def _get_all_subclasses(cls: type) -> set[type]:
 
 # TODO: Once click 8.2.0 releases, use better click.Choice
 MODELS: list[str] = list(llm.get_model_aliases().keys())
-SANDBOXES: dict[str, type[sandbox.DummySandbox]] = {
-  c.__name__: c for c in [sandbox.DummySandbox, *_get_all_subclasses(sandbox.DummySandbox)]
-}
 
 
 @main.command(context_settings={"show_default": True})
@@ -126,12 +122,6 @@ SANDBOXES: dict[str, type[sandbox.DummySandbox]] = {
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-@click.option(
-  "--sandbox-type",
-  default="ExternalProcessSandbox",
-  type=click.Choice(list(SANDBOXES.keys())),
-  help="Sandbox type",
-)
 def start(
   spec_file: click.File,
   inputs: list[float | int] | list[str],
@@ -139,7 +129,6 @@ def start(
   llm: str,
   output_path: click.Path,
   iterations: int,
-  sandbox_type: str,
 ) -> None:
   """Execute FunSearch algorithm.
 
@@ -168,7 +157,7 @@ def start(
   if not log_path.exists():
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
-  samplers = _build_samplers(database, sandbox_type, log_path, llm, conf)
+  samplers = _build_samplers(database, log_path, llm, conf)
 
   core.run(samplers, database, iterations)
 
@@ -180,15 +169,7 @@ def start(
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-@click.option(
-  "--sandbox-type",
-  default="ExternalProcessSandbox",
-  type=click.Choice(list(SANDBOXES.keys())),
-  help="Sandbox type",
-)
-def resume(
-  db_file: click.File | None, llm: str, output_path: click.Path, iterations: int, sandbox_type: str
-) -> None:
+def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterations: int) -> None:
   """Continue running FunSearch from a backup.
 
   If not provided, selects the most recent one from data/backups/.
@@ -207,7 +188,7 @@ def resume(
     log_path.mkdir(parents=True)
     logging.info(f"Writing logs to {log_path}")
 
-  samplers = _build_samplers(database, sandbox_type, log_path, llm, conf)
+  samplers = _build_samplers(database, log_path, llm, conf)
 
   core.run(samplers, database, iterations)
 

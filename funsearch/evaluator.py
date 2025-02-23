@@ -141,7 +141,7 @@ class Evaluator:
   def __init__(
     self,
     database: programs_database.ProgramsDatabase,
-    sbox: sandbox.DummySandbox,
+    sbox: sandbox.ExternalProcessSandbox,
     template: code_manipulation.Program,
     function_to_evolve: str,
     function_to_run: str,
@@ -168,10 +168,8 @@ class Evaluator:
         program, self._function_to_run, current_input, INSERT RUN INDEX
       )
 
+      # TODO: Shouldn't we test _calls_ancestor before sandbox.run?
       if runs_ok and not _calls_ancestor(program, self._function_to_evolve) and test_output is not None:
-        if not isinstance(test_output, (int, float)):
-          msg = "@function.run did not return an int/float score."
-          raise ValueError(msg)
         scores_per_test[current_input] = test_output
 
     if scores_per_test:

@@ -79,7 +79,7 @@ class ExternalProcessSandbox:
     else:
       return result.returncode
 
-  # TODO: Add type to input
+  # TODO: Add type-hint to input
   def run(self, program: str, function_to_run: str, input, index: int) -> tuple[Any, bool]:
     call_data_folder = (self.output_path / f"call-{index}").absolute()
     if not call_data_folder.exists():
@@ -93,17 +93,16 @@ class ExternalProcessSandbox:
         cloudpickle.dump(input, f)
 
     try:
-      namespace = DummySandbox.compile_code(program)
+      namespace = _compile_code(program)
 
-      program_file = (call_data_folder / "program.pickle").absolute()
-      with open(program_file, "wb+") as f:
+      with open(call_data_folder / "program.pickle", "wb+") as f:
         cloudpickle.dump(namespace[function_to_run], f)
 
       error_file = self.output_path / f"stderr-{index}.log"
 
-      retcode = self._exec(call_data_folder, input_path, error_file)
+      return_code = self._exec(call_data_folder, input_path, error_file)
 
-      if retcode != 0:
+      if return_code != 0:
         self._save_diagnostics(program, call_data_folder)
         return None, False
 

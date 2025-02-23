@@ -11,11 +11,9 @@ from pathlib import Path
 
 import click
 import llm
-from dotenv import load_dotenv
 
-from funsearch import config, core, evaluator, sampler
+from funsearch import config, core
 from funsearch.programs_database import ProgramsDatabase
-from funsearch.sandbox import ExternalProcessSandbox
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)

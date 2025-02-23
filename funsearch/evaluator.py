@@ -20,12 +20,9 @@ from __future__ import annotations
 import ast
 import copy
 import re
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from funsearch import code_manipulation, programs_database, sandbox
-
-if TYPE_CHECKING:
-  from collections.abc import Sequence
+from funsearch import code_manipulation, sandbox
 
 
 class _FunctionLineVisitor(ast.NodeVisitor):

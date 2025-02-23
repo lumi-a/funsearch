@@ -24,14 +24,13 @@ import pickle
 import threading
 import time
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any
 
 import numpy as np
 from absl import logging
 
 from funsearch import code_manipulation
-from funsearch.evaluator import Evaluator
 from funsearch import config as config_lib
+from funsearch.evaluator import Evaluator
 from funsearch.sandbox import ExternalProcessSandbox
 
 Signature = tuple[float, ...]

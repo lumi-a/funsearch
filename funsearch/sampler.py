@@ -20,17 +20,11 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-import numpy as np
-
-from funsearch.evaluator import Evaluator
-
 if TYPE_CHECKING:
   import pathlib
-  from collections.abc import Sequence
 
   import llm
 
-  from funsearch import programs_database
 
 
 # TODO: This is currently unused, but I feel like we should use it again.

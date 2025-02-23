@@ -18,11 +18,11 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 import queue
 import threading
 import time
 from concurrent import futures
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import llm
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 # We could ask the caller to pass a class, but then we'd *also* need them to ask for the id.
 # So let's just ask them for the id directly and be a bit inefficient upfront. This might
 # make errors uglier, though.
-def run(database: "ProgramsDatabase", llm_name: str, log_path: Path, iterations: int = -1) -> None:
+def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: int = -1) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 

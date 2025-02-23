@@ -34,6 +34,16 @@
     [
       3
     ],
+    1.875,
+    "Start from Lucas' solution.\n\nThe only found improvement `gasoline(k)` seems to have the same approximation-ratio, and operate very similarly to, Lucas' solution with parameter (k+1).\n\n\nFound solution (each entry multiplied by 2, to compare more easily to ",
+    1740309473,
+    "gasoline-list_1740309473.json"
+  ],
+  [
+    "gasoline-list",
+    [
+      3
+    ],
     1110010.0099940917,
     "Perturb Lucas' solution by simply removing the ys",
     1740242660,

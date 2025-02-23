@@ -66,15 +66,15 @@ def run(samplers: list[Sampler], database: "ProgramsDatabase", iterations: int =
     # Otherwise, just keep the main thread alive.
     if iterations > 0:
       for t in threads:
-        database.print_status()
+        database.log_tabular(last_run=False)
         t.join()
     else:
       while True:
-        database.print_status()
+        database.log_tabular(last_run=False)
         t.join(timeout=1)
 
   except KeyboardInterrupt:
     logging.info("Keyboard interrupt. Stopping all sampler threads.")
   finally:
-    database.print_status()
+    database.log_tabular(last_run=True)
     database.backup()

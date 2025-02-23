@@ -16,6 +16,7 @@
 """A single-threaded implementation of the FunSearch pipeline."""
 
 import logging
+import queue
 import threading
 from typing import TYPE_CHECKING
 
@@ -55,28 +56,15 @@ def run(samplers: list[Sampler], database: "ProgramsDatabase", iterations: int =
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
-  threads = []
+  llm_responses = queue.Queue()
+  analysation_results = queue.Queue()
 
-  for sampler in samplers:
-    t = threading.Thread(target=sampler_runner, args=(sampler, iterations))
-    t.daemon = True
-    t.start()
-    threads.append(t)
+  # Keep track of how many llm requests you made, to not
+  # exceed `iterations` (TODO: rename parameter, also on callsites of `run`)
+  # and to pass to the llm-prompting to make logging to files safe
+  llm_prompt_index = 0
+  llm_prompt_index_lock = threading.Lock()
 
-  try:
-    # If iterations is finite, wait for all threads to finish.
-    # Otherwise, just keep the main thread alive.
-    if iterations > 0:
-      for t in threads:
-        t.join()
-        database.print_status()
-    else:
-      while True:
-        t.join(timeout=10)
-        database.print_status()
-
-  except KeyboardInterrupt:
-    logging.info("Keyboard interrupt. Stopping all sampler threads.")
-  finally:
-    database.print_status()
-    database.backup()
+  # The maximum size of the llm_responses queue
+  dynamic_max_queue_size = 30
+  dynamic_max_queue_lock = threading.Lock()

@@ -30,7 +30,9 @@ import numpy as np
 from absl import logging
 
 from funsearch import code_manipulation
+from funsearch.evaluator import Evaluator
 from funsearch import config as config_lib
+from funsearch.sandbox import ExternalProcessSandbox
 
 Signature = tuple[float, ...]
 ScoresPerTest = Mapping[float | str, float]
@@ -152,6 +154,25 @@ class ProgramsDatabase:
         zip(self._best_program_per_island, self._best_score_per_island), key=lambda t: t[1], reverse=True
       )
 
+  def populate(self, log_path) -> bool:
+    """Populate the database's islands with the seed-function and return whether the seed-function ran successfully."""
+    with self.lock:
+      evaluator = Evaluator(
+        ExternalProcessSandbox(log_path),
+        self.template,
+        self.function_to_evolve,
+        self.function_to_run,
+        self.inputs,
+      )
+      initial_sample = self.template.get_function(self.function_to_evolve).body
+    program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
+    if scores_per_test:
+      with self.lock:
+        for island_id in range(len(self._islands)):
+          self._register_program_in_island(program, island_id, scores_per_test)
+      return True
+    return False
+
   @classmethod
   def load(cls, file) -> ProgramsDatabase:
     """Load previously saved database."""
@@ -239,19 +260,16 @@ class ProgramsDatabase:
       logging.info("✔ Best score of island %d increased to %s", island_id, score)
 
   def register_program(
-    self, program: code_manipulation.Function, island_id: int | None, scores_per_test: ScoresPerTest
+    self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
   ) -> None:
     """Registers `program` in the database."""
     with self.lock:
       # In an asynchronous implementation we should consider the possibility of
       # registering a program on an island that had been reset after the prompt
       # was generated. Leaving that out here for simplicity.
-      if island_id is None:
-        # This is a program added at the beginning, so adding it to all islands.
-        for island_id in range(len(self._islands)):
-          self._register_program_in_island(program, island_id, scores_per_test)
-      else:
-        self._register_program_in_island(program, island_id, scores_per_test)
+      # TODO: There used to be old code here in case island_id was None, populating
+      # the remaining islands
+      self._register_program_in_island(program, island_id, scores_per_test)
 
       # Check whether it is time to reset an island.
       if time.time() - self._last_reset_time > self._config.reset_period:

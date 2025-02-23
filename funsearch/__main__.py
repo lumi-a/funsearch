@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 
 from funsearch import config, core, evaluator, sampler
 from funsearch.programs_database import ProgramsDatabase
+from funsearch.sandbox import ExternalProcessSandbox
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
@@ -60,43 +61,6 @@ def _most_recent_backup() -> Path:
   _, _, selected_file = max(matching_files)
 
   return selected_file
-
-
-def _build_samplers(
-  database: ProgramsDatabase, log_path: Path, model_name: str, conf: config.Config
-) -> list[sampler.Sampler]:
-  load_dotenv()
-  model = llm.get_model(model_name)
-
-  samplers: list[sampler.Sampler] = [
-    sampler.Sampler(
-      database,
-      [
-        evaluator.Evaluator(
-          database,
-          sandbox_class(
-            base_path=log_path / f"sampler-{sampler_ix}-evaluator-{evaluator_ix}", timeout_secs=30
-          ),
-          database.template,
-          database.function_to_evolve,
-          database.function_to_run,
-          database.inputs,
-        )
-        for evaluator_ix in range(conf.num_evaluators)
-      ],
-      language_model,
-    )
-    for sampler_ix in range(conf.num_samplers)
-  ]
-
-  initial = database.template.get_function(database.function_to_evolve).body
-
-  samplers[0]._evaluators[0].analyse(initial, island_id=None, version_generated=None)  # noqa: SLF001
-  if not len(database._islands[0]._clusters) > 0:  # noqa: SLF001
-    msg = "Running initial function failed, see logs in output_path"
-    raise RuntimeError(msg)
-
-  return samplers
 
 
 @click.group()
@@ -149,17 +113,16 @@ def start(
 
   timestamp = str(int(time.time()))
   problem_name = Path(spec_file.name).stem
+
   database = ProgramsDatabase(
     conf.programs_database, spec_file.read(), inputs, problem_name, timestamp, message
   )
 
   log_path = pathlib.Path(output_path) / problem_name / timestamp
-  if not log_path.exists():
-    log_path.mkdir(parents=True)
-    logging.info(f"Writing logs to {log_path}")
-  samplers = _build_samplers(database, log_path, llm, conf)
-
-  core.run(samplers, database, iterations)
+  if not database.populate(log_path):
+    msg = "Running initial function failed, see logs in output_path"
+    raise RuntimeError(msg)
+  core.run(database, llm, log_path, iterations)
 
 
 @main.command(context_settings={"show_default": True})
@@ -184,11 +147,6 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   database.identifier = str(timestamp)
 
   log_path = pathlib.Path(output_path) / database.problem_name / timestamp
-  if not log_path.exists():
-    log_path.mkdir(parents=True)
-    logging.info(f"Writing logs to {log_path}")
-
-  samplers = _build_samplers(database, log_path, llm, conf)
 
   core.run(samplers, database, iterations)
 

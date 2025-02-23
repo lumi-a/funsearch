@@ -60,6 +60,10 @@ def run(database: "ProgramsDatabase", llm_name: str, log_path: Path, iterations:
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
+  if not log_path.exists():
+    log_path.mkdir(parents=True)
+    logging.info(f"Writing logs to {log_path}")
+
   # Stores (program, island_id, version_generated, index) per LLM-call
   llm_responses: queue.Queue[tuple[str, int, int, int]] = queue.Queue()
   # The maximum size of the llm_responses queue.

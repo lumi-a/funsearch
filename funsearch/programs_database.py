@@ -140,29 +140,6 @@ class ProgramsDatabase:
         zip(self._best_program_per_island, self._best_score_per_island), key=lambda t: t[1], reverse=True
       )
 
-  def save(self, file) -> None:
-    """Save database to a file."""
-    with self.lock:
-      data = {}
-      keys = [
-        "_config",
-        "inputs",
-        "_specification",
-        "_islands",
-        "_best_score_per_island",
-        "_best_program_per_island",
-        "_best_scores_per_test_per_island",
-        "_last_reset_time",
-        "_program_counter",
-        "_backups_done",
-        "problem_name",
-        "timestamp",
-        "message",
-      ]
-      for key in keys:
-        data[key] = getattr(self, key)
-      pickle.dump(data, file)
-
   @classmethod
   def load(cls, file) -> ProgramsDatabase:
     """Load previously saved database."""
@@ -182,24 +159,52 @@ class ProgramsDatabase:
 
     return database
 
-  def backup(self) -> None:
+  def _save(self, file) -> None:
+    """Save database to a file without acquiring self.lock."""
+    data = {}
+    keys = [
+      "_config",
+      "inputs",
+      "_specification",
+      "_islands",
+      "_best_score_per_island",
+      "_best_program_per_island",
+      "_best_scores_per_test_per_island",
+      "_last_reset_time",
+      "_program_counter",
+      "_backups_done",
+      "problem_name",
+      "timestamp",
+      "message",
+    ]
+    for key in keys:
+      data[key] = getattr(self, key)
+    pickle.dump(data, file)
+
+  def save(self, file) -> None:
+    """Save database to a file."""
     with self.lock:
-      filename = f"{self.problem_name}_{self.timestamp}_{self._backups_done}.pickle"
+      self._save(file)
+
+  def backup(self) -> None:
+    """Save a backup of the database to the backup-folder."""
+    with self.lock:
       p = pathlib.Path(self._config.backup_folder)
       if not p.exists():
         p.mkdir(parents=True, exist_ok=True)
-      filepath = p / filename
+      filepath = p / f"{self.problem_name}_{self.timestamp}_{self._backups_done}.pickle"
       logging.info(f"Saving backup to {filepath}")
 
       with open(filepath, mode="wb") as f:
-        self.save(f)
+        self._save(f)
       self._backups_done += 1
 
   def get_prompt(self) -> Prompt:
     """Returns a prompt containing implementations from one chosen island."""
-    island_id = np.random.randint(len(self._islands))
-    code, version_generated = self._islands[island_id].get_prompt()
-    return Prompt(code, version_generated, island_id)
+    with self.lock:
+      island_id = np.random.randint(len(self._islands))
+      code, version_generated = self._islands[island_id].get_prompt()
+      return Prompt(code, version_generated, island_id)
 
   def _register_program_in_island(
     self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest

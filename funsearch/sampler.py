@@ -56,6 +56,8 @@ class LLM:
 
   def _draw_sample(self, prompt: str) -> tuple[str]:
     try:
+      # TODO: We could provide a temperature here, see
+      # https://llm.datasette.io/en/stable/python-api.html#model-options
       output_text = self.model.prompt(prompt).text()
     except Exception as e:
       print("LLM call failed:", e)  # noqa: T201

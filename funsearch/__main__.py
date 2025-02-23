@@ -67,8 +67,6 @@ def _build_samplers(
 ) -> list[sampler.Sampler]:
   load_dotenv()
   model = llm.get_model(model_name)
-  model.key = model.get_key()
-  language_model = sampler.LLM(model, log_path)
   sandbox_class = SANDBOXES[sandbox_name]
 
   samplers: list[sampler.Sampler] = [

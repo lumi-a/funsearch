@@ -48,32 +48,42 @@ def reformat_to_two_spaces(code: str) -> str:
 class LLM:
   """Language model that predicts continuation of provided source code."""
 
-  def __init__(self, model: llm.Model, log_path: pathlib.Path | None = None) -> None:
-    self.model = model
-    self.prompt_count = 0
-    self.log_path = log_path
+  def __init__(self, model: llm.Model, log_path: pathlib.Path) -> None:
+    """Initialize a new LLM."""
+    self._model = model
+    self._log_path = log_path
 
-  def _draw_sample(self, prompt: str) -> tuple[str]:
+  def draw_sample(self, prompt: str, index: int) -> tuple[str]:
+    """Draw a sample from the language model, given a prompt.
+
+    The index is used for logging and must be unique across threads.
+    """
+    # TODO: We could provide a temperature here, see
+    # https://llm.datasette.io/en/stable/python-api.html#model-options
     try:
-      # TODO: We could provide a temperature here, see
-      # https://llm.datasette.io/en/stable/python-api.html#model-options
-      output_text = self.model.prompt(prompt).text()
+      output_text = self._model.prompt(prompt).text()
     except Exception as e:
       print("LLM call failed:", e)  # noqa: T201
       output_text = ""
 
+    # TODO: Move this elsewhere. Being able to see the whole
+    # llm-response in the logs is useful.
     match = re.search(r"(```(python|))(.*?)```", output_text, re.DOTALL)
     response = match.group(3) if match else output_text
 
-    self._log(prompt, response, self.prompt_count)
-    self.prompt_count += 1
+    self._log(prompt, response, index)
+
     return response
 
   def _log(self, prompt: str, response: str, index: int) -> None:
-    if self.log_path is not None:
-      with open(self.log_path / f"prompt_{index}.log", "a") as f:
+    """Log prompt and response to file.
+
+    The index must be unique across thread.
+    """
+    if self._log_path:
+      with (self._log_path / f"prompt_{index}.log").open("a") as f:
         f.write(prompt)
-      with open(self.log_path / f"response_{index}.log", "a") as f:
+      with (self._log_path / f"response_{index}.log").open("a") as f:
         f.write(str(response))
 
 

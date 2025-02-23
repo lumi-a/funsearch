@@ -21,6 +21,8 @@ import threading
 import time
 from typing import TYPE_CHECKING
 
+import llm
+
 from funsearch import code_manipulation
 from funsearch.sampler import LLM, Sampler
 
@@ -53,7 +55,14 @@ def sampler_runner(sampler: Sampler, iterations: int) -> None:
     logging.info("Keyboard interrupt in sampler thread.")
 
 
-def run(database: "ProgramsDatabase", llm: "LLM", iterations: int = -1) -> None:
+# We pass in llm_name because there doesn't seem to be a good way of getting the class of
+# a model from its string. You could do:
+# |  a = get_model(llm_name)
+# |  b = a.__class__(a.model_id)
+# but it feels like we're lying to the caller there, who passes an instance of Model.
+# We could ask the caller to pass a class, but then we'd *also* need them to ask for the id.
+# So let's just ask them for the id directly and be a bit inefficient upfront.
+def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
@@ -70,7 +79,7 @@ def run(database: "ProgramsDatabase", llm: "LLM", iterations: int = -1) -> None:
   dynamic_max_queue_size = 30
   dynamic_max_queue_lock = threading.Lock()
 
-  def llm_response_worker(stop_event: threading.Event) -> None:
+  def llm_response_worker(stop_event: threading.Event, llm: LLM) -> None:
     """Worker thread that continuously makes web requests as long as we haven't reached `iterations`.
 
     Waits if the output queue has size >= dynamic_max_queue_size.
@@ -93,5 +102,7 @@ def run(database: "ProgramsDatabase", llm: "LLM", iterations: int = -1) -> None:
 
       # Perform the web request and enqueue the result
       prompt = database.get_prompt()
-      sample = llm.draw_sample(prompt.code)
+      sample = llm.draw_sample(prompt.code, current_index)
       llm_responses.put(sample)
+
+    logging.info("LLM response worker stopped.")

@@ -1,15 +1,24 @@
+"""Sandboxes for code-execution."""
+
 import ast
 import logging
-import os
-import pathlib
-import sys
+from pathlib import Path
 from typing import Any
 
 import cloudpickle
 
-CONTAINER_MAIN = (pathlib.Path(__file__).parent / "container" / "container_main.py").absolute()
+CONTAINER_MAIN = (Path(__file__).parent / "container" / "container_main.py").absolute()
 
 IMAGE_NAME = "funsearch_sandbox"
+
+
+def _compile_code(program: str) -> dict:
+  namespace = {}
+
+  parsed_code = ast.parse(program)
+  compiled_code = compile(parsed_code, filename="<ast>", mode="exec")
+  exec(compiled_code, namespace)
+  return namespace
 
 
 class ExternalProcessSandbox:
@@ -22,8 +31,8 @@ class ExternalProcessSandbox:
   code.
   """
 
-  def __init__(self, base_path: pathlib.Path, timeout_secs: int = 30) -> None:
-    self.output_path = pathlib.Path(base_path) / f"sandbox{self.id}"
+  def __init__(self, base_path: Path, timeout_secs: int = 30) -> None:
+    self.output_path = Path(base_path) / f"sandbox{self.id}"
     self.timeout_secs = timeout_secs
 
     self.input_path = self.output_path / "inputs"
@@ -31,7 +40,7 @@ class ExternalProcessSandbox:
       if not p.exists():
         p.mkdir(parents=True)
 
-  def _exec(self, call_data_path: pathlib.Path, input_path: pathlib.Path, error_file_path: pathlib.Path):
+  def _exec(self, call_data_path: Path, input_path: Path, error_file_path: Path) -> int:
     """Execute python-code in a separate process.
 
     - The main.py shall execute the LLM generated method from program.pickle file providing
@@ -44,38 +53,50 @@ class ExternalProcessSandbox:
 
     program_path = call_data_path / "program.pickle"
     output_file = call_data_path / "output.pickle"
-    cmd = f"uv run python {CONTAINER_MAIN} {program_path} {input_path} {output_file} 2> {error_file_path}"
+
+    cmd = [
+      "uv",
+      "run",
+      "python",
+      str(CONTAINER_MAIN),
+      str(program_path),
+      str(input_path),
+      str(output_file),
+    ]
 
     logging.debug(f"Executing {cmd}")
     timeout = int(self.timeout_secs)
     try:
-      result = subprocess.run(cmd, timeout=timeout, shell=True, check=False)
-      return result.returncode
+      result: subprocess.CompletedProcess = subprocess.run(  # noqa: S603
+        cmd, timeout=timeout, stderr=error_file_path, check=False
+      )
     except subprocess.TimeoutExpired:
       logging.debug(f"Command timed out after {timeout} seconds")
       return 1
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
       logging.debug(f"Command failed with error: {e}")
       return 1
+    else:
+      return result.returncode
 
-  def run(
-    self, program: str, function_to_run: str, test_input, timeout_seconds: int, index: int
-  ) -> tuple[Any, bool]:
+  # TODO: Add type to input
+  def run(self, program: str, function_to_run: str, input, index: int) -> tuple[Any, bool]:
     call_data_folder = (self.output_path / f"call-{index}").absolute()
     if not call_data_folder.exists():
       call_data_folder.mkdir()
 
-    input_hash = hash(test_input)
+    input_hash = hash(input)  # Good enough
     input_path = (self.input_path / f"{input_hash}.pickle").absolute()
 
     if not input_path.exists():
-      with open(input_path, "wb") as f:
-        cloudpickle.dump(test_input, f)
+      with Path(input_path).open("wb") as f:
+        cloudpickle.dump(input, f)
+
     try:
       namespace = DummySandbox.compile_code(program)
 
-      prog_file = (call_data_folder / "program.pickle").absolute()
-      with open(prog_file, "wb+") as f:
+      program_file = (call_data_folder / "program.pickle").absolute()
+      with open(program_file, "wb+") as f:
         cloudpickle.dump(namespace[function_to_run], f)
 
       error_file = self.output_path / f"stderr-{index}.log"
@@ -96,8 +117,24 @@ class ExternalProcessSandbox:
     return None, False
 
   @staticmethod
-  def _save_diagnostics(program: str, output_path: pathlib.Path) -> None:
+  def _save_diagnostics(program: str, output_path: Path) -> None:
     filepath = output_path / "program.py"
     logging.debug(f"Writing program to {filepath}")
     with open(filepath, "w+") as f:
       f.write(program)
+
+
+print(4)
+if __name__ == "__main__":
+  print(3)
+  print(
+    _compile_code("""
+import random
+
+def x(y):
+  print(f"Received {y}")
+  return y + 1
+
+print(1)
+""")
+  )

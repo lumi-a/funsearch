@@ -1,4 +1,4 @@
-"""This file will be used as an executable script by the ContainerSandbox and ExternalProcessSandbox."""
+"""Will be used as an executable script by the ContainerSandbox and ExternalProcessSandbox."""
 
 import pickle
 import sys

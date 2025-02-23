@@ -18,10 +18,11 @@
 import logging
 import queue
 import threading
+import time
 from typing import TYPE_CHECKING
 
 from funsearch import code_manipulation
-from funsearch.sampler import Sampler
+from funsearch.sampler import LLM, Sampler
 
 if TYPE_CHECKING:
   from funsearch.programs_database import ProgramsDatabase
@@ -52,7 +53,7 @@ def sampler_runner(sampler: Sampler, iterations: int) -> None:
     logging.info("Keyboard interrupt in sampler thread.")
 
 
-def run(samplers: list[Sampler], database: "ProgramsDatabase", iterations: int = -1) -> None:
+def run(database: "ProgramsDatabase", llm: "LLM", iterations: int = -1) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
@@ -68,3 +69,29 @@ def run(samplers: list[Sampler], database: "ProgramsDatabase", iterations: int =
   # The maximum size of the llm_responses queue
   dynamic_max_queue_size = 30
   dynamic_max_queue_lock = threading.Lock()
+
+  def llm_response_worker(stop_event: threading.Event) -> None:
+    """Worker thread that continuously makes web requests as long as we haven't reached `iterations`.
+
+    Waits if the output queue has size >= dynamic_max_queue_size.
+    """
+    global llm_prompt_index
+
+    while not stop_event.is_set():
+      # Check if we've reached the maximum number of web requests (if applicable)
+      with llm_prompt_index_lock:
+        if iterations != -1 and llm_prompt_index >= iterations:
+          break
+        current_index = llm_prompt_index
+        llm_prompt_index += 1
+
+      # Check dynamic max queue size and wait if needed
+      with dynamic_max_queue_lock:
+        current_max = dynamic_max_queue_size
+      while llm_responses.qsize() >= current_max and not stop_event.is_set():
+        time.sleep(0.1)
+
+      # Perform the web request and enqueue the result
+      prompt = database.get_prompt()
+      sample = llm.draw_sample(prompt.code)
+      llm_responses.put(sample)

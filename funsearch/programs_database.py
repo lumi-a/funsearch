@@ -263,7 +263,7 @@ class ProgramsDatabase:
       founder_scores = self._best_scores_per_test_per_island[founder_island_id]
       self._register_program_in_island(founder, island_id, founder_scores)
 
-  def print_status_str(self) -> None:
+  def print_status(self) -> None:
     scores = self._best_score_per_island
     max_score = max(scores)
     total_successes = sum(island._success_count for island in self._islands)

@@ -53,6 +53,8 @@ def sampler_runner(sampler: Sampler, iterations: int) -> None:
 
 def run(samplers: list[Sampler], database: "ProgramsDatabase", iterations: int = -1) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
+  database.print_status()
+
   threads = []
 
   for sampler in samplers:
@@ -66,15 +68,15 @@ def run(samplers: list[Sampler], database: "ProgramsDatabase", iterations: int =
     # Otherwise, just keep the main thread alive.
     if iterations > 0:
       for t in threads:
-        database.print_status_str()
         t.join()
+        database.print_status()
     else:
       while True:
-        database.print_status_str()
         t.join(timeout=10)
+        database.print_status()
 
   except KeyboardInterrupt:
     logging.info("Keyboard interrupt. Stopping all sampler threads.")
   finally:
-    database.print_status_str()
+    database.print_status()
     database.backup()

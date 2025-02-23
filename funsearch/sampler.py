@@ -18,13 +18,13 @@
 from __future__ import annotations
 
 import re
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
   import pathlib
 
   import llm
-
 
 
 # TODO: This is currently unused, but I feel like we should use it again.
@@ -55,6 +55,7 @@ class LLM:
 
     The index is used for logging and must be unique across threads.
     """
+    time.sleep(2)
     return "return 5"
     # TODO: We could provide a temperature here, see
     # https://llm.datasette.io/en/stable/python-api.html#model-options

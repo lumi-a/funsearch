@@ -66,18 +66,21 @@ class ExternalProcessSandbox:
     ]
 
     logging.debug(f"Executing {cmd}")
-    timeout = int(self.timeout_secs)
     try:
+      print(error_file_path)
       result: subprocess.CompletedProcess = subprocess.run(  # noqa: S603
-        cmd, timeout=timeout, stderr=error_file_path, check=False
+        cmd, timeout=self.timeout_secs, stderr=error_file_path, check=False
       )
     except subprocess.TimeoutExpired:
-      logging.debug(f"Command timed out after {timeout} seconds")
+      print("Command timed out")
+      logging.debug(f"Command timed out after {self.timeout_secs} seconds")
       return 1
     except Exception as e:  # noqa: BLE001
+      print(e.with_traceback())
       logging.debug(f"Command failed with error: {e}")
       return 1
     else:
+      print(13)
       return result.returncode
 
   def run(self, program: str, function_to_run: str, input: str | float, index: int) -> float | None:
@@ -86,7 +89,7 @@ class ExternalProcessSandbox:
     Returns the output of the code if it was successful and could be converted to a float,
     None otherwise.
     """
-    call_data_folder = (self.output_path / f"call-{index}").absolute()
+    call_data_folder = (self.output_path / f"call_{index}").absolute()
     if not call_data_folder.exists():
       call_data_folder.mkdir()
 
@@ -103,12 +106,12 @@ class ExternalProcessSandbox:
       with (call_data_folder / "program.pickle").open("wb+") as f:
         cloudpickle.dump(namespace[function_to_run], f)
 
-      error_file = self.output_path / f"stderr-{index}.log"
+      error_file = self.output_path / f"stderr_{index}.log"
 
       return_code = self._exec(call_data_folder, input_path, error_file)
 
       if return_code != 0:
-        return False
+        return None
 
       with (call_data_folder / "output.pickle").open("rb") as f:
         out = cloudpickle.load(f)
@@ -120,4 +123,4 @@ class ExternalProcessSandbox:
     except Exception as e:
       logging.debug(f"Could not execute code: {e}")
 
-    return None, False
+    return None

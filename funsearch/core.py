@@ -153,7 +153,6 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
 
   # TODO: Consider passing `max_workers=os.cpu_count()` to ProcessPoolExecutor.
   # This might help because the cpu-heavy task involves a subprocess-call itself.
-  database.print_status()
   with futures.ProcessPoolExecutor() as executor:
     # Start web request worker threads.
     num_llm_workers = 5
@@ -165,10 +164,9 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
       )
       t.start()
       llm_threads.append(t)
-
     # Start the dispatcher thread.
     dispatcher_thread = threading.Thread(
-      iteration_manager, target=analysation_dispatcher, args=(stop_event, executor)
+      target=analysation_dispatcher, args=(iteration_manager, stop_event, executor)
     )
     dispatcher_thread.start()
     try:

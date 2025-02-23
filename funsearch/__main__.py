@@ -250,7 +250,7 @@ def change_db_message(db_file: click.File | None) -> None:
   database = ProgramsDatabase.load(db_file)
   old_message = database.message
 
-  database.message = click.prompt("New message", type=str, default=old_message, show_default=True)
+  database.message = click.edit(old_message)
 
   db_file.seek(0)
   db_file.truncate()

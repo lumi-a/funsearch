@@ -61,6 +61,7 @@ class LLM:
 
     The index is used for logging and must be unique across threads.
     """
+    return "return 5"
     # TODO: We could provide a temperature here, see
     # https://llm.datasette.io/en/stable/python-api.html#model-options
     try:

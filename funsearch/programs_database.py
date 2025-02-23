@@ -31,10 +31,22 @@ from absl import logging
 
 from funsearch import code_manipulation
 from funsearch import config as config_lib
-from funsearch.core import extract_function_names
 
 Signature = tuple[float, ...]
-ScoresPerTest = Mapping[Any, float]
+ScoresPerTest = Mapping[float | str, float]
+
+
+def extract_function_names(specification: str) -> tuple[str, str]:
+  """Returns the name of the function to evolve and of the function to run."""
+  run_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "run"))
+  if len(run_functions) != 1:
+    msg = "Expected 1 function decorated with `@funsearch.run`."
+    raise ValueError(msg)
+  evolve_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "evolve"))
+  if len(evolve_functions) != 1:
+    msg = "Expected 1 function decorated with `@funsearch.evolve`."
+    raise ValueError(msg)
+  return evolve_functions[0], run_functions[0]
 
 
 def _softmax(logits: np.ndarray, temperature: float) -> np.ndarray:

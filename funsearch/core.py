@@ -36,19 +36,6 @@ if TYPE_CHECKING:
   from funsearch.programs_database import ProgramsDatabase
 
 
-def extract_function_names(specification: str) -> tuple[str, str]:
-  """Returns the name of the function to evolve and of the function to run."""
-  run_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "run"))
-  if len(run_functions) != 1:
-    msg = "Expected 1 function decorated with `@funsearch.run`."
-    raise ValueError(msg)
-  evolve_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "evolve"))
-  if len(evolve_functions) != 1:
-    msg = "Expected 1 function decorated with `@funsearch.evolve`."
-    raise ValueError(msg)
-  return evolve_functions[0], run_functions[0]
-
-
 def sampler_runner(sampler: Sampler, iterations: int) -> None:
   try:
     if iterations < 0:
@@ -117,6 +104,7 @@ def run(database: "ProgramsDatabase", llm_name: str, log_path: Path, iterations:
 
   def analysation_dispatcher(stop_event: threading.Event, executor: futures.ProcessPoolExecutor) -> None:
     """Dispatcher thread that pulls web results from the queue and submits CPU tasks to the process pool."""
+    # TODO: What a waste of an evaluator and sandbox. Can't we have one per thread?
     evaluator = Evaluator(
       ExternalProcessSandbox(log_path),
       database.template,

@@ -68,7 +68,9 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
 
   # Stores (program, island_id, version_generated, index) per LLM-call
   llm_responses: queue.Queue[tuple[str, int, int, int]] = queue.Queue()
-  analysation_results = queue.Queue()
+  analysation_results: queue.Queue[tuple[code_manipulation.Function, dict[float | int | str, float]]] = (
+    queue.Queue()
+  )
 
   # Keep track of how many llm requests you made, to not
   # exceed `iterations` (TODO: rename parameter, also on callsites of `run`)
@@ -128,13 +130,9 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
         continue
 
       future = executor.submit(evaluator.analyse, sample, version_generated, current_index)
-      future.add_done_callback(lambda fut: result_queue.put(fut.result()))
+      future.add_done_callback(lambda fut: analysation_results.put(fut.result()))
 
-      for sample in samples:
-        chosen_evaluator: evaluator.Evaluator = np.random.choice(self._evaluators)
-        chosen_evaluator.analyse(sample, prompt.island_id, prompt.version_generated)
-
-    logging.info("CPU-heavy dispatcher exiting.")
+    logging.info("Analysation-dispatcher exiting.")
 
   # TODO: Consider passing `max_workers=os.cpu_count()` to ProcessPoolExecutor.
   # This might help because the cpu-heavy task involves a subprocess-call itself.

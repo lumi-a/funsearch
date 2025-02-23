@@ -35,12 +35,13 @@ def gasoline(n: int) -> tuple[list[int], list[int]]:
   """Return a new gasoline-problem, specified by the list of x-values and y-values.
   The integers will be clamped to [0, 2**31 - 1].
   """
-  xs = []
+  xs, ys = [], []
   for i in range(1, n):
     u = int(2**n * (1 - 2 ** (-i)))
     xs.extend([u for _ in range(2**i)])
+    ys.extend([u for _ in range(2**i)])
   xs.extend([int(2**n) for _ in range(2**n - 1)])
   xs.append(0)
   u = int(2**n * (1 - 2 ** (-n)))
-  ys = [0 for _ in range(len(xs))]
+  ys.extend([u for _ in range(2**n)])
   return xs, ys

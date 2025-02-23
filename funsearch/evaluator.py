@@ -144,7 +144,7 @@ class Evaluator:
     template: code_manipulation.Program,
     function_to_evolve: str,
     function_to_run: str,
-    inputs: Sequence[Any],
+    inputs: list[float | int] | list[str],
   ) -> None:
     self._sandbox = sandbox
     self._template = template
@@ -152,14 +152,15 @@ class Evaluator:
     self._function_to_run = function_to_run
     self._inputs = inputs
 
-  def analyse(self, sample: str, island_id: int | None, version_generated: int | None, index: int) -> None:
-    """Compiles the sample into a program and executes it on test inputs."""
+  def analyse(
+    self, sample: str, version_generated: int | None, index: int
+  ) -> tuple[code_manipulation.Function, dict[float | int | str, float]]:
+    """Compile the sample, execute it on test inputs, returning the compiled function and outputs."""
     new_function, program = _sample_to_program(
       sample, version_generated, self._template, self._function_to_evolve
     )
 
-    # TODO: Type-hint inputs properly
-    scores_per_test: dict[Any, float] = {}
+    scores_per_test: dict[float | int | str, float] = {}
     for current_input in self._inputs:
       if _calls_ancestor(program, self._function_to_evolve):
         continue
@@ -167,7 +168,4 @@ class Evaluator:
       if result is not None:
         scores_per_test[current_input] = result
 
-    if scores_per_test:
-      self._database.register_program(new_function, island_id, scores_per_test)
-    elif island_id is not None:
-      self._database._register_failure(island_id)
+    return new_function, scores_per_test

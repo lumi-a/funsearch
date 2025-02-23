@@ -22,13 +22,15 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from funsearch.evaluator import Evaluator
+
 if TYPE_CHECKING:
   import pathlib
   from collections.abc import Sequence
 
   import llm
 
-  from funsearch import evaluator, programs_database
+  from funsearch import programs_database
 
 
 def reformat_to_two_spaces(code: str) -> str:
@@ -106,3 +108,9 @@ class Sampler:
     for sample in samples:
       chosen_evaluator: evaluator.Evaluator = np.random.choice(self._evaluators)
       chosen_evaluator.analyse(sample, prompt.island_id, prompt.version_generated)
+
+
+# if scores_per_test:
+#       self._database.register_program(new_function, island_id, scores_per_test)
+#     elif island_id is not None:
+#       self._database._register_failure(island_id)

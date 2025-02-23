@@ -92,7 +92,7 @@ class ProgramsDatabase:
     self,
     config: config_lib.ProgramsDatabaseConfig,
     specification: any,
-    inputs: list[float | int] | list[str],
+    inputs: list[float] | list[str],
     problem_name: str,
     timestamp: int,
     message: str,
@@ -253,9 +253,9 @@ class ProgramsDatabase:
           self._program_counter = 0
           self.backup()
 
-  def _register_failure(self, island_id: int) -> None:
-    """Registers a failure on an island without acquiring self.lock."""
-    if island_id is not None:
+  def register_failure(self, island_id: int) -> None:
+    """Registers a failure on an island."""
+    with self.lock:
       self._islands[island_id].register_failure()
 
   def _reset_islands(self) -> None:

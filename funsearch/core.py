@@ -15,12 +15,17 @@
 
 """A single-threaded implementation of the FunSearch pipeline."""
 
+from __future__ import annotations
+
 import logging
+from pathlib import Path
 import queue
 import threading
 import time
 from concurrent import futures
 from typing import TYPE_CHECKING
+
+import llm
 
 from funsearch import code_manipulation
 from funsearch.evaluator import Evaluator
@@ -61,26 +66,28 @@ def sampler_runner(sampler: Sampler, iterations: int) -> None:
 # |  b = a.__class__(a.model_id)
 # but it feels like we're lying to the caller there, who passes an instance of Model.
 # We could ask the caller to pass a class, but then we'd *also* need them to ask for the id.
-# So let's just ask them for the id directly and be a bit inefficient upfront.
-def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> None:
+# So let's just ask them for the id directly and be a bit inefficient upfront. This might
+# make errors uglier, though.
+def run(
+  database: "ProgramsDatabase", llm_name: str, log_path: Path, sandbox: ExternalSandbox, iterations: int = -1
+) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
   # Stores (program, island_id, version_generated, index) per LLM-call
   llm_responses: queue.Queue[tuple[str, int, int, int]] = queue.Queue()
-  analysation_results: queue.Queue[tuple[code_manipulation.Function, dict[float | int | str, float]]] = (
-    queue.Queue()
-  )
+  # The maximum size of the llm_responses queue.
+  # Increasing this might make the program a little faster (because the queue is
+  # less likely to be empty), but it also means that function-improvements are
+  # only transferred to the LLM every `max_stored_responses` iterations, which
+  # degrades the quality of the algorithm.
+  max_stored_responses = 20
 
   # Keep track of how many llm requests you made, to not
   # exceed `iterations` (TODO: rename parameter, also on callsites of `run`)
   # and to pass to the llm-prompting to make logging to files safe
   llm_prompt_index = 0
   llm_prompt_index_lock = threading.Lock()
-
-  # The maximum size of the llm_responses queue
-  dynamic_max_queue_size = 30
-  dynamic_max_queue_lock = threading.Lock()
 
   def llm_response_worker(stop_event: threading.Event, llm: LLM) -> None:
     """Worker thread that continuously makes web requests as long as we haven't reached `iterations`.
@@ -98,14 +105,12 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
         llm_prompt_index += 1
 
       # Check dynamic max queue size and wait if needed
-      with dynamic_max_queue_lock:
-        current_max = dynamic_max_queue_size
-      while llm_responses.qsize() >= current_max and not stop_event.is_set():
+      while llm_responses.qsize() >= max_stored_responses and not stop_event.is_set():
         time.sleep(0.1)
 
       # Perform the web request and enqueue the result
       prompt = database.get_prompt()
-      # TODO: Is this not blocking?
+      # TODO: Is this not-blocking?
       sample = llm.draw_sample(prompt.code, current_index)
       llm_responses.put((sample, prompt.island_id, prompt.version_generated, current_index))
 
@@ -124,23 +129,81 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
       except queue.Empty:
         with llm_prompt_index_lock:
           # If `iterations` is reached, we can exit now
-          # TODO: Do we need to check llm_responses.empty() here again?
+          # TODO: Do we really need to check llm_responses.empty() here again?
           if iterations != -1 and llm_prompt_index >= iterations and llm_responses.empty():
             break
         continue
 
       future = executor.submit(evaluator.analyse, sample, version_generated, current_index)
-      future.add_done_callback(lambda fut: analysation_results.put(fut.result()))
+
+      # TODO: How much work is it to update the database after every successful function-call?
+      # If it's a problem, we could instead implement another producer-consumer structure.
+      def on_complete(
+        future: futures.Future[tuple[code_manipulation.Function, dict[float | str, float]]],
+        island_id: int = island_id,
+      ) -> None:
+        # See https://docs.python-guide.org/writing/gotchas/#late-binding-closures for why
+        # we have island_id as an optional argument here.
+        new_function, scores_per_test = future.result()
+        if scores_per_test:
+          database.register_program(new_function, island_id, scores_per_test)
+        elif island_id is not None:
+          database.register_failure(island_id)
+
+      future.add_done_callback(on_complete)
 
     logging.info("Analysation-dispatcher exiting.")
+
+  stop_event = threading.Event()
 
   # TODO: Consider passing `max_workers=os.cpu_count()` to ProcessPoolExecutor.
   # This might help because the cpu-heavy task involves a subprocess-call itself.
   with futures.ProcessPoolExecutor() as executor:
-    pass
+    # Start web request worker threads.
+    num_web_workers = 5
+    web_threads = []
+    for _ in range(num_web_workers):
+      model = llm.get_model(llm_name)
+      t = threading.Thread(target=llm_response_worker, args=(stop_event, LLM(model, log_path)))
+      t.start()
+      web_threads.append(t)
 
+    # Start the dispatcher thread.
+    evaluator = Evaluator(
+      sandbox, database.template, database.function_to_evolve, database.function_to_run, database.inputs
+    )
+    dispatcher_thread = threading.Thread(target=analysation_dispatcher, args=(stop_event, executor))
+    dispatcher_thread.start()
 
-# if scores_per_test:
-#       self._database.register_program(new_function, island_id, scores_per_test)
-#     elif island_id is not None:
-#       self._database._register_failure(island_id)
+    # Start the database updater thread.
+    db_thread = threading.Thread(target=database_updater, args=(stop_event,))
+    db_thread.start()
+
+    # Start the thread that adjusts the dynamic max queue size.
+    adjust_thread = threading.Thread(target=adjust_queue_size, args=(stop_event,))
+    adjust_thread.start()
+
+    try:
+      # Wait for web request workers to finish (if M is finite, they will eventually stop)
+      for t in web_threads:
+        t.join()
+
+      # Wait until the web_result_queue is empty (i.e. all web results have been dispatched)
+      while not web_result_queue.empty():
+        time.sleep(0.1)
+
+      # Signal the dispatcher, database updater, and adjuster threads to stop
+      stop_event.set()
+
+      dispatcher_thread.join()
+      db_thread.join()
+      adjust_thread.join()
+
+    except KeyboardInterrupt:
+      logging.info("KeyboardInterrupt received, shutting down.")
+      stop_event.set()
+      for t in web_threads:
+        t.join()
+      dispatcher_thread.join()
+      db_thread.join()
+      adjust_thread.join()

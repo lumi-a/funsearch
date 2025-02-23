@@ -20,7 +20,7 @@ LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
 
 
-def _parse_input(filename_or_data: str) -> list[float | int] | list[str]:
+def _parse_input(filename_or_data: str) -> list[float] | list[str]:
   if len(filename_or_data) == 0:
     msg = "No input data specified"
     raise Exception(msg)
@@ -124,7 +124,7 @@ MODELS: list[str] = list(llm.get_model_aliases().keys())
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
 def start(
   spec_file: click.File,
-  inputs: list[float | int] | list[str],
+  inputs: list[float] | list[str],
   message: str,
   llm: str,
   output_path: click.Path,

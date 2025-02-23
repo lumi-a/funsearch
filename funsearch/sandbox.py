@@ -1,5 +1,7 @@
 """Sandboxes for code-execution."""
 
+from __future__ import annotations
+
 import ast
 import logging
 from pathlib import Path
@@ -79,8 +81,7 @@ class ExternalProcessSandbox:
     else:
       return result.returncode
 
-  # TODO: Add type-hint to input
-  def run(self, program: str, function_to_run: str, input, index: int) -> float | None:
+  def run(self, program: str, function_to_run: str, input: str | float, index: int) -> float | None:
     """Executes the code in a separate process.
 
     Returns the output of the code if it was successful and could be converted to a float,

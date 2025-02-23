@@ -144,7 +144,7 @@ class Evaluator:
     template: code_manipulation.Program,
     function_to_evolve: str,
     function_to_run: str,
-    inputs: list[float | int] | list[str],
+    inputs: list[float] | list[str],
   ) -> None:
     self._sandbox = sandbox
     self._template = template
@@ -154,13 +154,13 @@ class Evaluator:
 
   def analyse(
     self, sample: str, version_generated: int | None, index: int
-  ) -> tuple[code_manipulation.Function, dict[float | int | str, float]]:
+  ) -> tuple[code_manipulation.Function, dict[float | str, float]]:
     """Compile the sample, execute it on test inputs, returning the compiled function and outputs."""
     new_function, program = _sample_to_program(
       sample, version_generated, self._template, self._function_to_evolve
     )
 
-    scores_per_test: dict[float | int | str, float] = {}
+    scores_per_test: dict[float | str, float] = {}
     for current_input in self._inputs:
       if _calls_ancestor(program, self._function_to_evolve):
         continue

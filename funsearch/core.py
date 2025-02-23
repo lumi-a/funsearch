@@ -30,6 +30,7 @@ import llm
 from funsearch import code_manipulation
 from funsearch.evaluator import Evaluator
 from funsearch.sampler import LLM, Sampler
+from funsearch.sandbox import ExternalProcessSandbox
 
 if TYPE_CHECKING:
   from funsearch.programs_database import ProgramsDatabase
@@ -68,9 +69,7 @@ def sampler_runner(sampler: Sampler, iterations: int) -> None:
 # We could ask the caller to pass a class, but then we'd *also* need them to ask for the id.
 # So let's just ask them for the id directly and be a bit inefficient upfront. This might
 # make errors uglier, though.
-def run(
-  database: "ProgramsDatabase", llm_name: str, log_path: Path, sandbox: ExternalSandbox, iterations: int = -1
-) -> None:
+def run(database: "ProgramsDatabase", llm_name: str, log_path: Path, iterations: int = -1) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
@@ -116,13 +115,15 @@ def run(
 
     logging.info("LLM response worker stopped.")
 
-  def analysation_dispatcher(
-    stop_event: threading.Event, executor: futures.ProcessPoolExecutor, evaluator: Evaluator
-  ) -> None:
-    """Dispatcher thread that pulls web results from the queue and submits CPU tasks to the process pool.
-
-    Completed tasks have their results pushed into `analysation_results`
-    """
+  def analysation_dispatcher(stop_event: threading.Event, executor: futures.ProcessPoolExecutor) -> None:
+    """Dispatcher thread that pulls web results from the queue and submits CPU tasks to the process pool."""
+    evaluator = Evaluator(
+      ExternalProcessSandbox(log_path),
+      database.template,
+      database.function_to_evolve,
+      database.function_to_run,
+      database.inputs,
+    )
     while not stop_event.is_set():
       try:
         sample, island_id, version_generated, current_index = llm_responses.get(timeout=0.1)
@@ -160,50 +161,34 @@ def run(
   # This might help because the cpu-heavy task involves a subprocess-call itself.
   with futures.ProcessPoolExecutor() as executor:
     # Start web request worker threads.
-    num_web_workers = 5
-    web_threads = []
-    for _ in range(num_web_workers):
+    num_llm_workers = 5
+    llm_threads: list[threading.Thread] = []
+    for _ in range(num_llm_workers):
       model = llm.get_model(llm_name)
       t = threading.Thread(target=llm_response_worker, args=(stop_event, LLM(model, log_path)))
       t.start()
-      web_threads.append(t)
+      llm_threads.append(t)
 
     # Start the dispatcher thread.
-    evaluator = Evaluator(
-      sandbox, database.template, database.function_to_evolve, database.function_to_run, database.inputs
-    )
     dispatcher_thread = threading.Thread(target=analysation_dispatcher, args=(stop_event, executor))
     dispatcher_thread.start()
-
-    # Start the database updater thread.
-    db_thread = threading.Thread(target=database_updater, args=(stop_event,))
-    db_thread.start()
-
-    # Start the thread that adjusts the dynamic max queue size.
-    adjust_thread = threading.Thread(target=adjust_queue_size, args=(stop_event,))
-    adjust_thread.start()
-
     try:
       # Wait for web request workers to finish (if M is finite, they will eventually stop)
-      for t in web_threads:
+      for t in llm_threads:
         t.join()
 
-      # Wait until the web_result_queue is empty (i.e. all web results have been dispatched)
-      while not web_result_queue.empty():
+      # Wait until the llm_responses queue is empty (i.e. all llm-requests have been dispatched)
+      while not llm_responses.empty():
         time.sleep(0.1)
 
       # Signal the dispatcher, database updater, and adjuster threads to stop
       stop_event.set()
 
       dispatcher_thread.join()
-      db_thread.join()
-      adjust_thread.join()
 
     except KeyboardInterrupt:
       logging.info("KeyboardInterrupt received, shutting down.")
       stop_event.set()
-      for t in web_threads:
+      for t in llm_threads:
         t.join()
       dispatcher_thread.join()
-      db_thread.join()
-      adjust_thread.join()

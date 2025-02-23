@@ -33,6 +33,7 @@ if TYPE_CHECKING:
   from funsearch import programs_database
 
 
+# TODO: This is currently unused, but I feel like we should use it again.
 def reformat_to_two_spaces(code: str) -> str:
   # Regular expression to match leading spaces at the beginning of each line
   pattern = r"^\s+"

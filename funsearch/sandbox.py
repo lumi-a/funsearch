@@ -67,20 +67,17 @@ class ExternalProcessSandbox:
 
     logging.debug(f"Executing {cmd}")
     try:
-      print(error_file_path)
       result: subprocess.CompletedProcess = subprocess.run(  # noqa: S603
         cmd, timeout=self.timeout_secs, stderr=error_file_path, check=False
       )
     except subprocess.TimeoutExpired:
-      print("Command timed out")
       logging.debug(f"Command timed out after {self.timeout_secs} seconds")
       return 1
     except Exception as e:  # noqa: BLE001
-      print(e.with_traceback())
+      print(e)
       logging.debug(f"Command failed with error: {e}")
       return 1
     else:
-      print(13)
       return result.returncode
 
   def run(self, program: str, function_to_run: str, input: str | float, index: int) -> float | None:
@@ -106,9 +103,8 @@ class ExternalProcessSandbox:
       with (call_data_folder / "program.pickle").open("wb+") as f:
         cloudpickle.dump(namespace[function_to_run], f)
 
-      error_file = self.output_path / f"stderr_{index}.log"
-
-      return_code = self._exec(call_data_folder, input_path, error_file)
+      with (self.output_path / f"stderr_{index}.log").open("w") as error_file:
+        return_code = self._exec(call_data_folder, input_path, error_file)
 
       if return_code != 0:
         return None

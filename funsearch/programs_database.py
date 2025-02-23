@@ -166,7 +166,6 @@ class ProgramsDatabase:
       initial_sample = self.template.get_function(self.function_to_evolve).body
     program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
     if scores_per_test:
-      print(scores_per_test)
       with self.lock:
         for island_id in range(len(self._islands)):
           self._register_program_in_island(program, island_id, scores_per_test)

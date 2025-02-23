@@ -98,6 +98,7 @@ class ProgramsDatabase:
     timestamp: int,
     message: str,
   ) -> None:
+    # TODO: This could be an RwLock instead, but the read-operations are fast enough for now.
     self.lock = threading.Lock()
     self._config: config_lib.ProgramsDatabaseConfig = config
     self.inputs = inputs
@@ -160,7 +161,7 @@ class ProgramsDatabase:
     return database
 
   def _save(self, file) -> None:
-    """Save database to a file without acquiring self.lock."""
+    """Save `self` to a file. Does not acquire self.lock."""
     data = {}
     keys = [
       "_config",
@@ -209,7 +210,13 @@ class ProgramsDatabase:
   def _register_program_in_island(
     self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
   ) -> None:
-    """Registers `program` in the specified island."""
+    """Registers `program` in the specified island.
+
+    Mutates `self` without acquiring self.lock.
+    """
+    # TODO: Passing around all the island_ids seems ugly, could we instead
+    # move this method to Island?
+
     self._islands[island_id].register_program(program, scores_per_test)
     score = _reduce_score(scores_per_test)
     self._islands[island_id].register_success(score)
@@ -224,35 +231,37 @@ class ProgramsDatabase:
     self, program: code_manipulation.Function, island_id: int | None, scores_per_test: ScoresPerTest
   ) -> None:
     """Registers `program` in the database."""
-    # In an asynchronous implementation we should consider the possibility of
-    # registering a program on an island that had been reset after the prompt
-    # was generated. Leaving that out here for simplicity.
-    if island_id is None:
-      # This is a program added at the beginning, so adding it to all islands.
-      for island_id in range(len(self._islands)):
+
+    with self.lock:
+      # In an asynchronous implementation we should consider the possibility of
+      # registering a program on an island that had been reset after the prompt
+      # was generated. Leaving that out here for simplicity.
+      if island_id is None:
+        # This is a program added at the beginning, so adding it to all islands.
+        for island_id in range(len(self._islands)):
+          self._register_program_in_island(program, island_id, scores_per_test)
+      else:
         self._register_program_in_island(program, island_id, scores_per_test)
-    else:
-      self._register_program_in_island(program, island_id, scores_per_test)
 
-    # Check whether it is time to reset an island.
-    if time.time() - self._last_reset_time > self._config.reset_period:
-      self._last_reset_time = time.time()
-      self.reset_islands()
+      # Check whether it is time to reset an island.
+      if time.time() - self._last_reset_time > self._config.reset_period:
+        self._last_reset_time = time.time()
+        self._reset_islands()
 
-    # Backup every N iterations
-    if self._program_counter > 0:
-      self._program_counter += 1
-      if self._program_counter > self._config.backup_period:
-        self._program_counter = 0
-        self.backup()
+      # Backup every N iterations
+      if self._program_counter > 0:
+        self._program_counter += 1
+        if self._program_counter > self._config.backup_period:
+          self._program_counter = 0
+          self.backup()
 
-  def register_failure(self, island_id: int) -> None:
-    """Registers a failure in the database."""
+  def _register_failure(self, island_id: int) -> None:
+    """Registers a failure on an island without acquiring self.lock."""
     if island_id is not None:
       self._islands[island_id].register_failure()
 
-  def reset_islands(self) -> None:
-    """Resets the weaker half of islands."""
+  def _reset_islands(self) -> None:
+    """Resets the weaker half of islands without acquiring self.lock."""
     # We sort best scores after adding minor noise to break ties.
     indices_sorted_by_score: np.ndarray = np.argsort(
       self._best_score_per_island + np.random.randn(len(self._best_score_per_island)) * 1e-6
@@ -275,14 +284,16 @@ class ProgramsDatabase:
       self._register_program_in_island(founder, island_id, founder_scores)
 
   def print_status(self) -> None:
-    scores = self._best_score_per_island
-    max_score = max(scores)
-    total_successes = sum(island._success_count for island in self._islands)  # noqa: SLF001
-    total_failures = sum(island._failure_count for island in self._islands)  # noqa: SLF001
-    attempts = total_successes + total_failures
-    failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
+    """Prints the current status of the database."""
+    with self.lock:
+      scores = self._best_score_per_island
+      max_score = max(scores)
+      total_successes = sum(island._success_count for island in self._islands)  # noqa: SLF001
+      total_failures = sum(island._failure_count for island in self._islands)  # noqa: SLF001
+      attempts = total_successes + total_failures
+      failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
 
-    print(f"Max-Score {max_score:8.3f} │ {attempts} samples │ {failure_rate}% failed")  # noqa: T201
+      print(f"Max-Score {max_score:8.3f} │ {attempts} samples │ {failure_rate}% failed")  # noqa: T201
 
 
 class Island:

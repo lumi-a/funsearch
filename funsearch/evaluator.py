@@ -165,7 +165,7 @@ class Evaluator:
     scores_per_test = {}
     for current_input in self._inputs:
       test_output, runs_ok = self._sandbox.run(
-        program, self._function_to_run, current_input, self._timeout_seconds
+        program, self._function_to_run, current_input, INSERT RUN INDEX
       )
 
       if runs_ok and not _calls_ancestor(program, self._function_to_evolve) and test_output is not None:

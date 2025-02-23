@@ -7,7 +7,7 @@ from typing import Any
 
 import cloudpickle
 
-CONTAINER_MAIN = (Path(__file__).parent / "container" / "container_main.py").absolute()
+CONTAINER_MAIN = (Path(__file__).parent / "container" / "main.py").absolute()
 
 IMAGE_NAME = "funsearch_sandbox"
 

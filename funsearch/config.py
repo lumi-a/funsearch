@@ -56,12 +56,9 @@ class Config:
     num_evaluators: Number of independent program Evaluators in the experiment.
         A value larger than 1 is only expected to be useful when the Evaluators
         can execute in parallel as part of a distributed system.
-    samples_per_prompt: How many independently sampled program continuations to
-        obtain for each prompt.
 
   """
 
   programs_database: ProgramsDatabaseConfig = dataclasses.field(default_factory=ProgramsDatabaseConfig)
   num_samplers: int = 15
   num_evaluators: int = 1
-  samples_per_prompt: int = 1

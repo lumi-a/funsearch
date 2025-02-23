@@ -140,37 +140,32 @@ class Evaluator:
 
   def __init__(
     self,
-    database: programs_database.ProgramsDatabase,
-    sbox: sandbox.ExternalProcessSandbox,
+    sandbox: sandbox.ExternalProcessSandbox,
     template: code_manipulation.Program,
     function_to_evolve: str,
     function_to_run: str,
     inputs: Sequence[Any],
-    timeout_seconds: int = 30,
   ) -> None:
-    self._database = database
+    self._sandbox = sandbox
     self._template = template
     self._function_to_evolve = function_to_evolve
     self._function_to_run = function_to_run
     self._inputs = inputs
-    self._timeout_seconds = timeout_seconds
-    self._sandbox = sbox
 
-  def analyse(self, sample: str, island_id: int | None, version_generated: int | None) -> None:
+  def analyse(self, sample: str, island_id: int | None, version_generated: int | None, index: int) -> None:
     """Compiles the sample into a program and executes it on test inputs."""
     new_function, program = _sample_to_program(
       sample, version_generated, self._template, self._function_to_evolve
     )
 
-    scores_per_test = {}
+    # TODO: Type-hint inputs properly
+    scores_per_test: dict[Any, float] = {}
     for current_input in self._inputs:
-      test_output, runs_ok = self._sandbox.run(
-        program, self._function_to_run, current_input, INSERT RUN INDEX
-      )
-
-      # TODO: Shouldn't we test _calls_ancestor before sandbox.run?
-      if runs_ok and not _calls_ancestor(program, self._function_to_evolve) and test_output is not None:
-        scores_per_test[current_input] = test_output
+      if _calls_ancestor(program, self._function_to_evolve):
+        continue
+      result = self._sandbox.run(program, self._function_to_run, current_input, index)
+      if result is not None:
+        scores_per_test[current_input] = result
 
     if scores_per_test:
       self._database.register_program(new_function, island_id, scores_per_test)

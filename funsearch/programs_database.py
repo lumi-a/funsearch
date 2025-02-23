@@ -263,55 +263,15 @@ class ProgramsDatabase:
       founder_scores = self._best_scores_per_test_per_island[founder_island_id]
       self._register_program_in_island(founder, island_id, founder_scores)
 
-  def log_tabular(self, last_run: bool) -> None:
+  def print_status_str(self) -> None:
     scores = self._best_score_per_island
-    score_width = max(5, *(len(str(x)) for x in scores))
-    separator = "  "
+    max_score = max(scores)
+    total_successes = sum(island._success_count for island in self._islands)
+    total_failures = sum(island._failure_count for island in self._islands)
+    attempts = total_successes + total_failures
+    failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
 
-    headers = [
-      f"{'Isl':>3}",
-      f"{'Score':>{score_width}}",
-      f"{'Queries':>7}",
-      f"{'Failures':>8}",
-      f"{'ok%':>3}",
-    ]
-    output = [separator.join(headers), separator.join("─" * len(x) for x in headers)]
-
-    total_successes = 0
-    total_failures = 0
-    for island_idx, score in sorted(enumerate(scores), key=lambda t: t[1], reverse=True):
-      # Subtract one to account for the program that was added at the beginning.
-      successes = self._islands[island_idx]._success_count - 1  # noqa: SLF001
-      failures = self._islands[island_idx]._failure_count  # noqa: SLF001
-      total_successes += successes
-      total_failures += failures
-
-      attempts = successes + failures
-      success_rate = int(100 * successes / attempts if attempts > 0 else 0)
-
-      columns = [
-        f"{island_idx:>3}",
-        f"{score:>{score_width}}",
-        f"{attempts:>7}",
-        f"{failures:>8}",
-        f"{success_rate:>2.0f}% ",
-      ]
-      output.append(separator.join(columns))
-
-    total_attempts = total_successes + total_failures
-    total_success_rate = int(100 * total_successes / total_attempts if total_attempts > 0 else 0)
-    summary = [
-      f"{total_attempts:>7}",
-      f"{total_failures:>8}",
-      f"{total_success_rate:>2.0f}% ",
-    ]
-    output.append((" " * (2 * len(separator) + score_width - 5)) + " Total: " + separator.join(summary))
-    print("\n".join(output))  # noqa: T201
-
-    if not last_run:
-      lines_to_move = len(output)
-      print(f"\033[{lines_to_move}A", end="", flush=True)  # noqa: T201
-      sys.stdout.flush()
+    print(f"Max-Score {max_score:8.3f} │ {attempts} samples │ {failure_rate}% failed")  # noqa: T201
 
 
 class Island:

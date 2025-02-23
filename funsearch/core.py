@@ -29,23 +29,11 @@ import llm
 
 from funsearch import code_manipulation
 from funsearch.evaluator import Evaluator
-from funsearch.sampler import LLM, Sampler
+from funsearch.sampler import LLM
 from funsearch.sandbox import ExternalProcessSandbox
 
 if TYPE_CHECKING:
   from funsearch.programs_database import ProgramsDatabase
-
-
-def sampler_runner(sampler: Sampler, iterations: int) -> None:
-  try:
-    if iterations < 0:
-      while True:
-        sampler.sample()
-    else:
-      for _ in range(iterations):
-        sampler.sample()
-  except KeyboardInterrupt:
-    logging.info("Keyboard interrupt in sampler thread.")
 
 
 # We pass in llm_name because there doesn't seem to be a good way of getting the class of

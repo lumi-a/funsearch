@@ -250,7 +250,16 @@ def change_db_message(db_file: click.File | None) -> None:
   database = ProgramsDatabase.load(db_file)
   old_message = database.message
 
-  database.message = click.edit(old_message)
+  database.message = click.edit(old_message, require_save=False)
+
+  if database.message == old_message:
+    click.echo("Database message unchanged.")
+    db_file.close()
+    return
+  click.echo("Changed message from")
+  click.echo(click.style(old_message, fg="blue"))
+  click.echo("to")
+  click.echo(click.style(database.message, fg="green"))
 
   db_file.seek(0)
   db_file.truncate()

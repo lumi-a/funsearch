@@ -23,6 +23,7 @@ from concurrent import futures
 from typing import TYPE_CHECKING
 
 from funsearch import code_manipulation
+from funsearch.evaluator import Evaluator
 from funsearch.sampler import LLM, Sampler
 
 if TYPE_CHECKING:
@@ -65,7 +66,8 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
-  llm_responses: queue.Queue[tuple[str, int, int]] = queue.Queue()
+  # Stores (program, island_id, version_generated, index) per LLM-call
+  llm_responses: queue.Queue[tuple[str, int, int, int]] = queue.Queue()
   analysation_results = queue.Queue()
 
   # Keep track of how many llm requests you made, to not
@@ -103,18 +105,20 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
       prompt = database.get_prompt()
       # TODO: Is this not blocking?
       sample = llm.draw_sample(prompt.code, current_index)
-      llm_responses.put((sample, prompt.island_id, prompt.version_generated))
+      llm_responses.put((sample, prompt.island_id, prompt.version_generated, current_index))
 
     logging.info("LLM response worker stopped.")
 
-  def analysation_dispatcher(stop_event: threading.Event, executor: futures.ProcessPoolExecutor) -> None:
+  def analysation_dispatcher(
+    stop_event: threading.Event, executor: futures.ProcessPoolExecutor, evaluator: Evaluator
+  ) -> None:
     """Dispatcher thread that pulls web results from the queue and submits CPU tasks to the process pool.
 
     Completed tasks have their results pushed into `analysation_results`
     """
     while not stop_event.is_set():
       try:
-        result = llm_responses.get(timeout=0.1)
+        sample, island_id, version_generated, current_index = llm_responses.get(timeout=0.1)
       except queue.Empty:
         with llm_prompt_index_lock:
           # If `iterations` is reached, we can exit now
@@ -123,7 +127,7 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
             break
         continue
 
-      future = executor.submit(cpu_heavy_task, result)
+      future = executor.submit(evaluator.analyse, sample, version_generated, current_index)
       future.add_done_callback(lambda fut: result_queue.put(fut.result()))
 
       for sample in samples:
@@ -136,3 +140,9 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
   # This might help because the cpu-heavy task involves a subprocess-call itself.
   with futures.ProcessPoolExecutor() as executor:
     pass
+
+
+# if scores_per_test:
+#       self._database.register_program(new_function, island_id, scores_per_test)
+#     elif island_id is not None:
+#       self._database._register_failure(island_id)

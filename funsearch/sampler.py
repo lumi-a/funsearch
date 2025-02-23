@@ -109,9 +109,3 @@ class Sampler:
     for sample in samples:
       chosen_evaluator: evaluator.Evaluator = np.random.choice(self._evaluators)
       chosen_evaluator.analyse(sample, prompt.island_id, prompt.version_generated)
-
-
-# if scores_per_test:
-#       self._database.register_program(new_function, island_id, scores_per_test)
-#     elif island_id is not None:
-#       self._database._register_failure(island_id)

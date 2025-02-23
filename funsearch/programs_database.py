@@ -266,8 +266,8 @@ class ProgramsDatabase:
   def print_status(self) -> None:
     scores = self._best_score_per_island
     max_score = max(scores)
-    total_successes = sum(island._success_count for island in self._islands)
-    total_failures = sum(island._failure_count for island in self._islands)
+    total_successes = sum(island._success_count for island in self._islands)  # noqa: SLF001
+    total_failures = sum(island._failure_count for island in self._islands)  # noqa: SLF001
     attempts = total_successes + total_failures
     failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
 

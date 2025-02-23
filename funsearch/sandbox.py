@@ -51,7 +51,8 @@ class ExternalProcessSandbox(DummySandbox):
   Note: This does not provide real safety and should be only used in an environment where the host process is
   in some kind of safe sandbox itself (i.e., a container).
   This kind of sandbox merely makes it more probable that single invalid call does not break the whole
-  funsearch algorithm. It might be easier to set up and thus nice environment to tune the prompts and other code.
+  funsearch algorithm. It might be easier to set up and thus nice environment to tune the prompts and other
+  code.
   """
 
   def __init__(self, base_path: pathlib.Path, timeout_secs: int = 30, python_path: str = "python") -> None:

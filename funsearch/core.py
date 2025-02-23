@@ -132,5 +132,7 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
 
     logging.info("CPU-heavy dispatcher exiting.")
 
+  # TODO: Consider passing `max_workers=os.cpu_count()` to ProcessPoolExecutor.
+  # This might help because the cpu-heavy task involves a subprocess-call itself.
   with futures.ProcessPoolExecutor() as executor:
     pass

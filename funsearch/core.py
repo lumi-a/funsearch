@@ -21,7 +21,7 @@ import threading
 import time
 from typing import TYPE_CHECKING
 
-import llm
+from concurrent import futures
 
 from funsearch import code_manipulation
 from funsearch.sampler import LLM, Sampler
@@ -66,7 +66,7 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
-  llm_responses = queue.Queue()
+  llm_responses: queue.Queue[tuple[str, int, int]] = queue.Queue()
   analysation_results = queue.Queue()
 
   # Keep track of how many llm requests you made, to not
@@ -102,7 +102,36 @@ def run(database: "ProgramsDatabase", llm_name: str, iterations: int = -1) -> No
 
       # Perform the web request and enqueue the result
       prompt = database.get_prompt()
+      # TODO: Is this not blocking?
       sample = llm.draw_sample(prompt.code, current_index)
-      llm_responses.put(sample)
+      llm_responses.put((sample, prompt.island_id, prompt.version_generated))
 
     logging.info("LLM response worker stopped.")
+
+  def analysation_dispatcher(stop_event: threading.Event, executor: futures.ProcessPoolExecutor) -> None:
+    """Dispatcher thread that pulls web results from the queue and submits CPU tasks to the process pool.
+
+    Completed tasks have their results pushed into `analysation_results`
+    """
+    while not stop_event.is_set():
+      try:
+        result = llm_responses.get(timeout=0.1)
+      except queue.Empty:
+        with llm_prompt_index_lock:
+          # If `iterations` is reached, we can exit now
+          # TODO: Do we need to check llm_responses.empty() here again?
+          if iterations != -1 and llm_prompt_index >= iterations and llm_responses.empty():
+            break
+        continue
+
+      future = executor.submit(cpu_heavy_task, result)
+      future.add_done_callback(lambda fut: result_queue.put(fut.result()))
+
+      for sample in samples:
+        chosen_evaluator: evaluator.Evaluator = np.random.choice(self._evaluators)
+        chosen_evaluator.analyse(sample, prompt.island_id, prompt.version_generated)
+
+    logging.info("CPU-heavy dispatcher exiting.")
+
+  with futures.ProcessPoolExecutor() as executor:
+    pass

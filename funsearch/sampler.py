@@ -53,7 +53,7 @@ class LLM:
     self._model = model
     self._log_path = log_path
 
-  def draw_sample(self, prompt: str, index: int) -> tuple[str]:
+  def draw_sample(self, prompt: str, index: int) -> str:
     """Draw a sample from the language model, given a prompt.
 
     The index is used for logging and must be unique across threads.

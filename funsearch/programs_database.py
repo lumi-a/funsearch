@@ -22,6 +22,7 @@ import dataclasses
 import pathlib
 import pickle
 import sys
+import threading
 import time
 from collections.abc import Iterable, Mapping, Sequence
 from typing import Any
@@ -97,6 +98,7 @@ class ProgramsDatabase:
     timestamp: int,
     message: str,
   ) -> None:
+    self.lock = threading.Lock()
     self._config: config_lib.ProgramsDatabaseConfig = config
     self.inputs = inputs
 
@@ -133,37 +135,40 @@ class ProgramsDatabase:
     self.message = message
 
   def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
-    return sorted(
-      zip(self._best_program_per_island, self._best_score_per_island), key=lambda t: t[1], reverse=True
-    )
+    with self.lock:
+      return sorted(
+        zip(self._best_program_per_island, self._best_score_per_island), key=lambda t: t[1], reverse=True
+      )
 
   def save(self, file) -> None:
     """Save database to a file."""
-    data = {}
-    keys = [
-      "_config",
-      "inputs",
-      "_specification",
-      "_islands",
-      "_best_score_per_island",
-      "_best_program_per_island",
-      "_best_scores_per_test_per_island",
-      "_last_reset_time",
-      "_program_counter",
-      "_backups_done",
-      "problem_name",
-      "timestamp",
-      "message",
-    ]
-    for key in keys:
-      data[key] = getattr(self, key)
-    pickle.dump(data, file)
+    with self.lock:
+      data = {}
+      keys = [
+        "_config",
+        "inputs",
+        "_specification",
+        "_islands",
+        "_best_score_per_island",
+        "_best_program_per_island",
+        "_best_scores_per_test_per_island",
+        "_last_reset_time",
+        "_program_counter",
+        "_backups_done",
+        "problem_name",
+        "timestamp",
+        "message",
+      ]
+      for key in keys:
+        data[key] = getattr(self, key)
+      pickle.dump(data, file)
 
-  def load(file) -> ProgramsDatabase:
+  @classmethod
+  def load(cls, file) -> ProgramsDatabase:
     """Load previously saved database."""
     data = pickle.load(file)
 
-    database = ProgramsDatabase(
+    database = cls(
       config=data["_config"],
       specification=data["_specification"],
       inputs=data["inputs"],
@@ -178,16 +183,17 @@ class ProgramsDatabase:
     return database
 
   def backup(self) -> None:
-    filename = f"{self.problem_name}_{self.timestamp}_{self._backups_done}.pickle"
-    p = pathlib.Path(self._config.backup_folder)
-    if not p.exists():
-      p.mkdir(parents=True, exist_ok=True)
-    filepath = p / filename
-    logging.info(f"Saving backup to {filepath}")
+    with self.lock:
+      filename = f"{self.problem_name}_{self.timestamp}_{self._backups_done}.pickle"
+      p = pathlib.Path(self._config.backup_folder)
+      if not p.exists():
+        p.mkdir(parents=True, exist_ok=True)
+      filepath = p / filename
+      logging.info(f"Saving backup to {filepath}")
 
-    with open(filepath, mode="wb") as f:
-      self.save(f)
-    self._backups_done += 1
+      with open(filepath, mode="wb") as f:
+        self.save(f)
+      self._backups_done += 1
 
   def get_prompt(self) -> Prompt:
     """Returns a prompt containing implementations from one chosen island."""

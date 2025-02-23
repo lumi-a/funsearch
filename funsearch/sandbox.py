@@ -80,7 +80,12 @@ class ExternalProcessSandbox:
       return result.returncode
 
   # TODO: Add type-hint to input
-  def run(self, program: str, function_to_run: str, input, index: int) -> tuple[Any, bool]:
+  def run(self, program: str, function_to_run: str, input, index: int) -> float | None:
+    """Executes the code in a separate process.
+
+    Returns the output of the code if it was successful and could be converted to a float,
+    None otherwise.
+    """
     call_data_folder = (self.output_path / f"call-{index}").absolute()
     if not call_data_folder.exists():
       call_data_folder.mkdir()
@@ -95,7 +100,7 @@ class ExternalProcessSandbox:
     try:
       namespace = _compile_code(program)
 
-      with open(call_data_folder / "program.pickle", "wb+") as f:
+      with (call_data_folder / "program.pickle").open("wb+") as f:
         cloudpickle.dump(namespace[function_to_run], f)
 
       error_file = self.output_path / f"stderr-{index}.log"
@@ -103,37 +108,16 @@ class ExternalProcessSandbox:
       return_code = self._exec(call_data_folder, input_path, error_file)
 
       if return_code != 0:
-        self._save_diagnostics(program, call_data_folder)
-        return None, False
+        return False
 
-      output_file = call_data_folder / "output.pickle"
-      with open(output_file, "rb") as f:
+      with (call_data_folder / "output.pickle").open("rb") as f:
         out = cloudpickle.load(f)
-        return out, True
+        try:
+          return float(out)
+        except ValueError:
+          return None
+
     except Exception as e:
       logging.debug(f"Could not execute code: {e}")
-    self._save_diagnostics(program, call_data_folder)
+
     return None, False
-
-  @staticmethod
-  def _save_diagnostics(program: str, output_path: Path) -> None:
-    filepath = output_path / "program.py"
-    logging.debug(f"Writing program to {filepath}")
-    with open(filepath, "w+") as f:
-      f.write(program)
-
-
-print(4)
-if __name__ == "__main__":
-  print(3)
-  print(
-    _compile_code("""
-import random
-
-def x(y):
-  print(f"Received {y}")
-  return y + 1
-
-print(1)
-""")
-  )

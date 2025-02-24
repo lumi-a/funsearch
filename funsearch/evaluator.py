@@ -153,8 +153,11 @@ class Evaluator:
     self, sample: str, version_generated: int | None, index: int
   ) -> tuple[code_manipulation.Function, dict[float | str, float]]:
     """Compile the sample, execute it on test inputs, returning the compiled function and outputs."""
+    match = re.search(r"(```(python|))(.*?)```", sample, re.DOTALL)
+    code: str = match.group(3) or sample
+
     new_function, program = _sample_to_program(
-      sample, version_generated, self._template, self._function_to_evolve
+      code, version_generated, self._template, self._function_to_evolve
     )
 
     scores_per_test: dict[float | str, float] = {}

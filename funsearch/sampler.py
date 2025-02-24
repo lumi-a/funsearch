@@ -62,14 +62,9 @@ class LLM:
       print("LLM call failed:", e)  # noqa: T201
       output_text = ""
 
-    # TODO: Move this elsewhere. Being able to see the whole
-    # llm-response in the logs is useful.
-    match = re.search(r"(```(python|))(.*?)```", output_text, re.DOTALL)
-    response = match.group(3) if match else output_text
+    self._log(prompt, output_text, index)
 
-    self._log(prompt, response, index)
-
-    return response
+    return output_text
 
   def _log(self, prompt: str, response: str, index: int) -> None:
     """Log prompt and response to file.
@@ -77,7 +72,7 @@ class LLM:
     The index must be unique across thread.
     """
     if self._log_path:
-      with (self._log_path / f"prompt_{index}.log").open("a") as f:
+      with (self._log_path / f"{index}" / "prompt.log").open("a") as f:
         f.write(prompt)
-      with (self._log_path / f"response_{index}.log").open("a") as f:
+      with (self._log_path / f"{index}" / "response.log").open("a") as f:
         f.write(str(response))

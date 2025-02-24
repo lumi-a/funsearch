@@ -35,7 +35,7 @@ class ExternalProcessSandbox:
 
   def __init__(self, base_path: Path, timeout_secs: int = 30) -> None:
     """Create a new sandbox that logs to `base_path` and runs a sample for at most `timeout_secs`."""
-    self.output_path = Path(base_path) / "sandbox"
+    self.output_path = Path(base_path)
     self.timeout_secs = timeout_secs
 
     self.input_path = self.output_path / "inputs"
@@ -85,7 +85,7 @@ class ExternalProcessSandbox:
     Returns the output of the code if it was successful and could be converted to a float,
     None otherwise.
     """
-    call_data_folder = (self.output_path / f"call_{index}").absolute()
+    call_data_folder = (self.output_path / f"{index}").absolute()
     if not call_data_folder.exists():
       call_data_folder.mkdir()
 
@@ -102,7 +102,7 @@ class ExternalProcessSandbox:
       with (call_data_folder / "program.pickle").open("wb+") as f:
         cloudpickle.dump(namespace[function_to_run], f)
 
-      with (call_data_folder / f"stderr_{index}.log").open("w") as error_file:
+      with (call_data_folder / "stderr.log").open("w") as error_file:
         return_code = self._exec(call_data_folder, input_path, error_file)
 
       if return_code != 0:

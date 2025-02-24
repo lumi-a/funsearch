@@ -103,15 +103,20 @@ def priority_v2(element, n):
 
 def test_database_integrity():
   backup_data = Path(__file__).parent.parent / "data" / "backups"
-  for f in backup_data.glob("*.pickle"):
-    database = programs_database.ProgramsDatabase.load(f.open("rb"))
-    for island in database._islands:
-      last_score = float("-inf")
-      for run_id, _function in island._improvements:
-        score = island._runs[run_id]
-        assert score is not None, "Islands' improvements should have successful runs"
-        assert score > last_score, "Islands' improvements should have strictly increasing scores"
-        last_score = score
+  for file in backup_data.glob("*.pickle"):
+    with file.open("rb") as f:
+      database = programs_database.ProgramsDatabase.load(f)
+      for island_id, island in enumerate(database._islands):
+        last_score = float("-inf")
+        for run_id, _function in island._improvements:
+          score = island._runs[run_id]
+          assert score is not None, (
+            f"Islands' improvements should have successful runs (database {file.name}, island {island_id})"
+          )
+          assert score > last_score, (
+            f"Islands' improvements should be strictly increasing (database {file.name}, island {island_id})"
+          )
+          last_score = score
 
 
 class ProgramsDatabaseTest(parameterized.TestCase):

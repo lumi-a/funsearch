@@ -168,7 +168,7 @@ class ProgramsDatabase:
     if scores_per_test:
       with self.lock:
         for island_id in range(len(self._islands)):
-          self._register_program_in_island(program, island_id, scores_per_test)
+          self._register_program_in_island(program, island_id, scores_per_test, population_call=True)
       return True
     return False
 
@@ -239,18 +239,24 @@ class ProgramsDatabase:
       return Prompt(code, version_generated, island_id)
 
   def _register_program_in_island(
-    self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
+    self,
+    program: code_manipulation.Function,
+    island_id: int,
+    scores_per_test: ScoresPerTest,
+    population_call=False,
   ) -> None:
     """Registers `program` in the specified island.
 
-    Mutates `self` without acquiring self.lock.
+    Mutates `self` without acquiring self.lock. Population-call is used to
+    not count the initial .population-call as a success. TODO: That seems ugly.
     """
     # TODO: Passing around all the island_ids seems ugly, could we instead
     # move this method to Island?
 
     self._islands[island_id].register_program(program, scores_per_test)
     score = _reduce_score(scores_per_test)
-    self._islands[island_id].register_success(score)
+    if not population_call:
+      self._islands[island_id].register_success(score)
     if score > self._best_score_per_island[island_id]:
       self._best_program_per_island[island_id] = program
       self._best_scores_per_test_per_island[island_id] = scores_per_test

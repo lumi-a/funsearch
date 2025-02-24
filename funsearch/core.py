@@ -161,6 +161,7 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
 
   try:
     # Wait for web request workers to finish (if M is finite, they will eventually stop)
+    # TODO: Instead, you could also just call them with t.join() and use a separate printer-thread
     while any(t.is_alive() for t in llm_threads):
       for t in llm_threads:
         t.join(timeout=0.1)

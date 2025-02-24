@@ -62,8 +62,6 @@ for (specname, timestamp), (_idx, file) in files.items():
       )
     )
 
-    # As backups are indexed with timestamps, and we don't expect backups to change over time,
-    # keep the json minimal, without newlines (which otherwise would be neat for VCS)
     json.dump(
       {
         "problemName": database.problem_name,

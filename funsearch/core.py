@@ -143,11 +143,12 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
       llm_responses_slots.release()
 
   def database_printer(stop_event: threading.Event) -> None:
-    for _ in range(10):
-      time.sleep(1)
-      if stop_event.is_set():
-        return
-    database.print_status()
+    while True:
+      for _ in range(10):
+        time.sleep(1)
+        if stop_event.is_set():
+          return
+      database.print_status()
 
   stop_event = threading.Event()
   iteration_manager = IterationManager(iterations)

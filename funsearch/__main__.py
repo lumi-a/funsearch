@@ -146,7 +146,7 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   log_path = pathlib.Path(output_path) / database.problem_name / timestamp
   log_path.mkdir(exist_ok=True, parents=True)
 
-  core.run(database, llm, database, log_path, iterations)
+  core.run(database, llm, log_path, iterations)
 
 
 @main.command()

@@ -19,7 +19,7 @@ import dataclasses
 
 
 @dataclasses.dataclass(frozen=True)
-class ProgramsDatabaseConfig:
+class Config:
   """Configuration of a ProgramsDatabase.
 
   Attributes:
@@ -42,15 +42,3 @@ class ProgramsDatabaseConfig:
   cluster_sampling_temperature_period: int = 30_000
   backup_period: int = 30
   backup_folder: str = "./data/backups"
-
-
-@dataclasses.dataclass(frozen=True)
-class Config:
-  """Configuration of a FunSearch experiment.
-
-  Attributes:
-    programs_database: Configuration of the evolutionary algorithm.
-
-  """
-
-  programs_database: ProgramsDatabaseConfig = dataclasses.field(default_factory=ProgramsDatabaseConfig)

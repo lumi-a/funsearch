@@ -103,7 +103,7 @@ class ProgramsDatabase:
 
   def __init__(
     self,
-    config: config_lib.ProgramsDatabaseConfig,
+    config: config_lib.Config,
     specification: any,
     inputs: list[float] | list[str],
     problem_name: str,
@@ -112,7 +112,7 @@ class ProgramsDatabase:
   ) -> None:
     # TODO: This could be an RwLock instead, but the read-operations are fast enough for now.
     self.lock = threading.Lock()
-    self._config: config_lib.ProgramsDatabaseConfig = config
+    self._config: config_lib.Config = config
     self.inputs = inputs
 
     self._specification = specification

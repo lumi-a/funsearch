@@ -107,14 +107,12 @@ def start(
                 8,9,10
                 ./specs/cap_set_input_data.json
   """  # noqa: D301
-  conf = config.Config()
+  conf = config.Config(backup_folder=str(pathlib.Path(output_path) / "backups"))
 
   timestamp = str(int(time.time()))
   problem_name = Path(spec_file.name).stem
 
-  database = ProgramsDatabase(
-    conf.programs_database, spec_file.read(), inputs, problem_name, timestamp, message
-  )
+  database = ProgramsDatabase(conf, spec_file.read(), inputs, problem_name, timestamp, message)
 
   log_path = pathlib.Path(output_path) / problem_name / timestamp
   log_path.mkdir(exist_ok=True, parents=True)
@@ -139,6 +137,12 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
   database = ProgramsDatabase.load(db_file)
+  # TODO: There has to be a better way than doing this.
+  # Maybe require backup-path as an argument?
+  old_config = database._config
+  database._config = config.Config(
+    **old_config.__dict__, backup_folder=str(pathlib.Path(output_path) / "backups")
+  )
 
   timestamp = str(int(time.time()))
   database.timestamp = timestamp

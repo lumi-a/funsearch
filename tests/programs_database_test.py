@@ -127,7 +127,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
     template = code_manipulation.text_to_program(_SKELETON)
     function_to_evolve = "priority"
     database = programs_database.ProgramsDatabase(
-      config=config.ProgramsDatabaseConfig(functions_per_prompt=5),
+      config=config.Config(functions_per_prompt=5),
       template=template,
       function_to_evolve=function_to_evolve,
     )
@@ -144,7 +144,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
 
       f.seek(0)
       db2 = programs_database.ProgramsDatabase(
-        config=config.ProgramsDatabaseConfig(functions_per_prompt=5),
+        config=config.Config(functions_per_prompt=5),
         template=template,
         function_to_evolve=function_to_evolve,
       )
@@ -174,7 +174,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
     template = code_manipulation.text_to_program(_SKELETON)
     function_to_evolve = "priority"
     database = programs_database.ProgramsDatabase(
-      config=config.ProgramsDatabaseConfig(num_islands=10),
+      config=config.Config(num_islands=10),
       template=template,
       function_to_evolve=function_to_evolve,
     )

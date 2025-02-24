@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import logging
 from pathlib import Path
+import sys
 
 import cloudpickle
 
@@ -56,9 +57,7 @@ class ExternalProcessSandbox:
     output_file = call_data_path / "output.pickle"
 
     cmd = [
-      "uv",
-      "run",
-      "python",
+      sys.executable,
       str(CONTAINER_MAIN),
       str(program_path),
       str(input_path),

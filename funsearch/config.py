@@ -50,15 +50,7 @@ class Config:
 
   Attributes:
     programs_database: Configuration of the evolutionary algorithm.
-    num_samplers: Number of independent Samplers in the experiment. A value
-        larger than 1 only has an effect when the samplers are able to execute
-        in parallel, e.g. on different matchines of a distributed system.
-    num_evaluators: Number of independent program Evaluators in the experiment.
-        A value larger than 1 is only expected to be useful when the Evaluators
-        can execute in parallel as part of a distributed system.
 
   """
 
   programs_database: ProgramsDatabaseConfig = dataclasses.field(default_factory=ProgramsDatabaseConfig)
-  num_samplers: int = 15
-  num_evaluators: int = 1

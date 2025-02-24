@@ -135,8 +135,6 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
 
   If not provided, selects the most recent one from data/backups/.
   """
-  conf = config.Config()
-
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
   database = ProgramsDatabase.load(db_file)
@@ -144,7 +142,7 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   timestamp = str(int(time.time()))
   database.identifier = str(timestamp)
 
-  log_path = pathlib.Path(output_path) / database.problem_name / timestamp
+  pathlib.Path(output_path) / database.problem_name / timestamp
 
   core.run(samplers, database, iterations)
 

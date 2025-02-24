@@ -35,15 +35,11 @@ class ExternalProcessSandbox:
 
   def __init__(self, base_path: Path, timeout_secs: int = 30) -> None:
     """Create a new sandbox that logs to `base_path` and runs a sample for at most `timeout_secs`."""
-    self.output_path = Path(base_path)
+    base_path.mkdir(exist_ok=True)
+    self.base_path = Path(base_path)
     self.timeout_secs = timeout_secs
 
-    self.input_path = self.output_path / "inputs"
-    for p in [self.output_path, self.input_path]:
-      if not p.exists():
-        p.mkdir(parents=True)
-
-  def _exec(self, call_data_path: Path, input_path: Path, error_file_path: Path) -> int:
+  def _exec(self, program_path: Path, output_path: Path, input_path: Path, error_file_path: Path) -> int:
     """Execute python-code in a separate process.
 
     - The main.py shall execute the LLM generated method from program.pickle file providing
@@ -54,15 +50,12 @@ class ExternalProcessSandbox:
     """
     import subprocess
 
-    program_path = call_data_path / "program.pickle"
-    output_file = call_data_path / "output.pickle"
-
     cmd = [
       sys.executable,
       str(CONTAINER_MAIN),
       str(program_path),
       str(input_path),
-      str(output_file),
+      str(output_path),
     ]
 
     logging.debug(f"Executing {cmd}")
@@ -85,12 +78,11 @@ class ExternalProcessSandbox:
     Returns the output of the code if it was successful and could be converted to a float,
     None otherwise.
     """
-    call_data_folder = (self.output_path / f"{index}").absolute()
-    if not call_data_folder.exists():
-      call_data_folder.mkdir()
+    call_data_folder = (self.base_path / f"{index}").absolute()
+    call_data_folder.mkdir(exist_ok=True)
 
     input_hash = hash(input_to_run)  # Good enough
-    input_path = (self.input_path / f"{input_hash}.pickle").absolute()
+    input_path = (call_data_folder / f"input-{input_hash}.pickle").absolute()
 
     if not input_path.exists():
       with Path(input_path).open("wb") as f:
@@ -99,16 +91,18 @@ class ExternalProcessSandbox:
     try:
       namespace = _compile_code(program)
 
-      with (call_data_folder / "program.pickle").open("wb+") as f:
+      output_path = call_data_folder / "output.pickle"
+      program_path = call_data_folder / "program.pickle"
+      with program_path.open("wb+") as f:
         cloudpickle.dump(namespace[function_to_run], f)
 
       with (call_data_folder / "stderr.log").open("w") as error_file:
-        return_code = self._exec(call_data_folder, input_path, error_file)
+        return_code = self._exec(program_path, output_path, input_path, error_file)
 
       if return_code != 0:
         return None
 
-      with (call_data_folder / "output.pickle").open("rb") as f:
+      with output_path.open("rb") as f:
         out = cloudpickle.load(f)
         try:
           return float(out)

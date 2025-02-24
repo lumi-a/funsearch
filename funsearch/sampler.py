@@ -72,7 +72,9 @@ class LLM:
     The index must be unique across thread.
     """
     if self._log_path:
-      with (self._log_path / f"{index}" / "prompt.log").open("a") as f:
+      call_data_folder = self._log_path / f"{index}"
+      call_data_folder.mkdir(exist_ok=True)
+      with (call_data_folder / "prompt.log").open("a") as f:
         f.write(prompt)
-      with (self._log_path / f"{index}" / "response.log").open("a") as f:
+      with (call_data_folder / "response.log").open("a") as f:
         f.write(str(response))

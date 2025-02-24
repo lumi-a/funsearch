@@ -22,13 +22,11 @@ import os
 import queue
 import threading
 import time
-from concurrent import futures
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import llm
 
-from funsearch import code_manipulation
 from funsearch.evaluator import Evaluator
 from funsearch.sampler import LLM
 from funsearch.sandbox import ExternalProcessSandbox

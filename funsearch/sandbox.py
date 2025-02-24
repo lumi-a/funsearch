@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import ast
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import cloudpickle
 

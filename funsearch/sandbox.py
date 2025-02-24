@@ -73,7 +73,6 @@ class ExternalProcessSandbox:
       logging.debug(f"Command timed out after {self.timeout_secs} seconds")
       return 1
     except Exception as e:  # noqa: BLE001
-      print(e)
       logging.debug(f"Command failed with error: {e}")
       return 1
     else:

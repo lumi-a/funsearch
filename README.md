@@ -1,4 +1,4 @@
-[FunSearch](https://deepmind.google/discover/blog/funsearch-making-new-discoveries-in-mathematical-sciences-using-large-language-models/) uses evolutionary search on python-code to find better functions. Because randomly changing the characters in python-code makes it unrunnable, we instead ask an LLM to slightly change the code.
+[FunSearch](https://deepmind.google/discover/blog/funsearch-making-new-discoveries-in-mathematical-sciences-using-large-language-models/) uses evolutionary search on python-code to find better functions. Because randomly changing the characters in python-code makes it unrunnable, we instead ask an LLM to slightly change the code. See [examples](https://lumi-a.github.io/funsearch) of functions found by Funsearch.
 
 ## Setup
 

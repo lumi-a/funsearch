@@ -15,6 +15,7 @@ requests of a limited number of readers before them. Books are idealised as inte
 """
 
 from collections import deque
+import random
 
 import funsearch
 from funsearch.library import read_accesses
@@ -25,7 +26,7 @@ type Book = int
 @funsearch.run
 def evaluate() -> float:
   """Returns the (negative) number of orders the library had to make."""
-  shelf_space = 256
+  shelf_space = 30
   bookshelf = set()
   past_reader_requests = deque(maxlen=2048)
   book_orders = 0
@@ -50,7 +51,7 @@ def evaluate() -> float:
 
 @funsearch.evolve
 def replace(past_reader_requests: deque[Book], bookshelf: set[Book], book_order: Book) -> Book:
-  """Given our past reader requests, the current bookshelf, and the book that we'll order,
-  return the book on our bookshelf that should be replaced by the ordered book.
+  """Given our past reader requests (from oldest to newest), the current bookshelf, and the book
+  that we'll order, return the book on our bookshelf that should be replaced by the ordered book.
   """
   return min(bookshelf)

@@ -187,7 +187,11 @@ async function displayDatabase(database, runDetailsInner) {
             ...islands.map(island => details(`Score ${island.bestScore}`, `Island ${island.ix}, failure-rate ${island.rate}%`,
                 ...island.improvements.toReversed().map(improvement => detailsCode(`Score ${improvement[1]}`, `Run ${improvement[0]}`, improvement[2])))
             )),
-        detailsCode("Config", null, Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
+        detailsCode("Config", null, Object.entries(database.config)
+            .filter(([k, v]) => !["problem_name", "inputs", "message", "specification", "num_islands"].includes(k))
+            .map(([k, v]) => `${k} = ${JSON.stringify(v)}`)
+            .join("\n")
+        )
     ]
     children.forEach(child => runDetailsInner.appendChild(child))
 }

@@ -1,3 +1,15 @@
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: inherit;
+}
+
+body {
+    box-sizing: border-box;
+}
+
 code {
     white-space: pre-wrap;
 }
@@ -8,27 +20,34 @@ code {
 }
 
 .problem-container>details {
-    margin: 1em;
+    margin: 0.5em;
+}
+
+.problem-container>details>summary {
+    padding: 0.75em;
 }
 
 details {
     border-left: 0.125em solid #8888;
-    border-radius: 0.25em;
+    border-top-left-radius: 0.25em;
+    border-bottom-left-radius: 0.25em;
     background: #8881;
 }
 
 .details-inner {
-    padding: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 0.5em;
     display: flex;
     flex-direction: column;
-    gap: 1em;
+    gap: 0.25em;
 }
 
 summary {
     cursor: pointer;
-    padding: 0.75em;
     background: #8881;
     display: flex;
+    padding: 0.5em;
     gap: 1em;
 }
 

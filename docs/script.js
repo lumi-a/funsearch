@@ -113,7 +113,27 @@ function detailsCode(title, description, code) {
     codeElement.textContent = code
     pre.appendChild(codeElement)
     hljs.highlightElement(codeElement)
-    return details(title, description, pre)
+
+    // The rest is mostly just `details` without .details-inner
+    const details = document.createElement("details")
+    const summary = document.createElement("summary")
+    details.appendChild(summary)
+
+
+    const titleSpan = document.createElement("span")
+    titleSpan.textContent = title
+    titleSpan.classList.add("title")
+    summary.appendChild(titleSpan)
+
+    if (description) {
+        const descriptionSpan = document.createElement("span")
+        descriptionSpan.textContent = description
+        descriptionSpan.classList.add("description")
+        summary.appendChild(descriptionSpan)
+    }
+
+    details.appendChild(pre)
+    return details
 }
 
 function runToId(problemName, timestamp) {
@@ -164,14 +184,14 @@ async function displayDatabase(database, runDetailsInner) {
 
     const children = [
         messageSpan,
-        detailsCode("Spec", "Specification-file and seed-function", database.specCode),
-        details("Best Programs", "Best program of each island", ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][2])
+        detailsCode("Spec", null, database.specCode),
+        details("Best Programs", null, ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][2])
         )),
-        details("Improvements over Time", "Improvement-steps of each island", document.createTextNode(`Total failure-rate: ${totalRate}%`), improvementCanvas(islands, database.highestRunIndex),
+        details("Improvements over Time", null, document.createTextNode(`Total failure-rate: ${totalRate}%`), improvementCanvas(islands, database.highestRunIndex),
             ...islands.map(island => details(`Score ${island.bestScore}`, `Island ${island.ix}, failure-rate ${island.rate}%`,
                 ...island.improvements.toReversed().map(improvement => detailsCode(`Score ${improvement[1]}`, `Run ${improvement[0]}`, improvement[2])))
             )),
-        detailsCode("Config", "Config-file for this run", Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
+        detailsCode("Config", null, Object.entries(database.config).map(([k, v]) => `${k} = ${JSON.stringify(v)}`).join("\n"))
     ]
     children.forEach(child => runDetailsInner.appendChild(child))
 }

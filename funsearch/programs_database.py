@@ -185,7 +185,7 @@ class ProgramsDatabase:
   def load(cls, file) -> ProgramsDatabase:
     """Load previously saved database."""
     data = pickle.load(file)
-    database = ProgramsDatabase(config=ProgramsDatabaseConfig(**data["_config"]))
+    database = ProgramsDatabase(ProgramsDatabaseConfig(**data["_config"].__dict__))
     for key in data:
       if key != "_config":
         setattr(database, key, data[key])

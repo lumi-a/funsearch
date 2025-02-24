@@ -82,7 +82,9 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
     logging.info(f"Writing logs to {log_path}")
 
   # Stores (program, island_id, version_generated, index) per LLM-call
-  llm_responses: queue.Queue[tuple[str, int, int, int]] = queue.Queue()
+  # None is a sentinel-value to signal to the analysation-workers that
+  # no more values will be added.
+  llm_responses: queue.Queue[None | tuple[str, int, int, int]] = queue.Queue()
   # Increasing the semaphore-value might make the program a little faster
   # (because the queue is less likely to be empty when an analyser tries to
   # get a sample from it), but it also means that function-improvements are
@@ -111,7 +113,7 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
       sample = llm.draw_sample(prompt.code, current_index)
       llm_responses.put((sample, prompt.island_id, prompt.version_generated, current_index))
 
-  def analysation_dispatcher(iteration_manager: IterationManager, stop_event: threading.Event) -> None:
+  def analysation_dispatcher(stop_event: threading.Event) -> None:
     """Dispatcher thread that pulls web results from the queue and analyses the results."""
     evaluator = Evaluator(
       ExternalProcessSandbox(log_path),
@@ -122,11 +124,14 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
     )
     while not stop_event.is_set():
       try:
-        sample, island_id, version_generated, current_index = llm_responses.get(timeout=0.1)
+        queue_item = llm_responses.get(timeout=0.1)
       except queue.Empty:
-        if iteration_manager.is_done():
-          break
         continue
+
+      if queue_item is None:
+        break
+
+      sample, island_id, version_generated, current_index = queue_item
 
       new_function, scores_per_test = evaluator.analyse(sample, version_generated, current_index)
 
@@ -159,8 +164,7 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
   # Start analysation dispatcher threads
   num_dispatcher_workers = os.cpu_count()
   dispatcher_threads: list[threading.Thread] = [
-    threading.Thread(target=analysation_dispatcher, args=(iteration_manager, stop_event))
-    for _ in range(num_dispatcher_workers)
+    threading.Thread(target=analysation_dispatcher, args=(stop_event,)) for _ in range(num_dispatcher_workers)
   ]
   for t in dispatcher_threads:
     t.start()
@@ -173,6 +177,9 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
     while any(t.is_alive() for t in llm_threads):
       for t in llm_threads:
         t.join(timeout=0.1)
+
+    for _ in range(num_dispatcher_workers):
+      llm_responses.put(None)
 
     # Wait for dispatcher threads to finish now
     while any(t.is_alive() for t in dispatcher_threads):

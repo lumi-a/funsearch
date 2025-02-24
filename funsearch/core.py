@@ -52,7 +52,7 @@ class IterationManager:
   def get_next_index(self) -> int | None:
     """Returns the next index, or None if we're done."""
     with self._index_lock:
-      if self._max_iterations != -1 and self._index >= self.M:
+      if self._max_iterations != -1 and self._index >= self._max_iterations:
         return None
       index = self._index
       self._index += 1
@@ -127,12 +127,15 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
           break
         continue
 
+      print(f"Analysing {current_index}")
       new_function, scores_per_test = evaluator.analyse(sample, version_generated, current_index)
 
       if scores_per_test:
         db.register_program(new_function, island_id, scores_per_test)
       elif island_id is not None:
         db.register_failure(island_id)
+
+      print(f"Entered {current_index}")
 
       llm_responses_slots.release()
 
@@ -160,18 +163,18 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
     t.start()
 
   try:
-    # Wait for web request workers to finish (if M is finite, they will eventually stop)
-    # TODO: Instead, you could also just call them with t.join() and use a separate printer-thread
+    # Wait for web request workers to finish (if iterations is finite, they will eventually stop)
     while any(t.is_alive() for t in llm_threads):
       for t in llm_threads:
-        t.join(timeout=0.1)
+        t.join(timeout=1)
         database.print_status()
 
     print(f"Analysing {llm_responses.qsize()} remaining responses...")
     # Wait for dispatcher threads to finish now
-    for t in dispatcher_threads:
-      t.join(timeout=0.1)
-      database.print_status()
+    while any(t.is_alive() for t in dispatcher_threads):
+      for t in dispatcher_threads:
+        t.join(timeout=1)
+        database.print_status()
 
     # Signal the dispatcher, database updater, and adjuster threads to stop.
     # This should be redundant, anyway.
@@ -184,8 +187,9 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
     for t in llm_threads:
       t.join()
     print(f"Analysing {llm_responses.qsize()} remaining responses...")
+    # TODO: The KeyboardInterrupt is forwarded to the subprocesses, so they always fail here.
     for t in dispatcher_threads:
       t.join()
-
-  database.print_status()
-  database.backup()
+  finally:
+    database.print_status()
+    database.backup()

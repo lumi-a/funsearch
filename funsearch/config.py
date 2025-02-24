@@ -19,7 +19,7 @@ import dataclasses
 
 
 @dataclasses.dataclass(frozen=True)
-class Config:
+class ProgramsDatabaseConfig:
   """Configuration of a ProgramsDatabase.
 
   Attributes:
@@ -40,5 +40,5 @@ class Config:
   reset_period: int = 4 * 60 * 60
   cluster_sampling_temperature_init: float = 0.1
   cluster_sampling_temperature_period: int = 30_000
-  backup_period: int = 30
-  backup_folder: str = "./data/backups"
+  backup_period: int = 30  ####################################
+  backup_folder: str = "./data/backups"  ######################

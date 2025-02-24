@@ -53,10 +53,10 @@ for (specname, timestamp), (_idx, file) in files.items():
     # This is bad practice, something something graphemes, but it will be cut off on the website anyway.
     index_json.append(
       (
-        database.problem_name,
-        database.inputs,
+        database._config.problem_name,
+        database._config.inputs,
         max(database._best_score_per_island),  # noqa: SLF001
-        database.message[:255],
+        database._config.message.splitlines()[0][:255],
         timestamp,
         _to_filename(specname, timestamp),
       )
@@ -64,12 +64,12 @@ for (specname, timestamp), (_idx, file) in files.items():
 
     json.dump(
       {
-        "problemName": database.problem_name,
-        "inputs": database.inputs,
-        "message": database.message,
+        "problemName": database._config.problem_name,
+        "inputs": database._config.inputs,
+        "message": database._config.message,
         "config": vars(database._config),  # noqa: SLF001
-        "specCode": database._specification,  # noqa: SLF001
-        "timestamp": database.timestamp,
+        "specCode": database._config.specification,  # noqa: SLF001
+        "timestamp": timestamp,
         "highestRunIndex": max(len(island._runs) for island in database._islands),  # noqa: SLF001
         "islands": [
           {

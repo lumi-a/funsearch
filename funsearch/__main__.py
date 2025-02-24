@@ -107,7 +107,7 @@ def start(
                 8,9,10
                 ./specs/cap_set_input_data.json
   """  # noqa: D301
-  conf = config.Config(backup_folder=str(pathlib.Path(output_path) / "backups"))
+  conf = config.ProgramsDatabaseConfig(backup_folder=str(pathlib.Path(output_path) / "backups"))
 
   timestamp = str(int(time.time()))
   problem_name = Path(spec_file.name).stem
@@ -141,12 +141,12 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   # Maybe require backup-path as an argument?
   old_config = database._config.__dict__
   old_config["backup_folder"] = str(pathlib.Path(output_path) / "backups")
-  database._config = config.Config(**old_config)
+  database._config = config.ProgramsDatabaseConfig(**old_config)
 
   timestamp = str(int(time.time()))
-  database.timestamp = timestamp
+  database.timestamp = timestampthiswontwork  # Database doesn't have attribute timestamp anymore
 
-  log_path = pathlib.Path(output_path) / database.problem_name / timestamp
+  log_path = pathlib.Path(output_path) / database._config.problem_name / timestamp
   log_path.mkdir(exist_ok=True, parents=True)
 
   core.run(database, llm, log_path, iterations)

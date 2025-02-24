@@ -73,13 +73,14 @@ class IterationManager:
 # We could ask the caller to pass a class, but then we'd *also* need them to ask for the id.
 # So let's just ask them for the id directly and be a bit inefficient upfront. This might
 # make errors uglier, though.
-def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: int = -1) -> None:
+def run(
+  database: ProgramsDatabase, llm_name: str, log_path: Path, backup_dir: Path, iterations: int = -1
+) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
   database.print_status()
 
-  if not log_path.exists():
-    log_path.mkdir(parents=True)
-    logging.info(f"Writing logs to {log_path}")
+  log_path.mkdir(parents=True, exist_ok=True)
+  backup_dir.mkdir(parents=True, exist_ok=True)
 
   # Stores (program, island_id, version_generated, index) per LLM-call
   # None is a sentinel-value to signal to the analysation-workers that
@@ -91,6 +92,8 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
   # only transferred to the LLM ~every `value` iterations, which
   # degrades the quality of the algorithm.
   llm_responses_slots = threading.Semaphore(32)
+
+  database_lock = threading.Lock()
 
   def llm_response_worker(iteration_manager: IterationManager, stop_event: threading.Event, llm: LLM) -> None:
     """Worker thread that continuously makes web requests as long as we haven't reached `iterations`.
@@ -109,19 +112,21 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
       if current_index is None:
         break
 
-      prompt = database.get_prompt()
+      with database_lock:
+        prompt = database.get_prompt()
       sample = llm.draw_sample(prompt.code, current_index)
       llm_responses.put((sample, prompt.island_id, prompt.version_generated, current_index))
 
   def analysation_dispatcher(stop_event: threading.Event) -> None:
     """Dispatcher thread that pulls web results from the queue and analyses the results."""
-    evaluator = Evaluator(
-      ExternalProcessSandbox(log_path),
-      database.template,
-      database.function_to_evolve,
-      database.function_to_run,
-      database.inputs,
-    )
+    with database_lock:
+      evaluator = Evaluator(
+        ExternalProcessSandbox(log_path),
+        database._template,
+        database._function_to_evolve,
+        database._function_to_run,
+        database._config.inputs,
+      )
     while not stop_event.is_set():
       try:
         queue_item = llm_responses.get(timeout=0.1)
@@ -135,12 +140,18 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
 
       new_function, scores_per_test = evaluator.analyse(sample, version_generated, current_index)
 
-      if scores_per_test:
-        database.register_program(new_function, island_id, scores_per_test)
-      elif island_id is not None:
-        database.register_failure(island_id)
+      with database_lock:
+        if scores_per_test:
+          database.register_program(new_function, island_id, scores_per_test)
+        elif island_id is not None:
+          database.register_failure(island_id)
 
       llm_responses_slots.release()
+
+      if current_index % fixthis == 0:
+        with database_lock:
+          backup_file = backup_dir / f"{database._config.problem_name}_{timestamp}_{current_index}.pickle"
+          database.backup(backup_file)
 
   def database_printer(stop_event: threading.Event) -> None:
     while True:
@@ -148,7 +159,8 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
         time.sleep(1)
         if stop_event.is_set():
           return
-      database.print_status()
+      with database_lock:
+        database.print_status()
 
   stop_event = threading.Event()
   iteration_manager = IterationManager(iterations)
@@ -209,5 +221,8 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
         t.join(timeout=0.1)
   finally:
     db_printer_thread.join()
-    database.print_status()
-    database.backup()
+    # Shouldn't be necessary to acquire this lock anymore, but just to be safe:
+    with database_lock:
+      database.print_status()
+      backup_file = backup_dir / f"{database._config.problem_name}_{timestamp}.pickle"
+      database.backup(backup_file)

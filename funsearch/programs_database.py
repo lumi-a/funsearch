@@ -169,7 +169,7 @@ class ProgramsDatabase:
     if scores_per_test:
       with self.lock:
         for island_id in range(len(self._islands)):
-          self._register_program_in_island(program, island_id, scores_per_test, population_call=True)
+          self._register_program_in_island(program, island_id, scores_per_test)
       return True
     return False
 
@@ -244,8 +244,6 @@ class ProgramsDatabase:
     program: code_manipulation.Function,
     island_id: int,
     scores_per_test: ScoresPerTest,
-    *,
-    population_call: bool = False,
   ) -> None:
     """Registers `program` in the specified island.
 
@@ -254,8 +252,7 @@ class ProgramsDatabase:
     """
     self._islands[island_id].register_program(program, scores_per_test)
     score = _reduce_score(scores_per_test)
-    if not population_call:
-      self._islands[island_id].register_success(score)
+    self._islands[island_id].register_success(score)
     if score > self._best_score_per_island[island_id]:
       self._best_program_per_island[island_id] = program
       self._best_scores_per_test_per_island[island_id] = scores_per_test
@@ -315,7 +312,8 @@ class ProgramsDatabase:
     with self.lock:
       scores = self._best_score_per_island
       max_score = max(scores)
-      total_successes = sum(island._success_count for island in self._islands)  # noqa: SLF001
+      # Subtract 1 due to the initial .populate() calls
+      total_successes = sum(island._success_count - 1 for island in self._islands)  # noqa: SLF001
       total_failures = sum(island._failure_count for island in self._islands)  # noqa: SLF001
       attempts = total_successes + total_failures
       failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)

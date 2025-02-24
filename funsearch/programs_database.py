@@ -175,7 +175,7 @@ class ProgramsDatabase:
     program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
     if scores_per_test:
       for island_id in range(len(self._islands)):
-        self._register_program_in_island(program, island_id, scores_per_test)
+        self._islands[island_id].register_program(program, scores_per_test)
       return True
     return False
 
@@ -231,30 +231,14 @@ class ProgramsDatabase:
     code, version_generated = self._islands[island_id].get_prompt()
     return Prompt(code, version_generated, island_id)
 
-  def _register_program_in_island(
-    self,
-    program: code_manipulation.Function,
-    island_id: int,
-    scores_per_test: ScoresPerTest,
-  ) -> None:
-    """Registers `program` in the specified island."""
-    self._islands[island_id].register_program(program, scores_per_test)
-    score = _reduce_score(scores_per_test)
-    self._islands[island_id].register_success(score)
-    if score > self._best_score_per_island[island_id]:
-      self._best_program_per_island[island_id] = program
-      self._best_scores_per_test_per_island[island_id] = scores_per_test
-      self._best_score_per_island[island_id] = score
-      self._islands[island_id].register_improvement(program)
-      logging.info("✔ Best score of island %d increased to %s", island_id, score)
-
   def register_program(
     self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
   ) -> None:
     """Registers `program` in the database."""
-    self._register_program_in_island(program, island_id, scores_per_test)
+    self._islands[island_id].register_program(program, island_id, scores_per_test)
 
     # Check whether it is time to reset an island.
+    # TODO: Move this to core.run or something
     if time.time() - self._last_reset_time > self._config.reset_period:
       self._last_reset_time = time.time()
       self._reset_islands()
@@ -266,12 +250,18 @@ class ProgramsDatabase:
   def _reset_islands(self) -> None:
     """Resets the weaker half of islands."""
     # We sort best scores after adding minor noise to break ties.
-    indices_sorted_by_score: np.ndarray = np.argsort(
-      self._best_score_per_island + np.random.randn(len(self._best_score_per_island)) * 1e-6
+    num_islands = len(self._islands)
+    indices_sorted_by_score: list[int] = sorted(
+      range(num_islands),
+      key=lambda ix: self._islands[ix]._best_score + np.random.random() * 1e-6,
     )
-    num_islands_to_reset = self._config.num_islands // 2
-    reset_islands_ids = indices_sorted_by_score[:num_islands_to_reset]
-    keep_islands_ids = indices_sorted_by_score[num_islands_to_reset:]
+    num_islands_to_reset = num_islands // 2
+    reset_islands_ids: list[int] = indices_sorted_by_score[:num_islands_to_reset]
+    keep_islands_ids: list[int] = indices_sorted_by_score[num_islands_to_reset:]
+    founders = [
+      (self._islands[island_id]._best_program, self._islands[island_id]._best_scores_per_test)
+      for island_id in keep_islands_ids
+    ]
     for island_id in reset_islands_ids:
       self._islands[island_id] = Island(
         self._template,
@@ -280,11 +270,8 @@ class ProgramsDatabase:
         self._config.cluster_sampling_temperature_init,
         self._config.cluster_sampling_temperature_period,
       )
-      self._best_score_per_island[island_id] = -float("inf")
-      founder_island_id = np.random.choice(keep_islands_ids)
-      founder = self._best_program_per_island[founder_island_id]
-      founder_scores = self._best_scores_per_test_per_island[founder_island_id]
-      self._register_program_in_island(founder, island_id, founder_scores)
+      (program, scores_per_test) = np.random.choice(founders)
+      self._islands[island_id].register_program(program, island_id, scores_per_test)
 
   def print_status(self) -> None:
     """Prints the current status of the database."""
@@ -325,11 +312,16 @@ class Island:
     # This is (run_id, program).
     self._improvements: list[tuple[int, code_manipulation.Function]] = []
 
+    # TODO: Initialise island with initial programs instead
+    self._best_score: float = -float("inf")
+    self._best_program: code_manipulation.Function | None = None
+    self._best_scores_per_test: ScoresPerTest | None = None
+
     self._clusters: dict[Signature, Cluster] = {}
     self._num_programs_peroidic: int = 0
 
   def register_program(self, program: code_manipulation.Function, scores_per_test: ScoresPerTest) -> None:
-    """Stores a program on this island, in its appropriate cluster."""
+    """Register a `program` on this island with a given `scores_per_test`."""
     signature = _get_signature(scores_per_test)
     if signature not in self._clusters:
       score = _reduce_score(scores_per_test)
@@ -338,8 +330,18 @@ class Island:
       self._clusters[signature].register_program(program)
     self._num_programs_peroidic += 1
 
-  def register_improvement(self, program: code_manipulation.Function) -> None:
+    score = _reduce_score(scores_per_test)
+    self.register_success(score)
+    if score > self._best_score:
+      self.register_improvement(program, score, scores_per_test)
+
+  def register_improvement(
+    self, program: code_manipulation.Function, score: float, scores_per_test: ScoresPerTest
+  ) -> None:
     """Register the program that caused the latest improvement."""
+    self._best_program = program
+    self._best_score = score
+    self._best_scores_per_test = scores_per_test
     self._improvements.append((len(self._runs) - 1, program))
 
   def register_failure(self) -> None:

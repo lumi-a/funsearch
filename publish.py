@@ -55,7 +55,7 @@ for (specname, timestamp), (_idx, file) in files.items():
       (
         database._config.problem_name,
         database._config.inputs,
-        max(database._best_score_per_island),  # noqa: SLF001
+        max(island._best_score for island in database._islands),
         database._config.message.splitlines()[0][:255],
         timestamp,
         _to_filename(specname, timestamp),

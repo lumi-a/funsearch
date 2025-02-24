@@ -157,9 +157,11 @@ class ProgramsDatabase:
     self._last_reset_time: float = time.time()
 
   def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
-    """Returns the best programs per island."""
+    """Returns the best programs per island, together with their scores."""
     return sorted(
-      zip(self._best_program_per_island, self._best_score_per_island), key=lambda t: t[1], reverse=True
+      [(island._best_program, island._best_score) for island in self._islands],
+      key=lambda t: t[1],
+      reverse=True,
     )
 
   def populate(self, log_path: pathlib.Path) -> bool:
@@ -206,9 +208,6 @@ class ProgramsDatabase:
       "inputs",
       "_specification",
       "_islands",
-      "_best_score_per_island",
-      "_best_program_per_island",
-      "_best_scores_per_test_per_island",
       "_last_reset_time",
       "_program_counter",
       "_backups_done",
@@ -275,8 +274,7 @@ class ProgramsDatabase:
 
   def print_status(self) -> None:
     """Prints the current status of the database."""
-    scores = self._best_score_per_island
-    max_score = max(scores)
+    max_score = max(island._best_score for island in self._islands)
     # Subtract 1 due to the initial .populate() calls
     total_successes = sum(island._success_count - 1 for island in self._islands)  # noqa: SLF001
     total_failures = sum(island._failure_count for island in self._islands)  # noqa: SLF001

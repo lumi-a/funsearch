@@ -38,7 +38,7 @@ class TestMain(unittest.TestCase):
       assert mock_run.call_count == 1
 
   def test_main_sample(self):
-    with patch("funsearch.sampler.LLM._draw_sample", return_value="return 0.5") as mock_run:
+    with patch("funsearch.sampler.LLM._draw_sample", return_value="return 0.5"):
       result = runner.invoke(start, self.default_args)
       assert result.exit_code == 0
 

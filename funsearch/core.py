@@ -22,7 +22,6 @@ import os
 import queue
 import threading
 import time
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import llm
@@ -32,6 +31,8 @@ from funsearch.sampler import LLM
 from funsearch.sandbox import ExternalProcessSandbox
 
 if TYPE_CHECKING:
+  from pathlib import Path
+
   from funsearch.programs_database import ProgramsDatabase
 
 
@@ -136,7 +137,7 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
 
       llm_responses_slots.release()
 
-  def database_printer(stop_event: threading.Event):
+  def database_printer(stop_event: threading.Event) -> None:
     while not stop_event.is_set():
       time.sleep(10)
       database.print_status()
@@ -183,15 +184,15 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
     stop_event.set()
 
   except KeyboardInterrupt:
-    print("Stopping threads...")
+    print("Stopping threads...")  # noqa: T201
     stop_event.set()
 
-    print("Waiting for requests to finish...")
+    print("Waiting for requests to finish...")  # noqa: T201
     while any(t.is_alive() for t in llm_threads):
       for t in llm_threads:
         t.join(timeout=0.1)
 
-    print(f"Analysing {llm_responses.qsize()} remaining responses...")
+    print(f"Analysing {llm_responses.qsize()} remaining responses...")  # noqa: T201
     # TODO: The KeyboardInterrupt is forwarded to the subprocesses, so they always fail here.
     while any(t.is_alive() for t in dispatcher_threads):
       for t in dispatcher_threads:

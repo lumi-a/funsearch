@@ -24,6 +24,26 @@
     [
       3
     ],
+    1.75,
+    "Perturb Lucas' solution slightly\n\nStart with putting the final sequence of the xs as:\n  [2**n] * 2**n\ninstead of\n  [2**n] * 2**n + 0",
+    1740323614,
+    "gasoline-list_1740323614.json"
+  ],
+  [
+    "gasoline-list",
+    [
+      3
+    ],
+    1.7500002188608434,
+    "Perturb Lucas' solution by removing most final entries.",
+    1740413681,
+    "gasoline-list_1740413681.json"
+  ],
+  [
+    "gasoline-list",
+    [
+      3
+    ],
     1.7777777777777777,
     "Perturb Lucas' solution by removing the ys, and clamp both lists to [0, 2**31 - 1].",
     1740263394,

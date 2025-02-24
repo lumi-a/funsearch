@@ -11,16 +11,15 @@ from pathlib import Path
 
 import click
 import llm
-from dotenv import load_dotenv
 
-from funsearch import config, core, evaluator, sampler, sandbox
+from funsearch import config, core
 from funsearch.programs_database import ProgramsDatabase
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
 logging.basicConfig(level=LOGLEVEL)
 
 
-def _parse_input(filename_or_data: str) -> list[float | int] | list[str]:
+def _parse_input(filename_or_data: str) -> list[float] | list[str]:
   if len(filename_or_data) == 0:
     msg = "No input data specified"
     raise Exception(msg)
@@ -62,49 +61,9 @@ def _most_recent_backup() -> Path:
   return selected_file
 
 
-def _build_samplers(
-  database: ProgramsDatabase, sandbox_name: str, log_path: Path, model_name: str, conf: config.Config
-) -> list[sampler.Sampler]:
-  load_dotenv()
-  model = llm.get_model(model_name)
-  model.key = model.get_key()
-  language_model = sampler.LLM(conf.samples_per_prompt, model, log_path)
-  sandbox_class = SANDBOXES[sandbox_name]
-
-  samplers: list[sampler.Sampler] = [
-    sampler.Sampler(
-      database,
-      [
-        evaluator.Evaluator(
-          database,
-          sandbox_class(
-            base_path=log_path / f"sampler-{sampler_ix}-evaluator-{evaluator_ix}", timeout_secs=30
-          ),
-          database.template,
-          database.function_to_evolve,
-          database.function_to_run,
-          database.inputs,
-        )
-        for evaluator_ix in range(conf.num_evaluators)
-      ],
-      language_model,
-    )
-    for sampler_ix in range(conf.num_samplers)
-  ]
-
-  initial = database.template.get_function(database.function_to_evolve).body
-
-  samplers[0]._evaluators[0].analyse(initial, island_id=None, version_generated=None)  # noqa: SLF001
-  if not len(database._islands[0]._clusters) > 0:  # noqa: SLF001
-    msg = "Running initial function failed, see logs in output_path"
-    raise RuntimeError(msg)
-
-  return samplers
-
-
 @click.group()
 @click.pass_context
-def main(ctx: click.Context) -> None:
+def main(_ctx: click.Context) -> None:
   pass
 
 
@@ -114,9 +73,6 @@ def _get_all_subclasses(cls: type) -> set[type]:
 
 # TODO: Once click 8.2.0 releases, use better click.Choice
 MODELS: list[str] = list(llm.get_model_aliases().keys())
-SANDBOXES: dict[str, type[sandbox.DummySandbox]] = {
-  c.__name__: c for c in [sandbox.DummySandbox, *_get_all_subclasses(sandbox.DummySandbox)]
-}
 
 
 @main.command(context_settings={"show_default": True})
@@ -128,20 +84,13 @@ SANDBOXES: dict[str, type[sandbox.DummySandbox]] = {
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-@click.option(
-  "--sandbox-type",
-  default="ExternalProcessSandbox",
-  type=click.Choice(list(SANDBOXES.keys())),
-  help="Sandbox type",
-)
 def start(
   spec_file: click.File,
-  inputs: list[float | int] | list[str],
+  inputs: list[float] | list[str],
   message: str,
   llm: str,
   output_path: click.Path,
   iterations: int,
-  sandbox_type: str,
 ) -> None:
   """Execute FunSearch algorithm.
 
@@ -162,17 +111,17 @@ def start(
 
   timestamp = str(int(time.time()))
   problem_name = Path(spec_file.name).stem
+
   database = ProgramsDatabase(
     conf.programs_database, spec_file.read(), inputs, problem_name, timestamp, message
   )
 
   log_path = pathlib.Path(output_path) / problem_name / timestamp
-  if not log_path.exists():
-    log_path.mkdir(parents=True)
-    logging.info(f"Writing logs to {log_path}")
-  samplers = _build_samplers(database, sandbox_type, log_path, llm, conf)
-
-  core.run(samplers, database, iterations)
+  log_path.mkdir(exist_ok=True, parents=True)
+  if not database.populate(log_path):
+    msg = "Running initial function failed, see logs in output_path"
+    raise RuntimeError(msg)
+  core.run(database, llm, log_path, iterations)
 
 
 @main.command(context_settings={"show_default": True})
@@ -182,36 +131,22 @@ def start(
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
 @click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-@click.option(
-  "--sandbox-type",
-  default="ExternalProcessSandbox",
-  type=click.Choice(list(SANDBOXES.keys())),
-  help="Sandbox type",
-)
-def resume(
-  db_file: click.File | None, llm: str, output_path: click.Path, iterations: int, sandbox_type: str
-) -> None:
+def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterations: int) -> None:
   """Continue running FunSearch from a backup.
 
   If not provided, selects the most recent one from data/backups/.
   """
-  conf = config.Config()
-
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
   database = ProgramsDatabase.load(db_file)
 
   timestamp = str(int(time.time()))
-  database.identifier = str(timestamp)
+  database.timestamp = timestamp
 
   log_path = pathlib.Path(output_path) / database.problem_name / timestamp
-  if not log_path.exists():
-    log_path.mkdir(parents=True)
-    logging.info(f"Writing logs to {log_path}")
+  log_path.mkdir(exist_ok=True, parents=True)
 
-  samplers = _build_samplers(database, sandbox_type, log_path, llm, conf)
-
-  core.run(samplers, database, iterations)
+  core.run(database, llm, log_path, iterations)
 
 
 @main.command()

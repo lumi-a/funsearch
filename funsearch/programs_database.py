@@ -21,20 +21,33 @@ import copy
 import dataclasses
 import pathlib
 import pickle
-import sys
+import threading
 import time
 from collections.abc import Iterable, Mapping, Sequence
-from typing import Any
 
 import numpy as np
 from absl import logging
 
 from funsearch import code_manipulation
 from funsearch import config as config_lib
-from funsearch.core import extract_function_names
+from funsearch.evaluator import Evaluator
+from funsearch.sandbox import ExternalProcessSandbox
 
 Signature = tuple[float, ...]
-ScoresPerTest = Mapping[Any, float]
+ScoresPerTest = Mapping[float | str, float]
+
+
+def extract_function_names(specification: str) -> tuple[str, str]:
+  """Returns the name of the function to evolve and of the function to run."""
+  run_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "run"))
+  if len(run_functions) != 1:
+    msg = "Expected 1 function decorated with `@funsearch.run`."
+    raise ValueError(msg)
+  evolve_functions = list(code_manipulation.yield_decorated(specification, "funsearch", "evolve"))
+  if len(evolve_functions) != 1:
+    msg = "Expected 1 function decorated with `@funsearch.evolve`."
+    raise ValueError(msg)
+  return evolve_functions[0], run_functions[0]
 
 
 def _softmax(logits: np.ndarray, temperature: float) -> np.ndarray:
@@ -92,11 +105,13 @@ class ProgramsDatabase:
     self,
     config: config_lib.ProgramsDatabaseConfig,
     specification: any,
-    inputs: list[float | int] | list[str],
+    inputs: list[float] | list[str],
     problem_name: str,
     timestamp: int,
     message: str,
   ) -> None:
+    # TODO: This could be an RwLock instead, but the read-operations are fast enough for now.
+    self.lock = threading.Lock()
     self._config: config_lib.ProgramsDatabaseConfig = config
     self.inputs = inputs
 
@@ -133,12 +148,52 @@ class ProgramsDatabase:
     self.message = message
 
   def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
-    return sorted(
-      zip(self._best_program_per_island, self._best_score_per_island), key=lambda t: t[1], reverse=True
+    """Returns the best programs per island."""
+    with self.lock:
+      return sorted(
+        zip(self._best_program_per_island, self._best_score_per_island), key=lambda t: t[1], reverse=True
+      )
+
+  def populate(self, log_path: pathlib.Path) -> bool:
+    """Populate islands with the seed-function and return whether the seed-function ran successfully."""
+    with self.lock:
+      evaluator = Evaluator(
+        ExternalProcessSandbox(log_path),
+        self.template,
+        self.function_to_evolve,
+        self.function_to_run,
+        self.inputs,
+      )
+      initial_sample = self.template.get_function(self.function_to_evolve).body
+    program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
+    if scores_per_test:
+      with self.lock:
+        for island_id in range(len(self._islands)):
+          self._register_program_in_island(program, island_id, scores_per_test, population_call=True)
+      return True
+    return False
+
+  @classmethod
+  def load(cls, file) -> ProgramsDatabase:
+    """Load previously saved database."""
+    data = pickle.load(file)
+
+    database = cls(
+      config=data["_config"],
+      specification=data["_specification"],
+      inputs=data["inputs"],
+      problem_name=data["problem_name"],
+      timestamp=int(time.time()),
+      message=data["message"],
     )
 
-  def save(self, file) -> None:
-    """Save database to a file."""
+    for key in data:
+      setattr(database, key, data[key])
+
+    return database
+
+  def _save(self, file) -> None:
+    """Save `self` to a file. Does not acquire self.lock."""
     data = {}
     keys = [
       "_config",
@@ -159,49 +214,48 @@ class ProgramsDatabase:
       data[key] = getattr(self, key)
     pickle.dump(data, file)
 
-  def load(file) -> ProgramsDatabase:
-    """Load previously saved database."""
-    data = pickle.load(file)
-
-    database = ProgramsDatabase(
-      config=data["_config"],
-      specification=data["_specification"],
-      inputs=data["inputs"],
-      problem_name=data["problem_name"],
-      timestamp=int(time.time()),
-      message=data["message"],
-    )
-
-    for key in data:
-      setattr(database, key, data[key])
-
-    return database
+  def save(self, file) -> None:
+    """Save database to a file."""
+    with self.lock:
+      self._save(file)
 
   def backup(self) -> None:
-    filename = f"{self.problem_name}_{self.timestamp}_{self._backups_done}.pickle"
-    p = pathlib.Path(self._config.backup_folder)
-    if not p.exists():
-      p.mkdir(parents=True, exist_ok=True)
-    filepath = p / filename
-    logging.info(f"Saving backup to {filepath}")
+    """Save a backup of the database to the backup-folder."""
+    with self.lock:
+      p = pathlib.Path(self._config.backup_folder)
+      if not p.exists():
+        p.mkdir(parents=True, exist_ok=True)
+      filepath = p / f"{self.problem_name}_{self.timestamp}_{self._backups_done}.pickle"
+      logging.info(f"Saving backup to {filepath}")
 
-    with open(filepath, mode="wb") as f:
-      self.save(f)
-    self._backups_done += 1
+      with filepath.open("wb") as f:
+        self._save(f)
+      self._backups_done += 1
 
   def get_prompt(self) -> Prompt:
     """Returns a prompt containing implementations from one chosen island."""
-    island_id = np.random.randint(len(self._islands))
-    code, version_generated = self._islands[island_id].get_prompt()
-    return Prompt(code, version_generated, island_id)
+    with self.lock:
+      island_id = np.random.randint(len(self._islands))
+      code, version_generated = self._islands[island_id].get_prompt()
+      return Prompt(code, version_generated, island_id)
 
   def _register_program_in_island(
-    self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
+    self,
+    program: code_manipulation.Function,
+    island_id: int,
+    scores_per_test: ScoresPerTest,
+    *,
+    population_call: bool = False,
   ) -> None:
-    """Registers `program` in the specified island."""
+    """Registers `program` in the specified island.
+
+    Mutates `self` without acquiring self.lock. Population-call is used to
+    not count the initial .population-call as a success. TODO: That seems ugly.
+    """
     self._islands[island_id].register_program(program, scores_per_test)
     score = _reduce_score(scores_per_test)
-    self._islands[island_id].register_success(score)
+    if not population_call:
+      self._islands[island_id].register_success(score)
     if score > self._best_score_per_island[island_id]:
       self._best_program_per_island[island_id] = program
       self._best_scores_per_test_per_island[island_id] = scores_per_test
@@ -210,38 +264,31 @@ class ProgramsDatabase:
       logging.info("✔ Best score of island %d increased to %s", island_id, score)
 
   def register_program(
-    self, program: code_manipulation.Function, island_id: int | None, scores_per_test: ScoresPerTest
+    self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
   ) -> None:
     """Registers `program` in the database."""
-    # In an asynchronous implementation we should consider the possibility of
-    # registering a program on an island that had been reset after the prompt
-    # was generated. Leaving that out here for simplicity.
-    if island_id is None:
-      # This is a program added at the beginning, so adding it to all islands.
-      for island_id in range(len(self._islands)):
-        self._register_program_in_island(program, island_id, scores_per_test)
-    else:
+    with self.lock:
       self._register_program_in_island(program, island_id, scores_per_test)
 
-    # Check whether it is time to reset an island.
-    if time.time() - self._last_reset_time > self._config.reset_period:
-      self._last_reset_time = time.time()
-      self.reset_islands()
+      # Check whether it is time to reset an island.
+      if time.time() - self._last_reset_time > self._config.reset_period:
+        self._last_reset_time = time.time()
+        self._reset_islands()
 
-    # Backup every N iterations
-    if self._program_counter > 0:
-      self._program_counter += 1
-      if self._program_counter > self._config.backup_period:
-        self._program_counter = 0
-        self.backup()
+      # Backup every N iterations
+      if self._program_counter > 0:
+        self._program_counter += 1
+        if self._program_counter > self._config.backup_period:
+          self._program_counter = 0
+          self.backup()
 
   def register_failure(self, island_id: int) -> None:
-    """Registers a failure in the database."""
-    if island_id is not None:
+    """Registers a failure on an island."""
+    with self.lock:
       self._islands[island_id].register_failure()
 
-  def reset_islands(self) -> None:
-    """Resets the weaker half of islands."""
+  def _reset_islands(self) -> None:
+    """Resets the weaker half of islands without acquiring self.lock."""
     # We sort best scores after adding minor noise to break ties.
     indices_sorted_by_score: np.ndarray = np.argsort(
       self._best_score_per_island + np.random.randn(len(self._best_score_per_island)) * 1e-6
@@ -264,14 +311,16 @@ class ProgramsDatabase:
       self._register_program_in_island(founder, island_id, founder_scores)
 
   def print_status(self) -> None:
-    scores = self._best_score_per_island
-    max_score = max(scores)
-    total_successes = sum(island._success_count for island in self._islands)  # noqa: SLF001
-    total_failures = sum(island._failure_count for island in self._islands)  # noqa: SLF001
-    attempts = total_successes + total_failures
-    failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
+    """Prints the current status of the database."""
+    with self.lock:
+      scores = self._best_score_per_island
+      max_score = max(scores)
+      total_successes = sum(island._success_count for island in self._islands)  # noqa: SLF001
+      total_failures = sum(island._failure_count for island in self._islands)  # noqa: SLF001
+      attempts = total_successes + total_failures
+      failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
 
-    print(f"Max-Score {max_score:8.3f} │ {attempts} samples │ {failure_rate}% failed")  # noqa: T201
+      print(f"Max-Score {max_score:8.3f} │ {attempts} samples │ {failure_rate}% failed")  # noqa: T201
 
 
 class Island:
@@ -285,6 +334,7 @@ class Island:
     cluster_sampling_temperature_init: float,
     cluster_sampling_temperature_period: int,
   ) -> None:
+    """Initialise island."""
     self._template: code_manipulation.Program = template
     self._function_to_evolve: str = function_to_evolve
     self._functions_per_prompt: int = functions_per_prompt
@@ -296,7 +346,7 @@ class Island:
     self._success_count: int = 0  # This should always equal len([x for x in self._runs if x is not None])
     self._failure_count: int = 0  # This should always equal len([x for x in self._runs if x is None])
     # For each improvement, keep track of the program that caused the improvement.
-    self._improvements: [tuple[int, code_manipulation.Function]] = []
+    self._improvements: list[tuple[int, code_manipulation.Function]] = []
 
     self._clusters: dict[Signature, Cluster] = {}
     self._num_programs_peroidic: int = 0
@@ -368,10 +418,10 @@ class Island:
       if i >= 1:
         implementation.docstring = f"Improved version of `{self._function_to_evolve}_v{i - 1}`."
       # If the function is recursive, replace calls to itself with its new name.
-      implementation = code_manipulation.rename_function_calls(
+      renamed_implementation = code_manipulation.rename_function_calls(
         str(implementation), self._function_to_evolve, new_function_name
       )
-      versioned_functions.append(code_manipulation.text_to_function(implementation))
+      versioned_functions.append(code_manipulation.text_to_function(renamed_implementation))
 
     # Create the header of the function to be generated by the LLM.
     next_version = len(implementations)
@@ -393,7 +443,7 @@ class Cluster:
   """A cluster of programs on the same island and with the same Signature."""
 
   def __init__(self, score: float, implementation: code_manipulation.Function) -> None:
-    # TODO: This is never used?
+    """A cluster, initialised with a single implementation and score."""
     self._score = score
     self._programs: list[code_manipulation.Function] = [implementation]
     self._lengths: list[int] = [len(str(implementation))]

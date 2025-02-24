@@ -20,12 +20,9 @@ from __future__ import annotations
 import ast
 import copy
 import re
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-from funsearch import code_manipulation, programs_database, sandbox
-
-if TYPE_CHECKING:
-  from collections.abc import Sequence
+from funsearch import code_manipulation, sandbox
 
 
 class _FunctionLineVisitor(ast.NodeVisitor):
@@ -140,41 +137,35 @@ class Evaluator:
 
   def __init__(
     self,
-    database: programs_database.ProgramsDatabase,
-    sbox: sandbox.DummySandbox,
+    sandbox: sandbox.ExternalProcessSandbox,
     template: code_manipulation.Program,
     function_to_evolve: str,
     function_to_run: str,
-    inputs: Sequence[Any],
-    timeout_seconds: int = 30,
+    inputs: list[float] | list[str],
   ) -> None:
-    self._database = database
+    self._sandbox = sandbox
     self._template = template
     self._function_to_evolve = function_to_evolve
     self._function_to_run = function_to_run
     self._inputs = inputs
-    self._timeout_seconds = timeout_seconds
-    self._sandbox = sbox
 
-  def analyse(self, sample: str, island_id: int | None, version_generated: int | None) -> None:
-    """Compiles the sample into a program and executes it on test inputs."""
+  def analyse(
+    self, sample: str, version_generated: int | None, index: int
+  ) -> tuple[code_manipulation.Function, dict[float | str, float]]:
+    """Compile the sample, execute it on test inputs, returning the compiled function and outputs."""
+    match = re.search(r"(```(python|))(.*?)```", sample, re.DOTALL)
+    code: str = match.group(3) if match else sample
+
     new_function, program = _sample_to_program(
-      sample, version_generated, self._template, self._function_to_evolve
+      code, version_generated, self._template, self._function_to_evolve
     )
 
-    scores_per_test = {}
+    scores_per_test: dict[float | str, float] = {}
     for current_input in self._inputs:
-      test_output, runs_ok = self._sandbox.run(
-        program, self._function_to_run, current_input, self._timeout_seconds
-      )
+      if _calls_ancestor(program, self._function_to_evolve):
+        continue
+      result = self._sandbox.run(program, self._function_to_run, current_input, index)
+      if result is not None:
+        scores_per_test[current_input] = result
 
-      if runs_ok and not _calls_ancestor(program, self._function_to_evolve) and test_output is not None:
-        if not isinstance(test_output, (int, float)):
-          msg = "@function.run did not return an int/float score."
-          raise ValueError(msg)
-        scores_per_test[current_input] = test_output
-
-    if scores_per_test:
-      self._database.register_program(new_function, island_id, scores_per_test)
-    elif island_id is not None:
-      self._database.register_failure(island_id)
+    return new_function, scores_per_test

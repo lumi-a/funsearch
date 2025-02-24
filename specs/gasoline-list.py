@@ -40,7 +40,5 @@ def gasoline(n: int) -> tuple[list[int], list[int]]:
     u = int(2**n * (1 - 2 ** (-i)))
     xs.extend([u for _ in range(2**i)])
     ys.extend([u for _ in range(2**i)])
-  xs.extend([int(2**n) for _ in range(2**n)])
-  u = int(2**n * (1 - 2 ** (-n)))
-  ys.extend([u for _ in range(2**n)])
+  xs[-1] = 0
   return xs, ys

@@ -44,8 +44,8 @@ def _to_filename(function_name: str, timestamp: int) -> Path:
 
 # Save small descriptions of each json-file in index.json
 # Has schema (problemName, inputs, maxScore, message, timestamp, filepath)
-index_json: list[tuple[str, list[float | int] | list[str], float, str, int, str]] = []
-for (specname, timestamp), (idx, file) in files.items():
+index_json: list[tuple[str, list[float] | list[str], float, str, int, str]] = []
+for (specname, timestamp), (_idx, file) in files.items():
   database = ProgramsDatabase.load(file.open("rb"))
 
   with (JSON_DIR / _to_filename(specname, timestamp)).open("w") as f:

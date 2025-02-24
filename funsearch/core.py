@@ -112,12 +112,14 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
       sample = llm.draw_sample(prompt.code, current_index)
       llm_responses.put((sample, prompt.island_id, prompt.version_generated, current_index))
 
-  def analysation_dispatcher(
-    iteration_manager: IterationManager, stop_event: threading.Event, db: ProgramsDatabase
-  ) -> None:
+  def analysation_dispatcher(iteration_manager: IterationManager, stop_event: threading.Event) -> None:
     """Dispatcher thread that pulls web results from the queue and analyses the results."""
     evaluator = Evaluator(
-      ExternalProcessSandbox(log_path), db.template, db.function_to_evolve, db.function_to_run, db.inputs
+      ExternalProcessSandbox(log_path),
+      database.template,
+      database.function_to_evolve,
+      database.function_to_run,
+      database.inputs,
     )
     while not stop_event.is_set():
       try:
@@ -127,17 +129,19 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
           break
         continue
 
-      print(f"Analysing {current_index}")
       new_function, scores_per_test = evaluator.analyse(sample, version_generated, current_index)
 
       if scores_per_test:
-        db.register_program(new_function, island_id, scores_per_test)
+        database.register_program(new_function, island_id, scores_per_test)
       elif island_id is not None:
-        db.register_failure(island_id)
-
-      print(f"Entered {current_index}")
+        database.register_failure(island_id)
 
       llm_responses_slots.release()
+
+  def database_printer(stop_event: threading.Event):
+    while not stop_event.is_set():
+      time.sleep(1)
+      database.print_status()
 
   stop_event = threading.Event()
   iteration_manager = IterationManager(iterations)
@@ -156,25 +160,25 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
   # Start analysation dispatcher threads
   num_dispatcher_workers = os.cpu_count()
   dispatcher_threads: list[threading.Thread] = [
-    threading.Thread(target=analysation_dispatcher, args=(iteration_manager, stop_event, database))
+    threading.Thread(target=analysation_dispatcher, args=(iteration_manager, stop_event))
     for _ in range(num_dispatcher_workers)
   ]
   for t in dispatcher_threads:
     t.start()
 
+  db_printer_thread = threading.Thread(target=database_printer, args=(stop_event,))
+  db_printer_thread.start()
+
   try:
     # Wait for web request workers to finish (if iterations is finite, they will eventually stop)
     while any(t.is_alive() for t in llm_threads):
       for t in llm_threads:
-        t.join(timeout=1)
-        database.print_status()
+        t.join(timeout=0.1)
 
-    print(f"Analysing {llm_responses.qsize()} remaining responses...")
     # Wait for dispatcher threads to finish now
     while any(t.is_alive() for t in dispatcher_threads):
       for t in dispatcher_threads:
-        t.join(timeout=1)
-        database.print_status()
+        t.join(timeout=0.1)
 
     # Signal the dispatcher, database updater, and adjuster threads to stop.
     # This should be redundant, anyway.
@@ -183,13 +187,18 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
   except KeyboardInterrupt:
     print("Stopping threads...")
     stop_event.set()
+
     print("Waiting for requests to finish...")
-    for t in llm_threads:
-      t.join()
+    while any(t.is_alive() for t in llm_threads):
+      for t in llm_threads:
+        t.join(timeout=0.1)
+
     print(f"Analysing {llm_responses.qsize()} remaining responses...")
     # TODO: The KeyboardInterrupt is forwarded to the subprocesses, so they always fail here.
-    for t in dispatcher_threads:
-      t.join()
+    while any(t.is_alive() for t in dispatcher_threads):
+      for t in dispatcher_threads:
+        t.join(timeout=0.1)
   finally:
+    db_printer_thread.join()
     database.print_status()
     database.backup()

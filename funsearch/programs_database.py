@@ -154,14 +154,7 @@ class ProgramsDatabase:
       for _ in range(config.num_islands)
     ]
 
-    # TODO: Why not move these to Island?
-    self._best_score_per_island: list[float] = [-float("inf")] * config.num_islands
-    self._best_program_per_island: list[code_manipulation.Function | None] = [None] * config.num_islands
-    self._best_scores_per_test_per_island: list[ScoresPerTest | None] = [None] * config.num_islands
-
     self._last_reset_time: float = time.time()
-    self._program_counter = 0
-    self._backups_done = 0
 
   def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
     """Returns the best programs per island."""
@@ -231,7 +224,6 @@ class ProgramsDatabase:
     """Save a backup of the database to a backup-file."""
     with backup_file.open("wb") as f:
       self.save(f)
-    self._backups_done += 1
 
   def get_prompt(self) -> Prompt:
     """Returns a prompt containing implementations from one chosen island."""

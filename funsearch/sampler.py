@@ -44,7 +44,7 @@ class LLM:
         output_text = self._model.prompt(prompt).text()
         break
       except Exception as e:
-        print("Retrying LLM call after", e)  # noqa: T201
+        print("Retrying LLM call after error:", e)  # noqa: T201
 
     self._log(prompt, output_text, index)
 

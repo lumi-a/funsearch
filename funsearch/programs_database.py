@@ -185,18 +185,10 @@ class ProgramsDatabase:
   def load(cls, file) -> ProgramsDatabase:
     """Load previously saved database."""
     data = pickle.load(file)
-
-    database = cls(
-      config=data["_config"],
-      specification=data["_specification"],
-      inputs=data["inputs"],
-      problem_name=data["problem_name"],
-      timestamp=int(time.time()),
-      message=data["message"],
-    )
-
+    database = ProgramsDatabase(config=ProgramsDatabaseConfig(**data["_config"]))
     for key in data:
-      setattr(database, key, data[key])
+      if key != "_config":
+        setattr(database, key, data[key])
 
     return database
 
@@ -205,15 +197,8 @@ class ProgramsDatabase:
     data = {}
     keys = [
       "_config",
-      "inputs",
-      "_specification",
       "_islands",
       "_last_reset_time",
-      "_program_counter",
-      "_backups_done",
-      "problem_name",
-      "timestamp",
-      "message",
     ]
     for key in keys:
       data[key] = getattr(self, key)

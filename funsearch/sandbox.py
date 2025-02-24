@@ -19,7 +19,7 @@ def _compile_code(program: str) -> dict:
 
   parsed_code = ast.parse(program)
   compiled_code = compile(parsed_code, filename="<ast>", mode="exec")
-  exec(compiled_code, namespace)
+  exec(compiled_code, namespace)  # noqa: S102
   return namespace
 
 
@@ -34,6 +34,7 @@ class ExternalProcessSandbox:
   """
 
   def __init__(self, base_path: Path, timeout_secs: int = 30) -> None:
+    """Create a new sandbox that logs to `base_path` and runs a sample for at most `timeout_secs`."""
     self.output_path = Path(base_path) / "sandbox"
     self.timeout_secs = timeout_secs
 
@@ -78,7 +79,7 @@ class ExternalProcessSandbox:
     else:
       return result.returncode
 
-  def run(self, program: str, function_to_run: str, input: str | float, index: int) -> float | None:
+  def run(self, program: str, function_to_run: str, input_to_run: str | float, index: int) -> float | None:
     """Executes the code in a separate process.
 
     Returns the output of the code if it was successful and could be converted to a float,
@@ -88,12 +89,12 @@ class ExternalProcessSandbox:
     if not call_data_folder.exists():
       call_data_folder.mkdir()
 
-    input_hash = hash(input)  # Good enough
+    input_hash = hash(input_to_run)  # Good enough
     input_path = (self.input_path / f"{input_hash}.pickle").absolute()
 
     if not input_path.exists():
       with Path(input_path).open("wb") as f:
-        cloudpickle.dump(input, f)
+        cloudpickle.dump(input_to_run, f)
 
     try:
       namespace = _compile_code(program)

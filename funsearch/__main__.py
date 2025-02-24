@@ -142,9 +142,9 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   timestamp = str(int(time.time()))
   database.identifier = str(timestamp)
 
-  pathlib.Path(output_path) / database.problem_name / timestamp
+  log_path = pathlib.Path(output_path) / database.problem_name / timestamp
 
-  core.run(samplers, database, iterations)
+  core.run(database, llm, database, log_path, iterations)
 
 
 @main.command()

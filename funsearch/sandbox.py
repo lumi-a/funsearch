@@ -11,8 +11,6 @@ import cloudpickle
 
 CONTAINER_MAIN = (Path(__file__).parent / "container" / "main.py").absolute()
 
-IMAGE_NAME = "funsearch_sandbox"
-
 
 def _compile_code(program: str) -> dict:
   namespace = {}

@@ -63,7 +63,7 @@ def _most_recent_backup() -> Path:
 
 @click.group()
 @click.pass_context
-def main(ctx: click.Context) -> None:
+def main(_ctx: click.Context) -> None:
   pass
 
 
@@ -140,7 +140,7 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   database = ProgramsDatabase.load(db_file)
 
   timestamp = str(int(time.time()))
-  database.identifier = str(timestamp)
+  database.timestamp = timestamp
 
   log_path = pathlib.Path(output_path) / database.problem_name / timestamp
 

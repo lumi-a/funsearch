@@ -19,8 +19,6 @@ from absl.testing import absltest, parameterized
 
 from funsearch import evaluator
 
-TESTS_FOLDER = pathlib.Path(__file__).parent
-
 
 class EvaluatorTest(parameterized.TestCase):
   def test_trim_function_body_docstring(self):

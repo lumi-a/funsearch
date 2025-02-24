@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import queue
 import threading
 import time
@@ -61,6 +62,10 @@ class IterationManager:
     return self._max_iterations != -1 and self._index >= self._max_iterations
 
 
+# TODO: Instead of giving each Database a lock, consider writing a DbManager class
+# that implements the locking outside of the Database-class.
+
+
 # We pass in llm_name because there doesn't seem to be a good way of getting the class of
 # a model from its string. You could do:
 # |  a = get_model(llm_name)
@@ -79,46 +84,40 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
 
   # Stores (program, island_id, version_generated, index) per LLM-call
   llm_responses: queue.Queue[tuple[str, int, int, int]] = queue.Queue()
-  # The maximum size of the llm_responses queue.
-  # Increasing this might make the program a little faster (because the queue is
-  # less likely to be empty), but it also means that function-improvements are
-  # only transferred to the LLM every `max_stored_responses` iterations, which
+  # Increasing the semaphore-value might make the program a little faster
+  # (because the queue is less likely to be empty when an analyser tries to
+  # get a sample from it), but it also means that function-improvements are
+  # only transferred to the LLM ~every `value` iterations, which
   # degrades the quality of the algorithm.
-  max_stored_responses = 20
+  llm_responses_slots = threading.Semaphore(32)  # TODO: increase to like 20
 
   def llm_response_worker(iteration_manager: IterationManager, stop_event: threading.Event, llm: LLM) -> None:
     """Worker thread that continuously makes web requests as long as we haven't reached `iterations`.
 
     Waits if the output queue has size >= dynamic_max_queue_size.
     """
-    while not stop_event.is_set():
-      # Check if we've reached the maximum number of web requests (if applicable)
+    while not (stop_event.is_set() or iteration_manager.is_done()):
+      # Acquire a queue slot
+      while not stop_event.is_set():
+        if llm_responses_slots.acquire(timeout=0.1):
+          break
+      if stop_event.is_set():
+        break
+
       current_index = iteration_manager.get_next_index()
       if current_index is None:
         break
 
-      # Check dynamic max queue size and wait if needed
-      while llm_responses.qsize() >= max_stored_responses and not stop_event.is_set():
-        time.sleep(0.1)
-
-      # Perform the web request and enqueue the result
       prompt = database.get_prompt()
-      # TODO: Is this not-blocking?
       sample = llm.draw_sample(prompt.code, current_index)
       llm_responses.put((sample, prompt.island_id, prompt.version_generated, current_index))
 
-    logging.info("LLM response worker stopped.")
-
   def analysation_dispatcher(
-    iteration_manager: IterationManager, stop_event: threading.Event, executor: futures.ProcessPoolExecutor
+    iteration_manager: IterationManager, stop_event: threading.Event, db: ProgramsDatabase
   ) -> None:
-    """Dispatcher thread that pulls web results from the queue and submits CPU tasks to the process pool."""
+    """Dispatcher thread that pulls web results from the queue and analyses the results."""
     evaluator = Evaluator(
-      ExternalProcessSandbox(log_path),
-      database.template,
-      database.function_to_evolve,
-      database.function_to_run,
-      database.inputs,
+      ExternalProcessSandbox(log_path), db.template, db.function_to_evolve, db.function_to_run, db.inputs
     )
     while not stop_event.is_set():
       try:
@@ -128,68 +127,64 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
           break
         continue
 
-      future = executor.submit(evaluator.analyse, sample, version_generated, current_index)
+      new_function, scores_per_test = evaluator.analyse(sample, version_generated, current_index)
 
-      # TODO: How much work is it to update the database after every successful function-call?
-      # If it's a problem, we could instead implement another producer-consumer structure.
-      def on_complete(
-        future: futures.Future[tuple[code_manipulation.Function, dict[float | str, float]]],
-        island_id: int = island_id,
-      ) -> None:
-        # See https://docs.python-guide.org/writing/gotchas/#late-binding-closures for why
-        # we have island_id as an optional argument here.
-        new_function, scores_per_test = future.result()
-        if scores_per_test:
-          database.register_program(new_function, island_id, scores_per_test)
-        elif island_id is not None:
-          database.register_failure(island_id)
+      if scores_per_test:
+        db.register_program(new_function, island_id, scores_per_test)
+      elif island_id is not None:
+        db.register_failure(island_id)
 
-      future.add_done_callback(on_complete)
-
-    logging.info("Analysation-dispatcher exiting.")
+      llm_responses_slots.release()
 
   stop_event = threading.Event()
   iteration_manager = IterationManager(iterations)
 
-  # TODO: Consider passing `max_workers=os.cpu_count()` to ProcessPoolExecutor.
-  # This might help because the cpu-heavy task involves a subprocess-call itself.
-  with futures.ProcessPoolExecutor() as executor:
-    # Start web request worker threads.
-    num_llm_workers = 5
-    llm_threads: list[threading.Thread] = []
-    for _ in range(num_llm_workers):
-      model = llm.get_model(llm_name)
-      t = threading.Thread(
-        target=llm_response_worker, args=(iteration_manager, stop_event, LLM(model, log_path))
-      )
-      t.start()
-      llm_threads.append(t)
-    # Start the dispatcher thread.
-    dispatcher_thread = threading.Thread(
-      target=analysation_dispatcher, args=(iteration_manager, stop_event, executor)
+  # Start web request worker threads.
+  num_llm_workers = os.cpu_count() * 2
+  llm_threads: list[threading.Thread] = [
+    threading.Thread(
+      target=llm_response_worker, args=(iteration_manager, stop_event, LLM(llm.get_model(llm_name), log_path))
     )
-    dispatcher_thread.start()
-    try:
-      # Wait for web request workers to finish (if M is finite, they will eventually stop)
+    for _ in range(num_llm_workers)
+  ]
+  for t in llm_threads:
+    t.start()
+
+  # Start analysation dispatcher threads
+  num_dispatcher_workers = os.cpu_count()
+  dispatcher_threads: list[threading.Thread] = [
+    threading.Thread(target=analysation_dispatcher, args=(iteration_manager, stop_event, database))
+    for _ in range(num_dispatcher_workers)
+  ]
+  for t in dispatcher_threads:
+    t.start()
+
+  try:
+    # Wait for web request workers to finish (if M is finite, they will eventually stop)
+    while any(t.is_alive() for t in llm_threads):
       for t in llm_threads:
-        t.join(timeout=10)
+        t.join(timeout=0.1)
         database.print_status()
 
-      # Wait until the llm_responses queue is empty (i.e. all llm-requests have been dispatched)
-      while not llm_responses.empty():
-        time.sleep(0.1)
+    print(f"Analysing {llm_responses.qsize()} remaining responses...")
+    # Wait for dispatcher threads to finish now
+    for t in dispatcher_threads:
+      t.join(timeout=0.1)
+      database.print_status()
 
-      # Signal the dispatcher, database updater, and adjuster threads to stop
-      stop_event.set()
+    # Signal the dispatcher, database updater, and adjuster threads to stop.
+    # This should be redundant, anyway.
+    stop_event.set()
 
-      dispatcher_thread.join()
-
-    except KeyboardInterrupt:
-      logging.info("KeyboardInterrupt received, shutting down.")
-      stop_event.set()
-      for t in llm_threads:
-        t.join()
-      dispatcher_thread.join()
+  except KeyboardInterrupt:
+    print("Stopping threads...")
+    stop_event.set()
+    print("Waiting for requests to finish...")
+    for t in llm_threads:
+      t.join()
+    print(f"Analysing {llm_responses.qsize()} remaining responses...")
+    for t in dispatcher_threads:
+      t.join()
 
   database.print_status()
   database.backup()

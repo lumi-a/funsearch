@@ -103,7 +103,7 @@ class ExternalProcessSandbox:
       with (call_data_folder / "program.pickle").open("wb+") as f:
         cloudpickle.dump(namespace[function_to_run], f)
 
-      with (self.output_path / f"stderr_{index}.log").open("w") as error_file:
+      with (call_data_folder / f"stderr_{index}.log").open("w") as error_file:
         return_code = self._exec(call_data_folder, input_path, error_file)
 
       if return_code != 0:

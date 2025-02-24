@@ -38,11 +38,13 @@ class LLM:
 
     The index is used for logging and must be unique across threads.
     """
-    try:
-      output_text = self._model.prompt(prompt).text()
-    except Exception as e:
-      print("LLM call failed:", e)  # noqa: T201
-      output_text = ""
+    # Keep sampling until we get a response
+    while True:
+      try:
+        output_text = self._model.prompt(prompt).text()
+        break
+      except Exception as e:
+        print("Retrying LLM call after", e)  # noqa: T201
 
     self._log(prompt, output_text, index)
 

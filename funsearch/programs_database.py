@@ -351,7 +351,7 @@ class Island:
     self._success_count: int = 0  # This should always equal len([x for x in self._runs if x is not None])
     self._failure_count: int = 0  # This should always equal len([x for x in self._runs if x is None])
     # For each improvement, keep track of the program that caused the improvement.
-    self._improvements: [tuple[int, code_manipulation.Function]] = []
+    self._improvements: list[tuple[int, code_manipulation.Function]] = []
 
     self._clusters: dict[Signature, Cluster] = {}
     self._num_programs_peroidic: int = 0

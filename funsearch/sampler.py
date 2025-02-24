@@ -26,21 +26,6 @@ if TYPE_CHECKING:
   import llm
 
 
-# TODO: This is currently unused, but I feel like we should use it again.
-def reformat_to_two_spaces(code: str) -> str:
-  # Regular expression to match leading spaces at the beginning of each line
-  pattern = r"^\s+"
-
-  # Function to replace leading spaces with two spaces per indentation level
-  def replace_with_two_spaces(match: re.Match[str]) -> str:
-    space_count = len(match.group(0))
-    return " " * (2 * (space_count // 4))  # Assumes original indentation was 4 spaces
-
-  # Split the code into lines, reformat each line, and join back into a single string
-  reformatted_lines = [re.sub(pattern, replace_with_two_spaces, line) for line in code.splitlines()]
-  return "\n".join(reformatted_lines)
-
-
 class LLM:
   """Language model that predicts continuation of provided source code."""
 
@@ -54,8 +39,6 @@ class LLM:
 
     The index is used for logging and must be unique across threads.
     """
-    # TODO: We could provide a temperature here, see
-    # https://llm.datasette.io/en/stable/python-api.html#model-options
     try:
       output_text = self._model.prompt(prompt).text()
     except Exception as e:

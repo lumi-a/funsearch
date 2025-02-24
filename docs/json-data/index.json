@@ -15,7 +15,7 @@
       3
     ],
     1.6521739130434783,
-    "Perturb Lucas' optimal function\n\nChanges from:\n  u_i = 2**n * (1 - 2 ** (-i))\nto:\n  u_i = 2*n / i\nAnd, to not give too much away, the final 2**n sequence to 2*n.",
+    "Perturb Lucas' optimal function",
     1740234412,
     "gasoline-list_1740234412.json"
   ],
@@ -25,7 +25,7 @@
       3
     ],
     1.75,
-    "Perturb Lucas' solution slightly\n\nStart with putting the final sequence of the xs as:\n  [2**n] * 2**n\ninstead of\n  [2**n] * 2**n + 0",
+    "Perturb Lucas' solution slightly",
     1740323614,
     "gasoline-list_1740323614.json"
   ],
@@ -55,7 +55,7 @@
       3
     ],
     1.875,
-    "Start from Lucas' solution.\n\nThe only found improvement `gasoline(k)` seems to have the same approximation-ratio, and operate very similarly to, Lucas' solution with parameter (k+1).\n\n\nFound solution (each entry multiplied by 2, to compare more easily to ",
+    "Start from Lucas' solution.",
     1740309473,
     "gasoline-list_1740309473.json"
   ],
@@ -68,5 +68,15 @@
     "Perturb Lucas' solution by simply removing the ys",
     1740242660,
     "gasoline-list_1740242660.json"
+  ],
+  [
+    "library",
+    [
+      0
+    ],
+    -27155.0,
+    "To simulate random accesses, we generated a list of 2^16 random accesses as follows: Each number in {0,...,99} was assigned an  (iid) exponentially-distributed weight, \u03bb=1. The 2^16 random accesses were then drawn iid from {0,...,99}, where a number x had",
+    1740424536,
+    "library_1740424536.json"
   ]
 ]

@@ -21,34 +21,25 @@ from funsearch.programs_database import ProgramsDatabase
 BACKUP_DIR = Path("data/backups")
 JSON_DIR = Path("docs/json-data")  # Also set this in script.js
 
-file_pattern = re.compile(r"(.*)_(\d+)_(\d+)\.pickle")
+file_pattern = re.compile(r"(.*)_(\d+)\.pickle")
 
-# For each tuple of (function_name, timestamp), only keep
-# the (idx, path) one with the highest idx.
-files: dict[tuple[str, int], tuple[int, Path]] = {}
+# (function_name, timestamp) -> path
+files: dict[tuple[str, int], Path] = {}
 for f in BACKUP_DIR.glob("*.pickle"):
   match = file_pattern.match(f.name)
   if match:
-    specname, timestamp, idx = match.groups()
-    try:
-      timestamp, idx = int(timestamp), int(idx)
-    except ValueError:
-      continue
-    if (specname, timestamp) not in files or idx > files[(specname, timestamp)][0]:
-      files[(specname, timestamp)] = (idx, f)
-
-
-def _to_filename(function_name: str, timestamp: int) -> Path:
-  return f"{function_name}_{timestamp}.json"
+    specname, timestamp = match.groups()
+    files[(specname, int(timestamp))] = f
 
 
 # Save small descriptions of each json-file in index.json
 # Has schema (problemName, inputs, maxScore, message, timestamp, filepath)
 index_json: list[tuple[str, list[float] | list[str], float, str, int, str]] = []
-for (specname, timestamp), (_idx, file) in files.items():
+for (specname, timestamp), file in files.items():
   database = ProgramsDatabase.load(file.open("rb"))
 
-  with (JSON_DIR / _to_filename(specname, timestamp)).open("w") as f:
+  filename = f"{specname}_{timestamp}.json"
+  with (JSON_DIR / filename).open("w") as f:
     # Trim message to 255 "characters"
     # This is bad practice, something something graphemes, but it will be cut off on the website anyway.
     index_json.append(
@@ -58,17 +49,14 @@ for (specname, timestamp), (_idx, file) in files.items():
         max(island._best_score for island in database._islands),
         database._config.message.splitlines()[0][:255],
         timestamp,
-        _to_filename(specname, timestamp),
+        filename,
       )
     )
 
+    # For consistent interfacing with Javascript,
     json.dump(
       {
-        "problemName": database._config.problem_name,
-        "inputs": database._config.inputs,
-        "message": database._config.message,
         "config": vars(database._config),  # noqa: SLF001
-        "specCode": database._config.specification,  # noqa: SLF001
         "timestamp": timestamp,
         "highestRunIndex": max(len(island._runs) for island in database._islands),  # noqa: SLF001
         "islands": [

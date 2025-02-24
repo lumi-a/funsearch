@@ -1,20 +1,18 @@
 {
-  "problemName":"gasoline-list",
-  "inputs":[
-    3
-  ],
-  "message":"Perturb Lucas' solution by removing the ys, and clamp both lists to [0, 2**31 - 1].",
   "config":{
+    "inputs":[
+      3
+    ],
+    "specification":"\"\"\"Find sets for which the rounding algorithm on the gasoline-problem has a poor (high) approximation-ratio.\n\nThe gasoline-problem find a permutation of the xs and ys (lists of positive integers) such that maximum of the\ndifferences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible,\nwhere zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nAs such, the problem is invariant under a permutation of the xs and ys.\n\nOn every iteration, improve gasoline_v1 over the gasoline_vX methods from previous iterations.\nThe methods must be deterministic.\nMake only small code-changes.\n\"\"\"\n\nimport funsearch\nfrom funsearch.gasoline.iterative_rounding import SlotOrdered\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n  \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n  xs, ys = gasoline(n)\n\n  # Assert determinancy\n  if (xs, ys) != gasoline(n):\n    return 0\n\n  xs = [max(0, min(2**31 - 1, int(x))) for x in xs]\n  ys = [max(0, min(2**31 - 1, int(y))) for y in ys]\n\n  return SlotOrdered().approximation_ratio(xs, ys)\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[int], list[int]]:\n  \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n  The integers will be clamped to [0, 2**31 - 1].\n  \"\"\"\n  xs = []\n  for i in range(1, n):\n    u = int(2**n * (1 - 2 ** (-i)))\n    xs.extend([u for _ in range(2**i)])\n  xs.extend([int(2**n) for _ in range(2**n - 1)])\n  xs.append(0)\n  u = int(2**n * (1 - 2 ** (-n)))\n  ys = [0 for _ in range(len(xs))]\n  return xs, ys\n",
+    "problem_name":"gasoline-list",
+    "message":"Perturb Lucas' solution by removing the ys, and clamp both lists to [0, 2**31 - 1].",
     "functions_per_prompt":2,
     "num_islands":10,
     "reset_period":14400,
     "cluster_sampling_temperature_init":0.1,
-    "cluster_sampling_temperature_period":30000,
-    "backup_period":30,
-    "backup_folder":"./data/backups"
+    "cluster_sampling_temperature_period":30000
   },
-  "specCode":"\"\"\"Find sets for which the rounding algorithm on the gasoline-problem has a poor (high) approximation-ratio.\n\nThe gasoline-problem find a permutation of the xs and ys (lists of positive integers) such that maximum of the\ndifferences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible,\nwhere zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nAs such, the problem is invariant under a permutation of the xs and ys.\n\nOn every iteration, improve gasoline_v1 over the gasoline_vX methods from previous iterations.\nThe methods must be deterministic.\nMake only small code-changes.\n\"\"\"\n\nimport funsearch\nfrom funsearch.gasoline.iterative_rounding import SlotOrdered\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n  \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n  xs, ys = gasoline(n)\n\n  # Assert determinancy\n  if (xs, ys) != gasoline(n):\n    return 0\n\n  xs = [max(0, min(2**31 - 1, int(x))) for x in xs]\n  ys = [max(0, min(2**31 - 1, int(y))) for y in ys]\n\n  return SlotOrdered().approximation_ratio(xs, ys)\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[int], list[int]]:\n  \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n  The integers will be clamped to [0, 2**31 - 1].\n  \"\"\"\n  xs = []\n  for i in range(1, n):\n    u = int(2**n * (1 - 2 ** (-i)))\n    xs.extend([u for _ in range(2**i)])\n  xs.extend([int(2**n) for _ in range(2**n - 1)])\n  xs.append(0)\n  u = int(2**n * (1 - 2 ** (-n)))\n  ys = [0 for _ in range(len(xs))]\n  return xs, ys\n",
-  "timestamp":"1740263394",
+  "timestamp":1740263394,
   "highestRunIndex":1105,
   "islands":[
     {

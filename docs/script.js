@@ -146,13 +146,9 @@ const colors = ['#CC6677', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255'
 async function displayDatabase(database, runDetailsInner) {
     /* Schema from generate.py (might be outdated)
       {
-        "problemName": database.problem_name,
-        "inputs": database.inputs,
-        "message": database.message,
         "config": vars(database._config),  # noqa: SLF001
-        "specCode": database._specification,  # noqa: SLF001
-        "timestamp": database.timestamp,
-        "highestRunIndex": max(len(island._runs.keys()) for island in database._islands),  # noqa: SLF001
+        "timestamp": timestamp,
+        "highestRunIndex": max(len(island._runs) for island in database._islands),  # noqa: SLF001
         "islands": [
           {
             "improvements": [(ix, island._runs[ix], str(program)) for ix, program in island._improvements],  # noqa: SLF001
@@ -179,12 +175,12 @@ async function displayDatabase(database, runDetailsInner) {
     islands.sort((a, b) => b.bestScore - a.bestScore)
 
     const messageSpan = document.createElement("span")
-    messageSpan.textContent = database.message
+    messageSpan.textContent = database.config.message
     messageSpan.classList.add("pre-wrap")
 
     const children = [
         messageSpan,
-        detailsCode("Spec", null, database.specCode),
+        detailsCode("Spec", null, database.config.specification),
         details("Best Programs", null, ...islands.map(island => detailsCode(`Score ${island.bestScore}`, `Island ${island.ix}`, island.improvements[island.improvements.length - 1][2])
         )),
         details("Improvements over Time", null, document.createTextNode(`Total failure-rate: ${totalRate}%`), improvementCanvas(islands, database.highestRunIndex),

@@ -1,20 +1,18 @@
 {
-  "problemName":"3-4-cyclefree",
-  "inputs":[
-    15
-  ],
-  "message":"The score 26 is optimal. This was a sample-run, mostly to test displaying the results on the website.",
   "config":{
+    "inputs":[
+      15
+    ],
+    "specification":"\"\"\"Find undirected graphs with many edges that don't contain a 3-cycle or 4-cycle.\n\nOn every iteration, improve priority_v1 over the priority_vX methods from previous iterations.\nMake only small code-changes. Do not use np.random.\n\"\"\"\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(total_vertex_count: int) -> float:\n  \"\"\"Returns the number of edges in an undirected graph on `total_vertex_count` vertices having no 3-cycles or 4-cycles.\"\"\"\n  return len(solve(total_vertex_count))\n\n\ndef solve(total_vertex_count: int) -> set[tuple[int, int]]:\n  \"\"\"Returns a large graph on `total_vertex_count` vertices without 3-cycles or 4-cycles.\"\"\"\n  edge_priorities = {\n    (vertex_v, vertex_w): priority(vertex_v, vertex_w, total_vertex_count)\n    for vertex_v in range(total_vertex_count)\n    for vertex_w in range(vertex_v + 1, total_vertex_count)\n  }\n  neighbors = {vertex_v: set() for vertex_v in range(total_vertex_count)}\n\n  for (vertex_v, vertex_w), _ in sorted(edge_priorities.items(), key=lambda x: -x[1]):\n    # Does adding the edge {vertex_v, vertex_w} add a 3-cycle?\n    if not neighbors[vertex_v].isdisjoint(neighbors[vertex_w]):\n      continue\n\n    # Does adding the edge {vertex_v, vertex_w} add a 4-cycle?\n    has_4_cycle = False\n    for neighbor_u in neighbors[vertex_v]:\n      if not neighbors[neighbor_u].isdisjoint(neighbors[vertex_w]):\n        has_4_cycle = True\n        break\n    if has_4_cycle:\n      continue\n\n    # There's no 3-cycle or 4-cycle, so insert the edge\n    neighbors[vertex_v].add(vertex_w)\n    neighbors[vertex_w].add(vertex_v)\n\n  edges = {\n    (vertex_v, vertex_w)\n    for vertex_v in range(total_vertex_count)\n    for vertex_w in neighbors[vertex_v]\n    if vertex_w > vertex_v\n  }\n  return edges\n\n\n@funsearch.evolve\ndef priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n  \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n",
+    "problem_name":"3-4-cyclefree",
+    "message":"The score 26 is optimal. This was a sample-run, mostly to test displaying the results on the website.",
     "functions_per_prompt":2,
     "num_islands":10,
     "reset_period":14400,
     "cluster_sampling_temperature_init":0.1,
-    "cluster_sampling_temperature_period":30000,
-    "backup_period":30,
-    "backup_folder":"./data/backups"
+    "cluster_sampling_temperature_period":30000
   },
-  "specCode":"\"\"\"Find undirected graphs with many edges that don't contain a 3-cycle or 4-cycle.\n\nOn every iteration, improve priority_v1 over the priority_vX methods from previous iterations.\nMake only small code-changes. Do not use np.random.\n\"\"\"\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(total_vertex_count: int) -> float:\n  \"\"\"Returns the number of edges in an undirected graph on `total_vertex_count` vertices having no 3-cycles or 4-cycles.\"\"\"\n  return len(solve(total_vertex_count))\n\n\ndef solve(total_vertex_count: int) -> set[tuple[int, int]]:\n  \"\"\"Returns a large graph on `total_vertex_count` vertices without 3-cycles or 4-cycles.\"\"\"\n  edge_priorities = {\n    (vertex_v, vertex_w): priority(vertex_v, vertex_w, total_vertex_count)\n    for vertex_v in range(total_vertex_count)\n    for vertex_w in range(vertex_v + 1, total_vertex_count)\n  }\n  neighbors = {vertex_v: set() for vertex_v in range(total_vertex_count)}\n\n  for (vertex_v, vertex_w), _ in sorted(edge_priorities.items(), key=lambda x: -x[1]):\n    # Does adding the edge {vertex_v, vertex_w} add a 3-cycle?\n    if not neighbors[vertex_v].isdisjoint(neighbors[vertex_w]):\n      continue\n\n    # Does adding the edge {vertex_v, vertex_w} add a 4-cycle?\n    has_4_cycle = False\n    for neighbor_u in neighbors[vertex_v]:\n      if not neighbors[neighbor_u].isdisjoint(neighbors[vertex_w]):\n        has_4_cycle = True\n        break\n    if has_4_cycle:\n      continue\n\n    # There's no 3-cycle or 4-cycle, so insert the edge\n    neighbors[vertex_v].add(vertex_w)\n    neighbors[vertex_w].add(vertex_v)\n\n  edges = {\n    (vertex_v, vertex_w)\n    for vertex_v in range(total_vertex_count)\n    for vertex_w in neighbors[vertex_v]\n    if vertex_w > vertex_v\n  }\n  return edges\n\n\n@funsearch.evolve\ndef priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n  \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n",
-  "timestamp":"1740256478",
+  "timestamp":1740256478,
   "highestRunIndex":41,
   "islands":[
     {

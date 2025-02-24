@@ -42,14 +42,18 @@ def _most_recent_backup() -> Path:
   """Returns the most recent backup file."""
   # Define the directory and file pattern
   backup_dir = Path("data/backups")
-  file_pattern = re.compile(r".*_(\d+)_(\d+)\.pickle")
+  file_pattern = re.compile(r".*_(\d+)(|_\d+)\.pickle")
 
   # Find all matching files and extract (X, Y) values
-  matching_files: list[tuple[int, int, Path]] = []
+  matching_files: list[tuple[int, str, Path]] = []
   for file in backup_dir.glob("*.pickle"):
     match = file_pattern.match(file.name)
     if match:
-      timestamp, idx = map(int, match.groups())
+      timestamp, idx = int(match.group(1)), match.group(2)
+      try:
+        idx = int(idx)
+      except ValueError:
+        idx = 10000000000000000  # HACK: Rework.
       matching_files.append((timestamp, idx, file))
 
   # Select the file with lexicographically maximal (X, Y)

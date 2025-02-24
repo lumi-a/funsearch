@@ -154,7 +154,7 @@ class Evaluator:
   ) -> tuple[code_manipulation.Function, dict[float | str, float]]:
     """Compile the sample, execute it on test inputs, returning the compiled function and outputs."""
     match = re.search(r"(```(python|))(.*?)```", sample, re.DOTALL)
-    code: str = match.group(3) or sample
+    code: str = match.group(3) if match else sample
 
     new_function, program = _sample_to_program(
       code, version_generated, self._template, self._function_to_evolve

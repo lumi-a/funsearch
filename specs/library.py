@@ -24,7 +24,7 @@ type Book = int
 
 
 @funsearch.run
-def evaluate() -> float:
+def evaluate(_) -> float:
   """Returns the (negative) number of orders the library had to make."""
   shelf_space = 30
   bookshelf = set()
@@ -38,7 +38,9 @@ def evaluate() -> float:
         bookshelf.add(book)
       else:
         book_to_replace = replace(past_reader_requests.copy(), bookshelf.copy(), book)
-        if book_to_replace not in bookshelf:
+        # Enforce determinism
+        deterministic = book_to_replace == replace(past_reader_requests.copy(), bookshelf.copy(), book)
+        if book_to_replace not in bookshelf or not deterministic:
           # Remove the book with the smallest id:
           book_to_replace = min(bookshelf)
         bookshelf.remove(book_to_replace)
@@ -53,5 +55,7 @@ def evaluate() -> float:
 def replace(past_reader_requests: deque[Book], bookshelf: set[Book], book_order: Book) -> Book:
   """Given our past reader requests (from oldest to newest), the current bookshelf, and the book
   that we'll order, return the book on our bookshelf that should be replaced by the ordered book.
+
+  The bookshelf will always be full, and the book_order will never be in the bookshelf.
   """
   return min(bookshelf)

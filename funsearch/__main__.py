@@ -139,10 +139,9 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   database = ProgramsDatabase.load(db_file)
   # TODO: There has to be a better way than doing this.
   # Maybe require backup-path as an argument?
-  old_config = database._config
-  database._config = config.Config(
-    **old_config.__dict__, backup_folder=str(pathlib.Path(output_path) / "backups")
-  )
+  old_config = database._config.__dict__
+  old_config["backup_folder"] = str(pathlib.Path(output_path) / "backups")
+  database._config = config.Config(**old_config)
 
   timestamp = str(int(time.time()))
   database.timestamp = timestamp

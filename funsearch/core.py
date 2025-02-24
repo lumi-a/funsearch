@@ -89,7 +89,7 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
   # get a sample from it), but it also means that function-improvements are
   # only transferred to the LLM ~every `value` iterations, which
   # degrades the quality of the algorithm.
-  llm_responses_slots = threading.Semaphore(32)  # TODO: increase to like 20
+  llm_responses_slots = threading.Semaphore(32)
 
   def llm_response_worker(iteration_manager: IterationManager, stop_event: threading.Event, llm: LLM) -> None:
     """Worker thread that continuously makes web requests as long as we haven't reached `iterations`.
@@ -140,7 +140,7 @@ def run(database: ProgramsDatabase, llm_name: str, log_path: Path, iterations: i
 
   def database_printer(stop_event: threading.Event):
     while not stop_event.is_set():
-      time.sleep(1)
+      time.sleep(10)
       database.print_status()
 
   stop_event = threading.Event()

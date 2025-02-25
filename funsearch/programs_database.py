@@ -112,8 +112,8 @@ class Island:
     self._template: code_manipulation.Program = template
     self._function_to_evolve: str = function_to_evolve
     self._functions_per_prompt: int = functions_per_prompt
-    self._cluster_sampling_temperature_init = cluster_sampling_temperature_init
-    self._cluster_sampling_temperature_period = cluster_sampling_temperature_period
+    self._cluster_sampling_temperature_init: float = cluster_sampling_temperature_init
+    self._cluster_sampling_temperature_period: float = cluster_sampling_temperature_period
 
     # The island-runs over time. None means a failure, otherwise a float representing the score.
     self._runs: list[float | None] = []

@@ -95,181 +95,6 @@ class Prompt:
   island_id: int
 
 
-import dataclasses
-
-
-@dataclasses.dataclass(frozen=True)
-class ProgramsDatabaseConfig:
-  """Configuration of a ProgramsDatabase.
-
-  Attributes:
-    functions_per_prompt: Number of previous programs to include in prompts.
-    num_islands: Number of islands to maintain as a diversity mechanism.
-    reset_period: How often (in seconds) the weakest islands should be reset.
-    cluster_sampling_temperature_init: Initial temperature for softmax sampling
-        of clusters within an island.
-    cluster_sampling_temperature_period: Period of linear decay of the cluster
-        sampling temperature.
-    backup_period: Number of iterations before backing up the program database on disk
-    backup_folder: Path for automatic backups
-
-  """
-
-  inputs: list[float] | list[str]
-  specification: str
-  problem_name: str
-  message: str = ""
-  functions_per_prompt: int = 2
-  num_islands: int = 10
-  reset_period: int = 4 * 60 * 60
-  cluster_sampling_temperature_init: float = 0.1
-  cluster_sampling_temperature_period: int = 30_000
-
-
-class ProgramsDatabase:
-  """A collection of programs, organized as islands."""
-
-  def __init__(
-    self,
-    config: ProgramsDatabaseConfig,
-  ) -> None:
-    self._config: ProgramsDatabaseConfig = config
-
-    function_to_evolve, function_to_run = extract_function_names(config.specification)
-    self._function_to_evolve: str = function_to_evolve
-    self._function_to_run: str = function_to_run
-    self._template: code_manipulation.Program = code_manipulation.text_to_program(config.specification)
-
-    self._islands: list[Island] = [
-      Island(
-        self._template,
-        function_to_evolve,
-        config.functions_per_prompt,
-        config.cluster_sampling_temperature_init,
-        config.cluster_sampling_temperature_period,
-      )
-      for _ in range(config.num_islands)
-    ]
-
-    self._last_reset_time: float = time.time()
-
-  def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
-    """Returns the best programs per island, together with their scores."""
-    return sorted(
-      [(island._best_program, island._best_score) for island in self._islands],
-      key=lambda t: t[1],
-      reverse=True,
-    )
-
-  def populate(self, log_path: pathlib.Path) -> bool:
-    """Populate islands with the seed-function and return whether the seed-function ran successfully."""
-    evaluator = self.construct_evaluator(log_path)
-    initial_sample = self._template.get_function(self._function_to_evolve).body
-    program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
-    if scores_per_test:
-      for island_id in range(len(self._islands)):
-        self._islands[island_id].register_program(program, scores_per_test)
-      return True
-    return False
-
-  @classmethod
-  def load(cls, file) -> ProgramsDatabase:
-    """Load previously saved database."""
-    data = pickle.load(file)
-    database = ProgramsDatabase(ProgramsDatabaseConfig(**data["_config"].__dict__))
-    for key in data:
-      if key != "_config":
-        setattr(database, key, data[key])
-
-    return database
-
-  def save(self, file) -> None:
-    """Save database to a file."""
-    data = {}
-    keys = [
-      "_config",
-      "_islands",
-      "_last_reset_time",
-    ]
-    for key in keys:
-      data[key] = getattr(self, key)
-    pickle.dump(data, file)
-
-  def backup(self, backup_file: pathlib.Path) -> None:
-    """Save a backup of the database to a backup-file."""
-    with backup_file.open("wb") as f:
-      self.save(f)
-
-  def get_prompt(self) -> Prompt:
-    """Returns a prompt containing implementations from one chosen island."""
-    island_id = np.random.randint(len(self._islands))
-    code, version_generated = self._islands[island_id].get_prompt()
-    return Prompt(code, version_generated, island_id)
-
-  def register_program(
-    self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
-  ) -> None:
-    """Registers `program` in the database."""
-    self._islands[island_id].register_program(program, island_id, scores_per_test)
-
-    # Check whether it is time to reset an island.
-    # TODO: Move this to core.run or something
-    if time.time() - self._last_reset_time > self._config.reset_period:
-      self._last_reset_time = time.time()
-      self._reset_islands()
-
-  def register_failure(self, island_id: int) -> None:
-    """Registers a failure on an island."""
-    self._islands[island_id].register_failure()
-
-  def _reset_islands(self) -> None:
-    """Resets the weaker half of islands."""
-    # We sort best scores after adding minor noise to break ties.
-    num_islands = len(self._islands)
-    indices_sorted_by_score: list[int] = sorted(
-      range(num_islands),
-      key=lambda ix: self._islands[ix]._best_score + np.random.random() * 1e-6,
-    )
-    num_islands_to_reset = num_islands // 2
-    reset_islands_ids: list[int] = indices_sorted_by_score[:num_islands_to_reset]
-    keep_islands_ids: list[int] = indices_sorted_by_score[num_islands_to_reset:]
-    founders = [
-      (self._islands[island_id]._best_program, self._islands[island_id]._best_scores_per_test)
-      for island_id in keep_islands_ids
-    ]
-    for island_id in reset_islands_ids:
-      self._islands[island_id] = Island(
-        self._template,
-        self._function_to_evolve,
-        self._config.functions_per_prompt,
-        self._config.cluster_sampling_temperature_init,
-        self._config.cluster_sampling_temperature_period,
-      )
-      (program, scores_per_test) = np.random.choice(founders)
-      self._islands[island_id].register_program(program, island_id, scores_per_test)
-
-  def construct_evaluator(self, log_path: pathlib.Path) -> Evaluator:
-    """Returns an evaluator for this database's spec and inputs."""
-    return Evaluator(
-      ExternalProcessSandbox(log_path),
-      self._template,
-      self._function_to_evolve,
-      self._function_to_run,
-      self._config.inputs,
-    )
-
-  def print_status(self) -> None:
-    """Prints the current status of the database."""
-    max_score = max(island._best_score for island in self._islands)
-    # Subtract 1 due to the initial .populate() calls
-    total_successes = sum(island._success_count - 1 for island in self._islands)
-    total_failures = sum(island._failure_count for island in self._islands)
-    attempts = total_successes + total_failures
-    failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
-
-    print(f"Max-Score {max_score:8.3f} │ {attempts} samples │ {failure_rate}% failed")  # noqa: T201
-
-
 class Island:
   """A sub-population of the programs database."""
 
@@ -280,6 +105,8 @@ class Island:
     functions_per_prompt: int,
     cluster_sampling_temperature_init: float,
     cluster_sampling_temperature_period: int,
+    initial_best_program: code_manipulation.Function,
+    initial_best_scores_per_test: ScoresPerTest,
   ) -> None:
     """Initialise island."""
     self._template: code_manipulation.Program = template
@@ -297,9 +124,9 @@ class Island:
     self._improvements: list[tuple[int, code_manipulation.Function]] = []
 
     # TODO: Initialise island with initial programs instead
-    self._best_score: float = -float("inf")
-    self._best_program: code_manipulation.Function | None = None
-    self._best_scores_per_test: ScoresPerTest | None = None
+    self._best_score: float = _reduce_score(initial_best_scores_per_test)
+    self._best_program: code_manipulation.Function = initial_best_program
+    self._best_scores_per_test: ScoresPerTest = initial_best_scores_per_test
 
     self._clusters: dict[Signature, Cluster] = {}
     self._num_programs_peroidic: int = 0
@@ -426,3 +253,215 @@ class Cluster:
     normalized_lengths = (np.array(self._lengths) - min(self._lengths)) / (max(self._lengths) + 1e-6)
     probabilities = _softmax(-normalized_lengths, temperature=1.0)
     return np.random.choice(self._programs, p=probabilities)
+
+
+@dataclasses.dataclass(frozen=True)
+class ProgramsDatabaseConfig:
+  """Configuration of a ProgramsDatabase.
+
+  Attributes:
+    functions_per_prompt: Number of previous programs to include in prompts.
+    num_islands: Number of islands to maintain as a diversity mechanism.
+    reset_period: How often (in seconds) the weakest islands should be reset.
+    cluster_sampling_temperature_init: Initial temperature for softmax sampling
+        of clusters within an island.
+    cluster_sampling_temperature_period: Period of linear decay of the cluster
+        sampling temperature.
+    backup_period: Number of iterations before backing up the program database on disk
+    backup_folder: Path for automatic backups
+
+  """
+
+  inputs: list[float] | list[str]
+  specification: str
+  problem_name: str
+  message: str = ""
+  functions_per_prompt: int = 2
+  num_islands: int = 10
+  reset_period: int = 4 * 60 * 60
+  cluster_sampling_temperature_init: float = 0.1
+  cluster_sampling_temperature_period: int = 30_000
+
+
+def _typecheck(obj: any, expected: tuple[type, ...]) -> bool:
+  if expected == ():
+    return True
+  if not isinstance(obj, expected[0]):
+    return False
+  if len(expected) == 1:
+    return True
+  return all(_typecheck(sub_obj, expected[1:]) for sub_obj in obj)
+
+
+class ProgramsDatabase:
+  """A collection of programs, organized as islands."""
+
+  __keys__ = (
+    ("_config", (ProgramsDatabaseConfig,)),
+    ("_islands", (list, Island)),
+    ("_function_to_evolve", (str,)),
+    ("_function_to_run", (str,)),
+    ("_template", (code_manipulation.Program,)),
+    ("_last_reset_time", (float,)),
+  )
+
+  def __init__(self, config: ProgramsDatabaseConfig, populate_log_path: pathlib.Path) -> None:
+    """Initialise database. Populates the islands, the initial run logs to `populate_log_path`."""
+    self._config: ProgramsDatabaseConfig = config
+
+    function_to_evolve, function_to_run = extract_function_names(config.specification)
+    self._function_to_evolve: str = function_to_evolve
+    self._function_to_run: str = function_to_run
+    self._template: code_manipulation.Program = code_manipulation.text_to_program(config.specification)
+    self._last_reset_time: float = time.time()
+
+    # Populate islands
+    evaluator = self.construct_evaluator(populate_log_path)
+    initial_sample = self._template.get_function(self._function_to_evolve).body
+    program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
+    if not scores_per_test:
+      msg = f"Initial function-evaluation failed, see logs in {populate_log_path}"
+      raise RuntimeError(msg)
+    self._islands: list[Island] = [
+      Island(
+        self._template,
+        function_to_evolve,
+        config.functions_per_prompt,
+        config.cluster_sampling_temperature_init,
+        config.cluster_sampling_temperature_period,
+        program,
+        scores_per_test,
+      )
+      for _ in range(config.num_islands)
+    ]
+
+  def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
+    """Returns the best programs per island, together with their scores."""
+    return sorted(
+      [(island._best_program, island._best_score) for island in self._islands],
+      key=lambda t: t[1],
+      reverse=True,
+    )
+
+  def populate(self, log_path: pathlib.Path) -> bool:
+    """Populate islands with the seed-function and return whether the seed-function ran successfully."""
+    evaluator = self.construct_evaluator(log_path)
+    initial_sample = self._template.get_function(self._function_to_evolve).body
+    program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
+    if scores_per_test:
+      for island_id in range(len(self._islands)):
+        self._islands[island_id].register_program(program, scores_per_test)
+      return True
+    return False
+
+  @classmethod
+  def load(cls, file) -> ProgramsDatabase:
+    """Load previously saved database.
+
+    Typechecks to ensure all keys are present and of the correct type.
+    """
+    data = pickle.load(file)
+
+    # Is this still pythonic?
+    database = object.__new__(cls)
+    missing_keys = {key[0] for key in cls.__keys__}
+    for datakey in data:
+      try:
+        expected_type: type = next(key[1] for key in cls.__keys__ if key[0] == datakey)
+      except StopIteration as e:
+        msg = f"Unexpected key: {datakey}"
+        raise ValueError(msg) from e
+      missing_keys.remove(datakey)
+
+      obj = data[datakey]
+      if not _typecheck(obj, expected_type):
+        msg = f"Wrong type for key {datakey}"
+        raise TypeError(msg)
+      setattr(database, datakey, obj)
+
+    if missing_keys:
+      msg = f"Missing keys: {', '.join(missing_keys)}"
+      raise ValueError(msg)
+
+    return database
+
+  def save(self, file) -> None:
+    """Save database to a file."""
+    data = {}
+    for key in [key[0] for key in self.__keys__]:
+      data[key] = getattr(self, key)
+    pickle.dump(data, file)
+
+  def backup(self, backup_file: pathlib.Path) -> None:
+    """Save a backup of the database to a backup-file."""
+    with backup_file.open("wb") as f:
+      self.save(f)
+
+  def get_prompt(self) -> Prompt:
+    """Returns a prompt containing implementations from one chosen island."""
+    island_id = np.random.randint(len(self._islands))
+    code, version_generated = self._islands[island_id].get_prompt()
+    return Prompt(code, version_generated, island_id)
+
+  def register_program(
+    self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
+  ) -> None:
+    """Registers `program` in the database."""
+    self._islands[island_id].register_program(program, island_id, scores_per_test)
+
+    # Check whether it is time to reset an island.
+    # TODO: Move this to core.run or something
+    if time.time() - self._last_reset_time > self._config.reset_period:
+      self._last_reset_time = time.time()
+      self._reset_islands()
+
+  def register_failure(self, island_id: int) -> None:
+    """Registers a failure on an island."""
+    self._islands[island_id].register_failure()
+
+  def _reset_islands(self) -> None:
+    """Resets the weaker half of islands."""
+    # We sort best scores after adding minor noise to break ties.
+    num_islands = len(self._islands)
+    indices_sorted_by_score: list[int] = sorted(
+      range(num_islands),
+      key=lambda ix: self._islands[ix]._best_score + np.random.random() * 1e-6,
+    )
+    num_islands_to_reset = num_islands // 2
+    reset_islands_ids: list[int] = indices_sorted_by_score[:num_islands_to_reset]
+    keep_islands_ids: list[int] = indices_sorted_by_score[num_islands_to_reset:]
+    founders = [
+      (self._islands[island_id]._best_program, self._islands[island_id]._best_scores_per_test)
+      for island_id in keep_islands_ids
+    ]
+    for island_id in reset_islands_ids:
+      self._islands[island_id] = Island(
+        self._template,
+        self._function_to_evolve,
+        self._config.functions_per_prompt,
+        self._config.cluster_sampling_temperature_init,
+        self._config.cluster_sampling_temperature_period,
+      )
+      (program, scores_per_test) = np.random.choice(founders)
+      self._islands[island_id].register_program(program, island_id, scores_per_test)
+
+  def construct_evaluator(self, log_path: pathlib.Path) -> Evaluator:
+    """Returns an evaluator for this database's spec and inputs."""
+    return Evaluator(
+      ExternalProcessSandbox(log_path),
+      self._template,
+      self._function_to_evolve,
+      self._function_to_run,
+      self._config.inputs,
+    )
+
+  def print_status(self) -> None:
+    """Prints the current status of the database."""
+    max_score = max(island._best_score for island in self._islands)
+    # Subtract 1 due to the initial .populate() calls
+    total_successes = sum(island._success_count - 1 for island in self._islands)
+    total_failures = sum(island._failure_count for island in self._islands)
+    attempts = total_successes + total_failures
+    failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
+
+    print(f"Max-Score {max_score:8.3f} │ {attempts} samples │ {failure_rate}% failed")  # noqa: T201

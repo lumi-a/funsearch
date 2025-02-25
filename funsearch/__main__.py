@@ -120,9 +120,6 @@ def start(
 
   log_path = pathlib.Path(output_path) / problem_name / timestamp
   log_path.mkdir(exist_ok=True, parents=True)
-  if not database.populate(log_path):
-    msg = "Running initial function failed, see logs in output_path"
-    raise RuntimeError(msg)
   core.run(database, llm, log_path, iterations)
 
 

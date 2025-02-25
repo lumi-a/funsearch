@@ -23,7 +23,7 @@ import pytest
 from absl.testing import parameterized
 
 from funsearch import code_manipulation
-from funsearch.programs_database import ProgramsDatabase, ProgramsDatabaseConfig
+from funsearch.programs_database import Island, ProgramsDatabase, ProgramsDatabaseConfig
 
 ROOT = Path(__file__).parent.parent
 
@@ -160,12 +160,14 @@ class TestProgramsDatabase:
     """Tests that we build the prompt shown in the paper."""
     template = code_manipulation.text_to_program(_SKELETON)
     function_to_evolve = "priority"
-    island = programs_database.Island(
+    island = Island(
       template=template,
       function_to_evolve=function_to_evolve,
       functions_per_prompt=2,
       cluster_sampling_temperature_init=1.0,
       cluster_sampling_temperature_period=30_000,
+      initial_best_program=None,
+      initial_best_scores_per_test=None,
     )
     sample_a = copy.deepcopy(template.get_function(function_to_evolve))
     sample_a.body = _SAMPLE_A
@@ -177,7 +179,7 @@ class TestProgramsDatabase:
   def test_destroy_islands(self):
     template = code_manipulation.text_to_program(_SKELETON)
     function_to_evolve = "priority"
-    database = programs_database.ProgramsDatabase(
+    database = ProgramsDatabase(
       config=config.ProgramsDatabaseConfig(num_islands=10), template=template, function_to_evolve=function_to_evolve
     )
     scores = [7, 3, 5, 6, 7, -2, 0, -1, 4, 3]

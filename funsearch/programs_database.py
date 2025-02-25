@@ -260,6 +260,10 @@ class ProgramsDatabaseConfig:
   """Configuration of a ProgramsDatabase.
 
   Attributes:
+    inputs: List of inputs to the program.
+    specification: Specification-code of the program.
+    problem_name: Name of the problem.
+    message: Description of this run. Not included in the prompt.
     functions_per_prompt: Number of previous programs to include in prompts.
     num_islands: Number of islands to maintain as a diversity mechanism.
     reset_period: How often (in samples) the weakest islands should be reset.
@@ -267,8 +271,6 @@ class ProgramsDatabaseConfig:
         of clusters within an island.
     cluster_sampling_temperature_period: Period of linear decay of the cluster
         sampling temperature.
-    backup_period: Number of iterations before backing up the program database on disk
-    backup_folder: Path for automatic backups
 
   """
 
@@ -276,11 +278,11 @@ class ProgramsDatabaseConfig:
   specification: str
   problem_name: str
   message: str = ""
-  functions_per_prompt: int = 2
-  num_islands: int = 10
-  reset_period: int = 4 * 60 * 60
-  cluster_sampling_temperature_init: float = 0.1
-  cluster_sampling_temperature_period: int = 30_000
+  functions_per_prompt: int
+  num_islands: int
+  reset_period: int
+  cluster_sampling_temperature_init: float
+  cluster_sampling_temperature_period: int
 
 
 def _typecheck(obj: any, expected: tuple[type, ...]) -> bool:
@@ -305,8 +307,11 @@ class ProgramsDatabase:
     ("_last_reset_time", (float,)),
   )
 
-  def __init__(self, config: ProgramsDatabaseConfig, populate_log_path: pathlib.Path) -> None:
-    """Initialise database. Populates the islands, the initial run logs to `populate_log_path`."""
+  def __init__(self, config: ProgramsDatabaseConfig, initial_log_path: pathlib.Path) -> None:
+    """Initialise database.
+
+    Populates the islands, the initial run logs to initial_log_path
+    """
     self._config: ProgramsDatabaseConfig = config
 
     function_to_evolve, function_to_run = extract_function_names(config.specification)
@@ -316,11 +321,11 @@ class ProgramsDatabase:
     self._last_reset_time: float = time.time()
 
     # Populate islands
-    evaluator = self.construct_evaluator(populate_log_path)
+    evaluator = self.construct_evaluator(initial_log_path)
     initial_sample = self._template.get_function(self._function_to_evolve).body
     program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
     if not scores_per_test:
-      msg = f"Initial function-evaluation failed, see logs in {populate_log_path}"
+      msg = f"Initial function-evaluation failed, see logs in {initial_log_path}"
       raise RuntimeError(msg)
     self._islands: list[Island] = [
       Island(

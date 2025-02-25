@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 import logging
 import os
@@ -87,14 +88,43 @@ MODELS: list[str] = list(llm.get_model_aliases().keys())
 @click.option(
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
-@click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
+@click.option("--samples", default=-1, type=click.INT, help="Maximum number of samples")
+@click.option(
+  "--functions-per-prompt", default=2, type=click.INT, help="How many past functions to send per prompt"
+)
+@click.option(
+  "--islands", default=10, type=click.INT, help="How many islands (mostly separate populations) to use"
+)
+@click.option(
+  "--reset-period",
+  default=100_000,
+  type=click.INT,
+  help="Number of iterations before half the islands are reset",
+)
+@click.option(
+  "--cluster-sampling-temperature-init",
+  default=0.1,
+  type=click.FLOAT,
+  help="Initial temperature for cluster sampling",
+)
+@click.option(
+  "--cluster-sampling-temperature-period",
+  default=30_000,
+  type=click.INT,
+  help="Number of samples before temperature resets",
+)
 def start(
   spec_file: click.File,
+  llm: str,
+  samples: int,
+  output_path: click.Path,
   inputs: list[float] | list[str],
   message: str,
-  llm: str,
-  output_path: click.Path,
-  iterations: int,
+  functions_per_prompt: int,
+  reset_period: int,
+  islands: int,
+  cluster_sampling_temperature_init: float,
+  cluster_sampling_temperature_period: int,
 ) -> None:
   """Execute FunSearch algorithm.
 
@@ -111,16 +141,22 @@ def start(
                 8,9,10
                 ./specs/cap_set_input_data.json
   """  # noqa: D301
-  conf = config.ProgramsDatabaseConfig(backup_folder=str(pathlib.Path(output_path) / "backups"))
-
-  timestamp = str(int(time.time()))
-  problem_name = Path(spec_file.name).stem
-
-  database = ProgramsDatabase(conf, spec_file.read(), inputs, problem_name, timestamp, message)
-
-  log_path = pathlib.Path(output_path) / problem_name / timestamp
-  log_path.mkdir(exist_ok=True, parents=True)
-  core.run(database, llm, log_path, iterations)
+  timestamp = int(time.time())
+  problem_name = spec_file.name.split(".")[0]  # Not great, but it's not a pathlib-file.
+  initial_log_path = output_path / problem_name / str(timestamp) / "_initial"
+  config = ProgramsDatabaseConfig(
+    inputs=inputs,
+    specification=spec_file.read(),
+    problem_name=problem_name,
+    message=message,
+    functions_per_prompt=functions_per_prompt,
+    num_islands=islands,
+    reset_period=reset_period,
+    cluster_sampling_temperature_init=cluster_sampling_temperature_init,
+    cluster_sampling_temperature_period=cluster_sampling_temperature_period,
+  )
+  database = ProgramsDatabase(config, output_path, initial_log_path)
+  core.run(database, llm, output_path, timestamp, samples)
 
 
 @main.command(context_settings={"show_default": True})
@@ -129,8 +165,8 @@ def start(
 @click.option(
   "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
 )
-@click.option("--iterations", default=-1, type=click.INT, help="Max iterations per sampler")
-def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterations: int) -> None:
+@click.option("--samples", default=-1, type=click.INT, help="Maximum number of samples")
+def resume(db_file: click.File | None, llm: str, output_path: click.Path, samples: int) -> None:
   """Continue running FunSearch from a backup.
 
   If not provided, selects the most recent one from data/backups/.
@@ -139,7 +175,7 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
     db_file = _most_recent_backup().open("rb")
   database = ProgramsDatabase.load(db_file)
 
-  core.run(database, llm, output_path, int(time.time()), iterations)
+  core.run(database, llm, output_path, int(time.time()), samples)
 
 
 @main.command()
@@ -153,8 +189,8 @@ def ls(db_file: click.File | None) -> None:
     db_file = _most_recent_backup().open("rb")
   database = ProgramsDatabase.load(db_file)
 
-  def comment(str):
-    click.echo(click.style(str, fg="green"))
+  def comment(string: str) -> None:
+    click.echo(click.style(string, fg="green"))
 
   progs = list(database.get_best_programs_per_island())
   for ix, (program, score) in enumerate(reversed(progs)):
@@ -189,9 +225,7 @@ def change_db_message(db_file: click.File | None) -> None:
   click.echo("to")
   click.echo(click.style(new_message, fg="green"))
 
-  newdict = database._config.__dict__
-  newdict["message"] = new_message
-  database._config = ProgramsDatabaseConfig(**newdict)
+  replace(database._config, message=new_message)
 
   db_file.seek(0)
   db_file.truncate()

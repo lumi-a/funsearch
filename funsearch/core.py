@@ -68,7 +68,7 @@ class IterationManager:
 # So let's just ask them for the id directly and be a bit inefficient upfront. This might
 # make errors uglier, though.
 def run(
-  database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp: int, iterations: int = -1
+  database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp: int, num_samples: int = -1
 ) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
 
@@ -154,7 +154,7 @@ def run(
         database.print_status()
 
   stop_event = threading.Event()
-  iteration_manager = IterationManager(iterations)
+  iteration_manager = IterationManager(num_samples)
 
   # Start web request worker threads.
   num_llm_workers = os.cpu_count() * 2

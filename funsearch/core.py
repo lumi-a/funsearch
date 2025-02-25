@@ -17,7 +17,6 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import queue
 import threading
@@ -26,9 +25,7 @@ from typing import TYPE_CHECKING
 
 import llm
 
-from funsearch.evaluator import Evaluator
 from funsearch.sampler import LLM
-from funsearch.sandbox import ExternalProcessSandbox
 
 if TYPE_CHECKING:
   from pathlib import Path

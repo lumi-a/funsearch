@@ -15,7 +15,6 @@ requests of a limited number of readers before them. Books are idealised as inte
 """
 
 from collections import deque
-import random
 
 import funsearch
 from funsearch.library import read_accesses

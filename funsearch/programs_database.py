@@ -21,15 +21,12 @@ import copy
 import dataclasses
 import pathlib
 import pickle
-import threading
 import time
 from collections.abc import Iterable, Mapping, Sequence
 
 import numpy as np
-from absl import logging
 
 from funsearch import code_manipulation
-from funsearch import config as config_lib
 from funsearch.evaluator import Evaluator
 from funsearch.sandbox import ExternalProcessSandbox
 
@@ -166,13 +163,7 @@ class ProgramsDatabase:
 
   def populate(self, log_path: pathlib.Path) -> bool:
     """Populate islands with the seed-function and return whether the seed-function ran successfully."""
-    evaluator = Evaluator(
-      ExternalProcessSandbox(log_path),
-      self._template,
-      self._function_to_evolve,
-      self._function_to_run,
-      self._config.inputs,
-    )
+    evaluator = self.construct_evaluator(log_path)
     initial_sample = self._template.get_function(self._function_to_evolve).body
     program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
     if scores_per_test:

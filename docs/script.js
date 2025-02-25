@@ -61,6 +61,25 @@ function improvementCanvas(islands, highestRunIndex) {
     return improvementsCanvas
 }
 
+const code_regex = /```(.*)\n([\s\S]+?)\n```/g
+/**
+ * @param {string} text
+ */
+function markdown(text) {
+    const div = document.createElement("div")
+    div.innerHTML = text.replaceAll(code_regex, (match, lang, code) => {
+        const pre = document.createElement("pre")
+        const codeElement = document.createElement("code")
+        codeElement.classList.add(`language-${lang}`)
+        codeElement.textContent = code
+        console.log(`"${code}"`)
+        pre.appendChild(codeElement)
+        hljs.highlightElement(codeElement)
+        return pre.outerHTML
+    })
+    return div
+}
+
 function getProblemContainer(problemName) {
     const maybeExisting = document.getElementById(`container-${problemName}`)
     if (maybeExisting) {
@@ -175,7 +194,7 @@ async function displayDatabase(database, runDetailsInner) {
     islands.sort((a, b) => b.bestScore - a.bestScore)
 
     const messageSpan = document.createElement("span")
-    messageSpan.textContent = database.config.message
+    messageSpan.innerHTML = markdown(database.config.message).innerHTML
     messageSpan.classList.add("pre-wrap")
 
     const children = [

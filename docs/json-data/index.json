@@ -15,7 +15,7 @@
       3
     ],
     1.6521739130434783,
-    "Perturb Lucas' optimal function",
+    "Perturb Lucas' solution by making it linear instead of exponential.",
     1740234412,
     "gasoline-list_1740234412.json"
   ],
@@ -25,7 +25,7 @@
       3
     ],
     1.75,
-    "Perturb Lucas' solution slightly",
+    "Perturb Lucas' solution by not setting last xs to 0.",
     1740323614,
     "gasoline-list_1740323614.json"
   ],
@@ -45,7 +45,7 @@
       3
     ],
     1.7777777777777777,
-    "Perturb Lucas' solution by removing the ys, and clamp both lists to [0, 2**31 - 1].",
+    "Perturb Lucas' solution by setting ys to 0.",
     1740263394,
     "gasoline-list_1740263394.json"
   ],
@@ -65,7 +65,7 @@
       3
     ],
     1110010.0099940917,
-    "Perturb Lucas' solution by simply removing the ys",
+    "Perturb Lucas' solution by setting ys to 0.",
     1740242660,
     "gasoline-list_1740242660.json"
   ],
@@ -75,7 +75,7 @@
       0
     ],
     -27155.0,
-    "To simulate random accesses, we generated a list of 2^16 random accesses as follows: Each number in {0,...,99} was assigned an  (iid) exponentially-distributed weight, \u03bb=1. The 2^16 random accesses were then drawn iid from {0,...,99}, where a number x had",
+    "Simulated paging-problem.",
     1740424536,
     "library_1740424536.json"
   ]

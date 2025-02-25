@@ -120,13 +120,7 @@ def run(
   def analysation_dispatcher(stop_event: threading.Event) -> None:
     """Dispatcher thread that pulls web results from the queue and analyses the results."""
     with database_lock:
-      evaluator = Evaluator(
-        ExternalProcessSandbox(log_path),
-        database._template,
-        database._function_to_evolve,
-        database._function_to_run,
-        database._config.inputs,
-      )
+      evaluator = database.construct_evaluator(log_path)
     while not stop_event.is_set():
       try:
         queue_item = llm_responses.get(timeout=0.1)

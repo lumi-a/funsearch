@@ -257,12 +257,22 @@ class ProgramsDatabase:
       (program, scores_per_test) = np.random.choice(founders)
       self._islands[island_id].register_program(program, island_id, scores_per_test)
 
+  def construct_evaluator(self, log_path: pathlib.Path) -> Evaluator:
+    """Returns an evaluator for this database's spec and inputs."""
+    return Evaluator(
+      ExternalProcessSandbox(log_path),
+      self._template,
+      self._function_to_evolve,
+      self._function_to_run,
+      self._config.inputs,
+    )
+
   def print_status(self) -> None:
     """Prints the current status of the database."""
     max_score = max(island._best_score for island in self._islands)
     # Subtract 1 due to the initial .populate() calls
-    total_successes = sum(island._success_count - 1 for island in self._islands)  # noqa: SLF001
-    total_failures = sum(island._failure_count for island in self._islands)  # noqa: SLF001
+    total_successes = sum(island._success_count - 1 for island in self._islands)
+    total_failures = sum(island._failure_count for island in self._islands)
     attempts = total_successes + total_failures
     failure_rate = round(100 * total_failures / attempts if attempts > 0 else 0.0)
 

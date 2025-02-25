@@ -242,7 +242,7 @@ async function main() {
         timestampLink.classList.add("timestamp")
         const href = `#${id}`
         timestampLink.href = href
-        timestampLink.textContent = href
+        timestampLink.textContent = "#"
         runDetails.querySelector("summary").appendChild(timestampLink)
 
         const runDetailsInner = runDetails.querySelector(".details-inner")

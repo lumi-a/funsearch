@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from dataclasses import replace
 import json
 import logging
@@ -166,7 +167,10 @@ def start(
 @click.argument("db_file", type=click.File("rb"), required=False)
 @click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
-  "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
+  "--output-path",
+  default="./data/",
+  type=click.Path(file_okay=False, path_type=Path),
+  help="Path for logs and data",
 )
 @click.option("--samples", default=-1, type=click.INT, help="Maximum number of samples")
 def resume(db_file: click.File | None, llm: str, output_path: click.Path, samples: int) -> None:
@@ -199,8 +203,9 @@ def ls(db_file: click.File | None) -> None:
   for ix, (program, score) in enumerate(reversed(progs)):
     i = len(progs) - 1 - ix
     comment(f"# Island {i}, score {score}:")
-    program.name += f"_{i}"
-    click.echo(str(program))
+    renamed_program = copy.deepcopy(program)
+    renamed_program.name += f"_{i}"
+    click.echo(str(renamed_program))
   comment(f"# Found {len(progs)} programs in file: {db_file.name}")
 
 

@@ -75,7 +75,7 @@ def run(
   database.print_status()
 
   log_path = output_path / database._config.problem_name / str(timestamp)
-  backup_dir = output_path / "backup"
+  backup_dir = output_path / "backups"
   log_path.mkdir(parents=True, exist_ok=True)
   backup_dir.mkdir(parents=True, exist_ok=True)
 

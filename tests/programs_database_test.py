@@ -14,43 +14,46 @@
 # ==============================================================================
 
 import copy
+import os
 import tempfile
 from pathlib import Path
 
 import numpy as np
 import pytest
-from absl.testing import absltest, parameterized
+from absl.testing import parameterized
 
-from funsearch import code_manipulation, programs_database
+from funsearch import code_manipulation
+from funsearch.programs_database import ProgramsDatabase, ProgramsDatabaseConfig
+
+ROOT = Path(__file__).parent.parent
 
 _SKELETON = '''
 """Finds large cap sets."""
 import numpy as np
-import utils_capset
+import itertools
+import funsearch
 
-
+@funsearch.run
 def evaluate(n: int) -> int:
   """Returns the size of an `n`-dimensional cap set."""
-  capset = solve(n)
-  return len(capset)
+  return priority(n)
 
-
-def priority(element, n):
+@funsearch.evolve
+def priority(n: int) -> float:
   """Returns the priority with which we want to add `element` to the cap set."""
   return 0.0
+
 '''
 _EXPECTED_INITIAL_PROMPT = '''
 """Finds large cap sets."""
 import numpy as np
-import utils_capset
+import itertools
 
-
-def priority_v0(element, n):
+def priority_v0(n: int) -> float:
   """Returns the priority with which we want to add `element` to the cap set."""
   return 0.0
 
-
-def priority_v1(element, n):
+def priority_v1(n: int) -> float:
   """Improved version of `priority_v0`."""
 
 '''
@@ -102,10 +105,10 @@ def priority_v2(element, n):
 
 
 def test_database_integrity():
-  backup_data = Path(__file__).parent.parent / "data" / "backups"
+  backup_data = ROOT / "data" / "backups"
   for file in backup_data.glob("*.pickle"):
     with file.open("rb") as f:
-      database = programs_database.ProgramsDatabase.load(f)
+      database = ProgramsDatabase.load(f)
       for island_id, island in enumerate(database._islands):
         last_score = float("-inf")
         for run_id, _function in island._improvements:
@@ -119,37 +122,38 @@ def test_database_integrity():
           last_score = score
 
 
-class ProgramsDatabaseTest(parameterized.TestCase):
-  def test_initial_prompt(self):
+# TODO: Parametrize over test-cases
+
+
+class TestProgramsDatabase:
+  def test_initial_prompt(self, tmp_path):
     """Verifies that the first prompt looks as expected."""
 
-    # Create a programs database.
-    template = code_manipulation.text_to_program(_SKELETON)
-    function_to_evolve = "priority"
-    database = programs_database.ProgramsDatabase(
-      config=config.ProgramsDatabaseConfig(functions_per_prompt=5),
-      template=template,
-      function_to_evolve=function_to_evolve,
+    database = ProgramsDatabase(
+      config=ProgramsDatabaseConfig(
+        inputs=[3],
+        specification=_SKELETON,
+        problem_name="unused",
+        message="unused",
+        functions_per_prompt=5,
+        num_islands=10,
+        reset_period=1000,
+        cluster_sampling_temperature_init=1.0,
+        cluster_sampling_temperature_period=1000,
+      ),
+      initial_log_path=tmp_path,
     )
-    # Register the initial implementation provided in the skeleton template.
-    database.register_program_in_island(
-      program=template.get_function(function_to_evolve), island_id=None, scores_per_test={"unused": -1}
-    )
+
     # Verify the first prompt.
+    print(database.get_prompt().code)
+    print(_EXPECTED_INITIAL_PROMPT)
     assert database.get_prompt().code == _EXPECTED_INITIAL_PROMPT
 
     # Test saving database
     with tempfile.TemporaryFile() as f:
       database.save(f)
-
       f.seek(0)
-      db2 = programs_database.ProgramsDatabase(
-        config=config.ProgramsDatabaseConfig(functions_per_prompt=5),
-        template=template,
-        function_to_evolve=function_to_evolve,
-      )
-      # Make sure the loaded database works as the original
-      db2.load(f)
+      db2 = ProgramsDatabase.load(f)
       assert db2.get_prompt().code == _EXPECTED_INITIAL_PROMPT
 
   def test_generate_prompt(self):
@@ -243,7 +247,3 @@ class ProgramsDatabaseTest(parameterized.TestCase):
   def test_softmax_non_finite_error(self, logits):
     with pytest.raises(ValueError, match=r"`logits` contains non-finite value\(s\)"):
       programs_database._softmax(logits, temperature=1.0)
-
-
-if __name__ == "__main__":
-  absltest.main()

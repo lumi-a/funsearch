@@ -81,12 +81,15 @@ MODELS: list[str] = list(llm.get_model_aliases().keys())
 
 
 @main.command(context_settings={"show_default": True})
-@click.argument("spec_file", type=click.File("r"))
+@click.argument("spec_file", type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path))
 @click.argument("inputs", type=_parse_input)
 @click.argument("message", type=str, default="")
 @click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
-  "--output-path", default="./data/", type=click.Path(file_okay=False), help="Path for logs and data"
+  "--output-path",
+  default="./data/",
+  type=click.Path(file_okay=False, path_type=Path),
+  help="Path for logs and data",
 )
 @click.option("--samples", default=-1, type=click.INT, help="Maximum number of samples")
 @click.option(
@@ -114,10 +117,10 @@ MODELS: list[str] = list(llm.get_model_aliases().keys())
   help="Number of samples before temperature resets",
 )
 def start(
-  spec_file: click.File,
+  spec_file: Path,
   llm: str,
   samples: int,
-  output_path: click.Path,
+  output_path: Path,
   inputs: list[float] | list[str],
   message: str,
   functions_per_prompt: int,
@@ -142,11 +145,11 @@ def start(
                 ./specs/cap_set_input_data.json
   """  # noqa: D301
   timestamp = int(time.time())
-  problem_name = spec_file.name.split(".")[0]  # Not great, but it's not a pathlib-file.
+  problem_name = spec_file.stem  # Not great, but it's not a pathlib-file.
   initial_log_path = output_path / problem_name / str(timestamp) / "_initial"
   config = ProgramsDatabaseConfig(
     inputs=inputs,
-    specification=spec_file.read(),
+    specification=spec_file.read_text(),
     problem_name=problem_name,
     message=message,
     functions_per_prompt=functions_per_prompt,
@@ -155,7 +158,7 @@ def start(
     cluster_sampling_temperature_init=cluster_sampling_temperature_init,
     cluster_sampling_temperature_period=cluster_sampling_temperature_period,
   )
-  database = ProgramsDatabase(config, output_path, initial_log_path)
+  database = ProgramsDatabase(config, initial_log_path)
   core.run(database, llm, output_path, timestamp, samples)
 
 

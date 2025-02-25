@@ -41,7 +41,7 @@ class LLM:
     # Keep sampling until we get a response
     while True:
       try:
-        output_text = self._model.prompt(prompt).text()
+        output_text = "  return 0.5"  # self._model.prompt(prompt).text()
         break
       except Exception as e:
         print("Retrying LLM call after error:", e)  # noqa: T201

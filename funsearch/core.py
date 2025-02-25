@@ -133,7 +133,7 @@ def run(
 
       with database_lock:
         if scores_per_test:
-          database.register_program(new_function, island_id, scores_per_test)
+          database.register_program_in_island(new_function, island_id, scores_per_test)
         elif island_id is not None:
           database.register_failure(island_id)
 

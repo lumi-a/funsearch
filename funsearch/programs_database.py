@@ -123,13 +123,13 @@ class Island:
     # This is (run_id, program).
     self._improvements: list[tuple[int, code_manipulation.Function]] = []
 
-    # TODO: Initialise island with initial programs instead
-    self._best_score: float = _reduce_score(initial_best_scores_per_test)
-    self._best_program: code_manipulation.Function = initial_best_program
-    self._best_scores_per_test: ScoresPerTest = initial_best_scores_per_test
-
     self._clusters: dict[Signature, Cluster] = {}
     self._num_programs_peroidic: int = 0
+
+    self._best_score: float = float("-inf")
+    self._best_program: code_manipulation.Function
+    self._best_scores_per_test: ScoresPerTest
+    self.register_program(initial_best_program, initial_best_scores_per_test)
 
   def register_program(self, program: code_manipulation.Function, scores_per_test: ScoresPerTest) -> None:
     """Register a `program` on this island with a given `scores_per_test`."""
@@ -277,7 +277,7 @@ class ProgramsDatabaseConfig:
   inputs: list[float] | list[str]
   specification: str
   problem_name: str
-  message: str = ""
+  message: str
   functions_per_prompt: int
   num_islands: int
   reset_period: int
@@ -321,6 +321,7 @@ class ProgramsDatabase:
     self._last_reset_time: float = time.time()
 
     # Populate islands
+    initial_log_path.mkdir(exist_ok=True, parents=True)
     evaluator = self.construct_evaluator(initial_log_path)
     initial_sample = self._template.get_function(self._function_to_evolve).body
     program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
@@ -347,17 +348,6 @@ class ProgramsDatabase:
       key=lambda t: t[1],
       reverse=True,
     )
-
-  def populate(self, log_path: pathlib.Path) -> bool:
-    """Populate islands with the seed-function and return whether the seed-function ran successfully."""
-    evaluator = self.construct_evaluator(log_path)
-    initial_sample = self._template.get_function(self._function_to_evolve).body
-    program, scores_per_test = evaluator.analyse(initial_sample, version_generated=None, index=-1)
-    if scores_per_test:
-      for island_id in range(len(self._islands)):
-        self._islands[island_id].register_program(program, scores_per_test)
-      return True
-    return False
 
   @classmethod
   def load(cls, file) -> ProgramsDatabase:
@@ -408,11 +398,11 @@ class ProgramsDatabase:
     code, version_generated = self._islands[island_id].get_prompt()
     return Prompt(code, version_generated, island_id)
 
-  def register_program(
+  def register_program_in_island(
     self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest
   ) -> None:
     """Registers `program` in the database."""
-    self._islands[island_id].register_program(program, island_id, scores_per_test)
+    self._islands[island_id].register_program(program, scores_per_test)
 
     # Check whether it is time to reset an island.
     # TODO: Move this to core.run or something
@@ -448,7 +438,7 @@ class ProgramsDatabase:
         self._config.cluster_sampling_temperature_period,
       )
       (program, scores_per_test) = np.random.choice(founders)
-      self._islands[island_id].register_program(program, island_id, scores_per_test)
+      self._islands[island_id].register_program(program, scores_per_test)
 
   def construct_evaluator(self, log_path: pathlib.Path) -> Evaluator:
     """Returns an evaluator for this database's spec and inputs."""

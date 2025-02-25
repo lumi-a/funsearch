@@ -174,9 +174,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
     template = code_manipulation.text_to_program(_SKELETON)
     function_to_evolve = "priority"
     database = programs_database.ProgramsDatabase(
-      config=config.ProgramsDatabaseConfig(num_islands=10),
-      template=template,
-      function_to_evolve=function_to_evolve,
+      config=config.ProgramsDatabaseConfig(num_islands=10), template=template, function_to_evolve=function_to_evolve
     )
     scores = [7, 3, 5, 6, 7, -2, 0, -1, 4, 3]
     unused_function = template.get_function(function_to_evolve)

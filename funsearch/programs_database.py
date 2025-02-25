@@ -342,9 +342,7 @@ class ProgramsDatabase:
   def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function, float]]:
     """Returns the best programs per island, together with their scores."""
     return sorted(
-      [(island._best_program, island._best_score) for island in self._islands],
-      key=lambda t: t[1],
-      reverse=True,
+      [(island._best_program, island._best_score) for island in self._islands], key=lambda t: t[1], reverse=True
     )
 
   @classmethod
@@ -417,8 +415,7 @@ class ProgramsDatabase:
     # We sort best scores after adding minor noise to break ties.
     num_islands = len(self._islands)
     indices_sorted_by_score: list[int] = sorted(
-      range(num_islands),
-      key=lambda ix: self._islands[ix]._best_score + np.random.random() * 1e-6,
+      range(num_islands), key=lambda ix: self._islands[ix]._best_score + np.random.random() * 1e-6
     )
     num_islands_to_reset = num_islands // 2
     reset_islands_ids: list[int] = indices_sorted_by_score[:num_islands_to_reset]

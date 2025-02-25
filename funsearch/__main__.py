@@ -87,25 +87,16 @@ MODELS: list[str] = list(llm.get_model_aliases().keys())
 @click.argument("message", type=str, default="")
 @click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
-  "--output-path",
-  default="./data/",
-  type=click.Path(file_okay=False, path_type=Path),
-  help="Path for logs and data",
+  "--output-path", default="./data/", type=click.Path(file_okay=False, path_type=Path), help="Path for logs and data"
 )
 @click.option("--samples", default=-1, type=click.INT, help="Maximum number of samples")
 @click.option("--functions-per-prompt", default=2, type=click.INT, help="How many past functions to send per prompt")
 @click.option("--islands", default=10, type=click.INT, help="How many islands (mostly separate populations) to use")
 @click.option(
-  "--reset-period",
-  default=100_000,
-  type=click.INT,
-  help="Number of iterations before half the islands are reset",
+  "--reset-period", default=100_000, type=click.INT, help="Number of iterations before half the islands are reset"
 )
 @click.option(
-  "--cluster-sampling-temperature-init",
-  default=0.1,
-  type=click.FLOAT,
-  help="Initial temperature for cluster sampling",
+  "--cluster-sampling-temperature-init", default=0.1, type=click.FLOAT, help="Initial temperature for cluster sampling"
 )
 @click.option(
   "--cluster-sampling-temperature-period",
@@ -163,10 +154,7 @@ def start(
 @click.argument("db_file", type=click.File("rb"), required=False)
 @click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
-  "--output-path",
-  default="./data/",
-  type=click.Path(file_okay=False, path_type=Path),
-  help="Path for logs and data",
+  "--output-path", default="./data/", type=click.Path(file_okay=False, path_type=Path), help="Path for logs and data"
 )
 @click.option("--samples", default=-1, type=click.INT, help="Maximum number of samples")
 def resume(db_file: click.File | None, llm: str, output_path: click.Path, samples: int) -> None:

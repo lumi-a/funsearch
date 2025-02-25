@@ -100,10 +100,7 @@ def _trim_function_body(generated_code: str, function_to_evolve: str) -> str:
 
 
 def _sample_to_program(
-  generated_code: str,
-  version_generated: int | None,
-  template: code_manipulation.Program,
-  function_to_evolve: str,
+  generated_code: str, version_generated: int | None, template: code_manipulation.Program, function_to_evolve: str
 ) -> tuple[code_manipulation.Function, str]:
   """Returns the compiled generated function and the full runnable program."""
   body = _trim_function_body(generated_code, function_to_evolve)

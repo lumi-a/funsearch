@@ -23,7 +23,7 @@ import pytest
 from absl.testing import parameterized
 
 from funsearch import code_manipulation
-from funsearch.programs_database import Island, ProgramsDatabase, ProgramsDatabaseConfig
+from funsearch.programs_database import Island, ProgramsDatabase, ProgramsDatabaseConfig, extract_function_names
 
 ROOT = Path(__file__).parent.parent
 
@@ -249,3 +249,107 @@ class TestProgramsDatabase:
   def test_softmax_non_finite_error(self, logits):
     with pytest.raises(ValueError, match=r"`logits` contains non-finite value\(s\)"):
       programs_database._softmax(logits, temperature=1.0)
+
+
+_PY_PROMPT = '''\
+import itertools
+import jax
+
+
+@funsearch.run
+@jax.jit
+def run(n: int):
+  return capset(n)
+
+
+@funsearch.evolve
+def capset(n: int):
+  """Trivial implementation of capset.
+
+  Args: ...
+  """
+  return [[1,] * n]
+'''
+
+_PY_PROMPT_EVOLVE_RUN = """\
+import itertools
+
+
+@funsearch.run
+@funsearch.evolve
+def capset(n: int):
+  return [[1,] * n]
+"""
+
+_PY_PROMPT_NO_RUN = '''\
+import itertools
+
+
+def run(n: int):
+  return capset(n)
+
+@funsearch.evolve
+def capset(n: int):
+  """Trivial implementation of capset.
+
+  Args: ...
+  """
+  return [[1,] * n]
+'''
+
+_PY_PROMPT_NO_EVOLVE = '''\
+import itertools
+
+
+@funsearch.run
+def run(n: int):
+  return capset(n)
+
+
+def capset(n: int):
+  """Trivial implementation of capset.
+
+  Args: ...
+  """
+  return [[1,] * n]
+'''
+
+_PY_PROMPT_DOUBLE_RUN = '''\
+import itertools
+
+@funsearch.run
+def run(n: int):
+  return capset(n)
+
+@funsearch.run
+def capset(n: int):
+  """Trivial implementation of capset.
+
+  Args: ...
+  """
+  return [[1,] * n]
+'''
+
+
+class TestExtractFunctionNames:
+  def test_extract_function_names(self):
+    to_evolve, to_run = extract_function_names(_PY_PROMPT)
+    assert to_run == "run"
+    assert to_evolve == "capset"
+
+  def test_extract_function_names_evolve_and_run(self):
+    to_evolve, to_run = extract_function_names(_PY_PROMPT_EVOLVE_RUN)
+    assert to_run == "capset"
+    assert to_evolve == "capset"
+
+  def test_extract_function_names_no_run(self):
+    with pytest.raises(ValueError, match=r"Expected 1 function decorated with `@funsearch.run`."):
+      extract_function_names(_PY_PROMPT_NO_RUN)
+
+  def test_extract_function_names_no_evolve(self):
+    with pytest.raises(ValueError, match=r"Expected 1 function decorated with `@funsearch.evolve`."):
+      extract_function_names(_PY_PROMPT_NO_EVOLVE)
+
+  def test_extract_function_names_double_run(self):
+    with pytest.raises(ValueError, match=r"Expected 1 function decorated with `@funsearch.run`."):
+      extract_function_names(_PY_PROMPT_DOUBLE_RUN)

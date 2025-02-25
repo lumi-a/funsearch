@@ -156,7 +156,7 @@ function detailsCode(title, description, code) {
 }
 
 function runToId(problemName, timestamp) {
-    return `run-${problemName}-${timestamp}`
+    return `${problemName}-${timestamp}`
 }
 
 // Paul Tol's discrete rainbow color scheme, from https://personal.sron.nl/~pault/
@@ -240,8 +240,7 @@ async function main() {
 
         const timestampLink = document.createElement("a")
         timestampLink.classList.add("timestamp")
-        const href = `#${id}`
-        timestampLink.href = href
+        timestampLink.href = `#${id}`
         timestampLink.textContent = "#"
         runDetails.querySelector("summary").appendChild(timestampLink)
 

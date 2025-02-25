@@ -164,6 +164,7 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, sample
   """
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
+    click.echo(f"Loading {db_file.name}")
   database = ProgramsDatabase.load(db_file)
 
   core.run(database, llm, output_path, int(time.time()), samples)
@@ -202,6 +203,7 @@ def change_db_message(db_file: click.File | None) -> None:
   """
   if db_file is None:
     db_file = _most_recent_backup().open("rb+")
+    click.echo(f"Using {db_file.name}")
 
   database = ProgramsDatabase.load(db_file)
   old_message = database._config.message

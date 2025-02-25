@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-from dataclasses import replace
 import json
 import logging
 import os
@@ -9,6 +8,7 @@ import pathlib
 import pickle
 import re
 import time
+from dataclasses import replace
 from pathlib import Path
 
 import click
@@ -93,12 +93,8 @@ MODELS: list[str] = list(llm.get_model_aliases().keys())
   help="Path for logs and data",
 )
 @click.option("--samples", default=-1, type=click.INT, help="Maximum number of samples")
-@click.option(
-  "--functions-per-prompt", default=2, type=click.INT, help="How many past functions to send per prompt"
-)
-@click.option(
-  "--islands", default=10, type=click.INT, help="How many islands (mostly separate populations) to use"
-)
+@click.option("--functions-per-prompt", default=2, type=click.INT, help="How many past functions to send per prompt")
+@click.option("--islands", default=10, type=click.INT, help="How many islands (mostly separate populations) to use")
 @click.option(
   "--reset-period",
   default=100_000,

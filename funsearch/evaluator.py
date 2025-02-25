@@ -56,9 +56,7 @@ def _find_method_implementation(generated_code: str, function_to_evolve: str) ->
   - a new 'def'
   - ` or ' or # without indentation
   """
-  method_matcher = re.compile(
-    rf"def {function_to_evolve}_v\d\(.*?\) -> .*:\n(?:\s*(?:[ \t]*(?!def|#|`|').*(?:\n|$)))+"
-  )
+  method_matcher = re.compile(rf"def {function_to_evolve}_v\d\(.*?\) -> .*:\n(?:\s*(?:[ \t]*(?!def|#|`|').*(?:\n|$)))+")
   method_name_matcher = re.compile(rf"{function_to_evolve}_v\d+")
 
   matches = method_matcher.findall(generated_code)
@@ -156,9 +154,7 @@ class Evaluator:
     match = re.search(r"(```(python|))(.*?)```", sample, re.DOTALL)
     code: str = match.group(3) if match else sample
 
-    new_function, program = _sample_to_program(
-      code, version_generated, self._template, self._function_to_evolve
-    )
+    new_function, program = _sample_to_program(code, version_generated, self._template, self._function_to_evolve)
 
     scores_per_test: dict[float | str, float] = {}
     for current_input in self._inputs:

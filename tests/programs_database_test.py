@@ -181,9 +181,7 @@ class ProgramsDatabaseTest(parameterized.TestCase):
     scores = [7, 3, 5, 6, 7, -2, 0, -1, 4, 3]
     unused_function = template.get_function(function_to_evolve)
     for i, score in enumerate(scores):
-      database.register_program_in_island(
-        program=unused_function, island_id=i, scores_per_test={"unused_input": score}
-      )
+      database.register_program_in_island(program=unused_function, island_id=i, scores_per_test={"unused_input": score})
     database.register_program_in_island(unused_function, island_id=7, scores_per_test={"unused_input": 17})
 
     expected_scores = list(scores)

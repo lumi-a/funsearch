@@ -89,9 +89,7 @@ class MyGenealisedModel:
       self.alpha.append(
         self.gurobi_model.addVar(vtype=GRB.INTEGER, name=f"alpha_{i}", lb=-float("inf"), ub=float("inf"))
       )
-      self.beta.append(
-        self.gurobi_model.addVar(vtype=GRB.INTEGER, name=f"beta_{i}", lb=-float("inf"), ub=float("inf"))
-      )
+      self.beta.append(self.gurobi_model.addVar(vtype=GRB.INTEGER, name=f"beta_{i}", lb=-float("inf"), ub=float("inf")))
     ll = list(range(inst.n))
     self.z = self.gurobi_model.addVars(ll, ll, vtype=GRB.BINARY, name="z")
     self.n = inst.n
@@ -119,9 +117,7 @@ class MyGenealisedModel:
   def initialize(self, inst: GeneralisedInstance) -> None:
     self._init_vars(inst)
     self.__init_constrs(inst)
-    self.gurobi_model.setObjective(
-      gp.quicksum(self.beta[ll] - self.alpha[ll] for ll in range(self.k)), GRB.MINIMIZE
-    )
+    self.gurobi_model.setObjective(gp.quicksum(self.beta[ll] - self.alpha[ll] for ll in range(self.k)), GRB.MINIMIZE)
     self.gurobi_model.setParam("OutputFlag", False)
 
   def relax(self) -> Self:
@@ -178,9 +174,7 @@ def generate_instance(n: int, k: int, min: int, max: int) -> GeneralisedInstance
   return generate_instance_distinct(n, k, min, max, min, max)
 
 
-def generate_instance_distinct(
-  n: int, k: int, x_min: int, x_max: int, y_min: int, y_max: int
-) -> GeneralisedInstance:
+def generate_instance_distinct(n: int, k: int, x_min: int, x_max: int, y_min: int, y_max: int) -> GeneralisedInstance:
   inst = GeneralisedInstance()
   valid = False
   while not valid:
@@ -188,9 +182,7 @@ def generate_instance_distinct(
     inst.k = k
     inst.x = _generate_tab(n, k, x_min, x_max)
     inst.y = _generate_tab(n - 1, k, y_min, y_max)
-    diff = tuple(
-      sum([inst.x[i][ll] for i in range(n)]) - sum([inst.y[i][ll] for i in range(n - 1)]) for ll in range(k)
-    )
+    diff = tuple(sum([inst.x[i][ll] for i in range(n)]) - sum([inst.y[i][ll] for i in range(n - 1)]) for ll in range(k))
     if all(diff[ll] >= y_min and diff[ll] < y_max for ll in range(k)):
       inst.y.append(diff)
       valid = True

@@ -46,7 +46,7 @@ dev = [
 
 [tool.ruff]
 indent-width = 2
-line-length = 110
+line-length = 120
 
 [tool.ruff.lint]
 select = ["ALL"]

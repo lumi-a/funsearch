@@ -172,9 +172,7 @@ class Island:
 
     # Convert scores to probabilities using softmax with temperature schedule.
     period = self._cluster_sampling_temperature_period
-    temperature = self._cluster_sampling_temperature_init * (
-      1 - (self._num_programs_peroidic % period) / period
-    )
+    temperature = self._cluster_sampling_temperature_init * (1 - (self._num_programs_peroidic % period) / period)
     probabilities = _softmax(cluster_scores, temperature)
 
     # At the beginning of an experiment when we have few clusters, place fewer

@@ -262,7 +262,7 @@ class ProgramsDatabaseConfig:
   Attributes:
     functions_per_prompt: Number of previous programs to include in prompts.
     num_islands: Number of islands to maintain as a diversity mechanism.
-    reset_period: How often (in seconds) the weakest islands should be reset.
+    reset_period: How often (in samples) the weakest islands should be reset.
     cluster_sampling_temperature_init: Initial temperature for softmax sampling
         of clusters within an island.
     cluster_sampling_temperature_period: Period of linear decay of the cluster
@@ -335,7 +335,7 @@ class ProgramsDatabase:
       for _ in range(config.num_islands)
     ]
 
-  def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function | None, float]]:
+  def get_best_programs_per_island(self) -> Iterable[tuple[code_manipulation.Function, float]]:
     """Returns the best programs per island, together with their scores."""
     return sorted(
       [(island._best_program, island._best_score) for island in self._islands],

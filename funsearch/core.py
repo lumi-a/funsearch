@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import os
+import pathlib
 import queue
 import threading
 import time
@@ -58,10 +59,6 @@ class IterationManager:
     return self._max_iterations != -1 and self._index >= self._max_iterations
 
 
-# TODO: Instead of giving each Database a lock, consider writing a DbManager class
-# that implements the locking outside of the Database-class.
-
-
 # We pass in llm_name because there doesn't seem to be a good way of getting the class of
 # a model from its string. You could do:
 # |  a = get_model(llm_name)
@@ -71,11 +68,14 @@ class IterationManager:
 # So let's just ask them for the id directly and be a bit inefficient upfront. This might
 # make errors uglier, though.
 def run(
-  database: ProgramsDatabase, llm_name: str, log_path: Path, backup_dir: Path, iterations: int = -1
+  database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp: int, iterations: int = -1
 ) -> None:
   """Launches a FunSearch experiment in parallel using threads."""
+
   database.print_status()
 
+  log_path = output_path / database._config.problem_name / str(timestamp)
+  backup_dir = output_path / "backup"
   log_path.mkdir(parents=True, exist_ok=True)
   backup_dir.mkdir(parents=True, exist_ok=True)
 
@@ -139,8 +139,8 @@ def run(
 
       llm_responses_slots.release()
 
-      if current_index % fixthis == 0:
-        with database_lock:
+      with database_lock:
+        if current_index % database._config.reset_period == 0:
           backup_file = backup_dir / f"{database._config.problem_name}_{timestamp}_{current_index}.pickle"
           database.backup(backup_file)
 

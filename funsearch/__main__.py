@@ -12,7 +12,7 @@ from pathlib import Path
 import click
 import llm
 
-from funsearch import config, core
+from funsearch import core
 from funsearch.programs_database import ProgramsDatabase, ProgramsDatabaseConfig
 
 LOGLEVEL = os.environ.get("LOGLEVEL", "WARNING").upper()
@@ -138,19 +138,8 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, iterat
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
   database = ProgramsDatabase.load(db_file)
-  # TODO: There has to be a better way than doing this.
-  # Maybe require backup-path as an argument?
-  old_config = database._config.__dict__
-  old_config["backup_folder"] = str(pathlib.Path(output_path) / "backups")
-  database._config = config.ProgramsDatabaseConfig(**old_config)
 
-  timestamp = str(int(time.time()))
-  database.timestamp = timestampthiswontwork  # Database doesn't have attribute timestamp anymore
-
-  log_path = pathlib.Path(output_path) / database._config.problem_name / timestamp
-  log_path.mkdir(exist_ok=True, parents=True)
-
-  core.run(database, llm, log_path, iterations)
+  core.run(database, llm, output_path, int(time.time()), iterations)
 
 
 @main.command()
@@ -162,18 +151,18 @@ def ls(db_file: click.File | None) -> None:
   """
   if db_file is None:
     db_file = _most_recent_backup().open("rb")
-
   database = ProgramsDatabase.load(db_file)
 
-  progs = database.get_best_programs_per_island()
-  print(f"# Found {len(progs)} programs")  # noqa: T201
-  for ix, (prog, score) in enumerate(reversed(progs)):
+  def comment(str):
+    click.echo(click.style(str, fg="green"))
+
+  progs = list(database.get_best_programs_per_island())
+  for ix, (program, score) in enumerate(reversed(progs)):
     i = len(progs) - 1 - ix
-    print(f"# {i}: Program with score {score}")  # noqa: T201
-    prog.name += f"_{i}"
-    print(prog)  # noqa: T201
-    print("\n")  # noqa: T201
-  print(f"# Programs loaded from file: {db_file.name}")  # noqa: T201
+    comment(f"# Island {i}, score {score}:")
+    program.name += f"_{i}"
+    click.echo(str(program))
+  comment(f"# Found {len(progs)} programs in file: {db_file.name}")
 
 
 @main.command()

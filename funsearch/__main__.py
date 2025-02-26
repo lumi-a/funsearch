@@ -12,6 +12,7 @@ from dataclasses import replace
 from pathlib import Path
 
 import click
+from dotenv import load_dotenv
 import llm
 
 from funsearch import core
@@ -147,6 +148,7 @@ def start(
     cluster_sampling_temperature_period=cluster_sampling_temperature_period,
   )
   database = ProgramsDatabase(config, initial_log_path)
+  load_dotenv()
   core.run(database, llm, output_path, timestamp, samples)
 
 
@@ -167,6 +169,7 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, sample
     click.echo(f"Loading {db_file.name}")
   database = ProgramsDatabase.load(db_file)
 
+  load_dotenv()
   core.run(database, llm, output_path, int(time.time()), samples)
 
 

@@ -24,8 +24,29 @@
     <div id="container-3-4-cyclefree" class="problem-container">
         <h2>3-4-cyclefree(<span class="math">n</span>)</h2>
         Search for simple graphs on <span class="math">n</span> vertices that contain neither a 3-cycle
-        nor a 4-cycle,
-        while maximizing the number of edges.
+        nor a 4-cycle, while maximizing the number of edges. The section "<span class="math">H={C₃, C₄}</span>" of
+        <a href="https://users.cecs.anu.edu.au/~bdm/data/extremal.html">Extremal Graphs and Turan numbers</a> lists
+        known computational lower bounds.
+    </div>
+    <div id="container-gasoline-list" class="problem-container">
+        <h2>Gasoline</h2>
+        <p>
+            [Todo: Define the problem and improve this description] This is a combinatorial
+            optimization problem. There exists an <a
+                href="https://en.wikipedia.org/wiki/Approximation_algorithm">approximation algorithm</a> whose exact
+            approximation-ratio is unknown, but exceeds at least 2. Specifically, for any <span class="math">ε>0</span>,
+            there exists an instance of the problem where the solution found by the algorithm is at least <span
+                class="math">(2-ε)</span>-times worse than the optimal solution.
+        </p>
+        <p>
+            FunSearch does not search for a function that yields a good solution, but instead tries to find an
+            <i>instance</i> of the problem that has a bad (i.e. high) approximation-ratio.
+        </p>
+    </div>
+    <div id="container-library" class="problem-container">
+        <h2>Paging</h2>
+        Search for an online-heuristic for the <a
+            href="https://en.wikipedia.org/wiki/Page_replacement_algorithm">page-replacement-problem</a>.
     </div>
 </body>
 

@@ -6,15 +6,6 @@ resolution-markers = [
 ]
 
 [[package]]
-name = "absl-py"
-version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/c6/09/fe8d9ab3e640b12322f8f73448db3428bf417b7dcfe14702fc7413e6c5c9/absl-py-2.0.0.tar.gz", hash = "sha256:d9690211c5fcfefcdd1a45470ac2b5c5acd45241c3af71eed96bc5441746c0d5", size = 115695 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/01/e4/dc0a1dcc4e74e08d7abedab278c795eef54a224363bb18f5692f416d834f/absl_py-2.0.0-py3-none-any.whl", hash = "sha256:9a28abb62774ae4e8edbe2dd4c49ffcd45a6a848952a5eccc6a49f3f0fc1e2f3", size = 130192 },
-]
-
-[[package]]
 name = "annotated-types"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -124,7 +115,6 @@ wheels = [
 name = "funsearch"
 source = { editable = "." }
 dependencies = [
-    { name = "absl-py" },
     { name = "autopep8" },
     { name = "click" },
     { name = "cloudpickle" },
@@ -145,7 +135,6 @@ lint = [
 
 [package.metadata]
 requires-dist = [
-    { name = "absl-py", specifier = "==2.0.0" },
     { name = "autopep8", specifier = ">=2.3.1" },
     { name = "click", specifier = "==8.1" },
     { name = "cloudpickle", specifier = "==3.0.0" },

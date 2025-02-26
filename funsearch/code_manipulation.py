@@ -27,11 +27,10 @@ from __future__ import annotations
 import ast
 import dataclasses
 import io
+import logging
 import re
 import tokenize
 from typing import TYPE_CHECKING
-
-from absl import logging
 
 if TYPE_CHECKING:
   from collections.abc import Iterator, MutableSet, Sequence

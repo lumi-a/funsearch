@@ -1,12 +1,21 @@
 import re
 import time
+import warnings
 from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
 
-from funsearch import __main__, sampler
+from funsearch import sampler
 from funsearch.programs_database import ProgramsDatabase
+
+warnings.filterwarnings(
+  "ignore",
+  message=r"Support for class-based `config` is deprecated, use ConfigDict instead\.",
+  category=DeprecationWarning,
+  module="pydantic",
+)
+from funsearch import __main__
 
 ROOT_DIR = Path(__file__).parent.parent
 

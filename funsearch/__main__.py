@@ -12,8 +12,8 @@ from dataclasses import replace
 from pathlib import Path
 
 import click
-from dotenv import load_dotenv
 import llm
+from dotenv import load_dotenv
 
 from funsearch import core
 from funsearch.programs_database import ProgramsDatabase, ProgramsDatabaseConfig

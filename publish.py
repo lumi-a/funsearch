@@ -64,7 +64,7 @@ def publish() -> None:
                         {
                             "improvements": [
                                 (ix, island._runs[ix], str(program)) for ix, program in island._improvements
-                            ],  # noqa: SLF001
+                            ],
                             "successCount": island._success_count,  # noqa: SLF001
                             "failureCount": island._failure_count,  # noqa: SLF001
                         }

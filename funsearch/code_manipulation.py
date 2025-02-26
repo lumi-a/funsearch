@@ -27,6 +27,7 @@ from __future__ import annotations
 import ast
 import dataclasses
 import io
+import re
 import tokenize
 from typing import TYPE_CHECKING
 
@@ -109,21 +110,48 @@ class ProgramVisitor(ast.NodeVisitor):
 
   def __init__(self, sourcecode: str) -> None:
     self._codelines: list[str] = sourcecode.splitlines()
-
     self._preface: str = ""
     self._functions: list[Function] = []
 
-  def visit_FunctionDef(
-    self,  # pylint: disable=invalid-name
-    node: ast.FunctionDef,
-  ) -> None:
+  def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
     """Collects all information about the function being parsed."""
-    if node.col_offset == 0:  # We only care about first level functions.
+    if node.col_offset == 0:  # Only process top-level functions.
       if not self._functions:
-        self._preface = "\n".join(self._codelines[: node.lineno - 1])
+        preface_lines = self._codelines[: node.lineno - 1]
+        filtered_lines = []
+        in_multiline_import = False
+
+        for line in preface_lines:
+          if in_multiline_import:
+            # Check if the current line contains a closing parenthesis,
+            # which signals the end of a multi-line import.
+            if ")" in line:
+              in_multiline_import = False
+            continue
+
+          # Check for the start of a multi-line import from funsearch.
+          if re.search(r"^\s*from\s+funsearch\s+import\s*\(", line):
+            # If the closing parenthesis is not on the same line,
+            # mark that we're in a multi-line import block.
+            if not re.search(r"\)", line):
+              in_multiline_import = True
+            continue
+
+          # Remove single-line funsearch imports.
+          if re.search(r"^\s*(?:from\s+funsearch\s+import\b|import\s+funsearch\b)", line):
+            continue
+
+          # Remove decorators like @funsearch.run or @funsearch.evolve.
+          if re.search(r"^\s*@funsearch\.(?:run|evolve)\b", line):
+            continue
+
+          filtered_lines.append(line)
+
+        self._preface = "\n".join(filtered_lines)
+
       function_end_line = node.end_lineno
       body_start_line = node.body[0].lineno - 1
-      # Extract the docstring.
+      # Extract the docstring if available.
       docstring = None
       if isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
         docstring = f'  """{ast.literal_eval(ast.unparse(node.body[0]))}"""'

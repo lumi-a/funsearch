@@ -32,6 +32,15 @@ uv run funsearch ls
 uv run funsearch ls data/backups/3-4-cyclefree_1731323471_0.pickle
 ```
 
+## Tests
+Run tests:
+
+```sh
+uv run pytest
+```
+
+Due to monkeypatching, this shouldn't execute any LLM-queries.
+
 ---
 
 This is a fork of [jonppe's fork](https://github.com/jonppe/funsearch) of [google-deepmind's funsearch](https://github.com/google-deepmind/funsearch), the latter accompanied by the publication:

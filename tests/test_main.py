@@ -25,7 +25,7 @@ def dummy_setup(monkeypatch, tmp_path):  # noqa: ARG001
     """Replace LLM-calls and override the output path to a temporary directory."""
 
     # Replace LLM call
-    monkeypatch.setattr(sampler.LLM, "draw_sample", lambda _self, _prompt, _ix: "  return 0.5")
+    monkeypatch.setattr(sampler.LLM, "draw_sample", lambda _self, _prompt, _ix: "    return 0.5")
 
 
 @pytest.mark.filterwarnings(
@@ -159,10 +159,10 @@ def test_cli(tmp_path: Path):
         re.findall(
             r'''# Island \d, score 8\.0:
 def priority_\d\(el: tuple\[int, \.\.\.\], n: int\) -> float:
-  """Returns the priority with which we want to add `element` to the cap set\.
-  el is a tuple of length n with values 0-2\.
-  """
-  return 0\.0
+    """Returns the priority with which we want to add `element` to the cap set\.
+    el is a tuple of length n with values 0-2\.
+    """
+    return 0\.0
 ''',
             ls_result.output,
         )

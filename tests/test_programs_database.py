@@ -53,6 +53,7 @@ def priority_v0(n: int) -> float:
   """Returns the priority with which we want to add `element` to the cap set."""
   return 0.0
 
+
 def priority_v1(n: int) -> float:
   """Improved version of `priority_v0`."""
 
@@ -145,8 +146,6 @@ class TestProgramsDatabase:
     )
 
     # Verify the first prompt.
-    print(database.get_prompt().code)
-    print(_EXPECTED_INITIAL_PROMPT)
     assert database.get_prompt().code == _EXPECTED_INITIAL_PROMPT
 
     # Test saving database

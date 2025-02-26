@@ -41,7 +41,21 @@ class LLM:
     # Keep sampling until we get a response
     while True:
       try:
-        output_text = self._model.prompt(prompt).text()
+        output_text = (
+          self._model.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+              {
+                "role": "developer",
+                "content": "You are a helpful coding assistant who only responds with code and no markdown-formatting.",
+              },
+              {"role": "user", "content": prompt},
+            ],
+          )
+          .choices[0]
+          .message.content
+        )
+        input(output_text)
         break
       except Exception as e:
         print("Retrying LLM call after error:", e)  # noqa: T201

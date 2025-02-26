@@ -23,7 +23,7 @@ import threading
 import time
 from typing import TYPE_CHECKING
 
-import llm
+from openai import OpenAI
 
 from funsearch.sampler import LLM
 
@@ -155,9 +155,7 @@ def run(database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp:
   # Start web request worker threads.
   num_llm_workers = os.cpu_count() * 2
   llm_threads: list[threading.Thread] = [
-    threading.Thread(
-      target=llm_response_worker, args=(iteration_manager, stop_event, LLM(llm.get_model(llm_name), log_path))
-    )
+    threading.Thread(target=llm_response_worker, args=(iteration_manager, stop_event, LLM(OpenAI(), log_path)))
     for _ in range(num_llm_workers)
   ]
   for t in llm_threads:

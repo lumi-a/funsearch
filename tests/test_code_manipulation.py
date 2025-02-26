@@ -16,7 +16,6 @@
 import itertools
 import textwrap
 
-from absl.testing import parameterized
 import pytest
 
 from funsearch import code_manipulation

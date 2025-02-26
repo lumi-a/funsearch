@@ -251,12 +251,13 @@ class TestProgramsDatabase:
     probabilities = programs_database._softmax(logits, temperature)
     np.testing.assert_array_almost_equal(probabilities, np.array(expected), decimal=5)
 
-  @parameterized.parameters(
+  @pytest.mark.parametrize(
+    "logits",
     [
-      {"logits": np.array([100, 200, 300, np.nan])},
-      {"logits": np.array([100, np.inf, 300, 200])},
-      {"logits": np.array([-np.inf, 200, 300, 100])},
-    ]
+      np.array([100, 200, 300, np.nan]),
+      np.array([100, np.inf, 300, 200]),
+      np.array([-np.inf, 200, 300, 100]),
+    ],
   )
   def test_softmax_non_finite_error(self, logits):
     with pytest.raises(ValueError, match=r"`logits` contains non-finite value\(s\)"):

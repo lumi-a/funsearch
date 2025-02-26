@@ -20,59 +20,59 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-  import pathlib
+    import pathlib
 
-  import llm
+    import llm
 
 
 class LLM:
-  """Language model that predicts continuation of provided source code."""
+    """Language model that predicts continuation of provided source code."""
 
-  def __init__(self, model: llm.Model, log_path: pathlib.Path) -> None:
-    """Initialize a new LLM."""
-    self._model = model
-    self._log_path = log_path
+    def __init__(self, model: llm.Model, log_path: pathlib.Path) -> None:
+        """Initialize a new LLM."""
+        self._model = model
+        self._log_path = log_path
 
-  def draw_sample(self, prompt: str, index: int) -> str:
-    """Draw a sample from the language model, given a prompt.
+    def draw_sample(self, prompt: str, index: int) -> str:
+        """Draw a sample from the language model, given a prompt.
 
-    The index is used for logging and must be unique across threads.
-    """
-    # Keep sampling until we get a response
-    while True:
-      try:
-        output_text = (
-          self._model.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-              {
-                "role": "developer",
-                "content": "You are a helpful coding assistant who only responds with code and no markdown-formatting.",
-              },
-              {"role": "user", "content": prompt},
-            ],
-          )
-          .choices[0]
-          .message.content
-        )
-        input(output_text)
-        break
-      except Exception as e:
-        print("Retrying LLM call after error:", e)  # noqa: T201
+        The index is used for logging and must be unique across threads.
+        """
+        # Keep sampling until we get a response
+        while True:
+            try:
+                output_text = (
+                    self._model.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[
+                            {
+                                "role": "developer",
+                                "content": "You are a helpful coding assistant who only responds with code and no markdown-formatting.",
+                            },
+                            {"role": "user", "content": prompt},
+                        ],
+                    )
+                    .choices[0]
+                    .message.content
+                )
+                input(output_text)
+                break
+            except Exception as e:
+                print("Retrying LLM call after error:", e)  # noqa: T201
 
-    self._log(prompt, output_text, index)
+        self._log(prompt, output_text, index)
 
-    return output_text
+        return output_text
 
-  def _log(self, prompt: str, response: str, index: int) -> None:
-    """Log prompt and response to file.
+    def _log(self, prompt: str, response: str, index: int) -> None:
+        """Log prompt and response to file.
 
-    The index must be unique across thread.
-    """
-    if self._log_path:
-      call_data_folder = self._log_path / f"{index}"
-      call_data_folder.mkdir(exist_ok=True)
-      with (call_data_folder / "prompt.log").open("a") as f:
-        f.write(prompt)
-      with (call_data_folder / "response.log").open("a") as f:
-        f.write(str(response))
+        The index must be unique across thread.
+        """
+        if self._log_path:
+            call_data_folder = self._log_path / f"{index}"
+            call_data_folder.mkdir(exist_ok=True)
+            with (call_data_folder / "prompt.log").open("a") as f:
+                f.write(prompt)
+            with (call_data_folder / "response.log").open("a") as f:
+                f.write(str(response))

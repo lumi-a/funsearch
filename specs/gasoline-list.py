@@ -17,30 +17,30 @@ from funsearch.gasoline.iterative_rounding import SlotOrdered
 
 @funsearch.run
 def evaluate(n: int) -> float:
-  """Returns the approximation-ratio of the gasoline problem."""
-  xs, ys = gasoline(n)
+    """Returns the approximation-ratio of the gasoline problem."""
+    xs, ys = gasoline(n)
 
-  # Assert determinancy
-  if (xs, ys) != gasoline(n):
-    return 0
+    # Assert determinancy
+    if (xs, ys) != gasoline(n):
+        return 0
 
-  xs = [max(0, min(2**31 - 1, int(x))) for x in xs]
-  ys = [max(0, min(2**31 - 1, int(y))) for y in ys]
+    xs = [max(0, min(2**31 - 1, int(x))) for x in xs]
+    ys = [max(0, min(2**31 - 1, int(y))) for y in ys]
 
-  return SlotOrdered().approximation_ratio(xs, ys)
+    return SlotOrdered().approximation_ratio(xs, ys)
 
 
 @funsearch.evolve
 def gasoline(n: int) -> tuple[list[int], list[int]]:
-  """Return a new gasoline-problem, specified by the list of x-values and y-values.
-  The integers will be clamped to [0, 2**31 - 1].
-  """
-  xs, ys = [], []
-  for i in range(1, n):
-    u = int(2**n * (1 - 2 ** (-i)))
-    xs.extend([u for _ in range(2**i)])
-    ys.extend([u for _ in range(2**i)])
-  xs.extend([int(2**n) for _ in range(2**n)])
-  u = int(2**n * (1 - 2 ** (-n)))
-  ys.extend([u for _ in range(2**n)])
-  return xs, ys
+    """Return a new gasoline-problem, specified by the list of x-values and y-values.
+    The integers will be clamped to [0, 2**31 - 1].
+    """
+    xs, ys = [], []
+    for i in range(1, n):
+        u = int(2**n * (1 - 2 ** (-i)))
+        xs.extend([u for _ in range(2**i)])
+        ys.extend([u for _ in range(2**i)])
+    xs.extend([int(2**n) for _ in range(2**n)])
+    u = int(2**n * (1 - 2 ** (-n)))
+    ys.extend([u for _ in range(2**n)])
+    return xs, ys

@@ -24,37 +24,37 @@ type Book = int
 
 @funsearch.run
 def evaluate(_) -> float:
-  """Returns the (negative) number of orders the library had to make."""
-  shelf_space = 30
-  bookshelf = set()
-  past_reader_requests = deque(maxlen=2048)
-  book_orders = 0
+    """Returns the (negative) number of orders the library had to make."""
+    shelf_space = 30
+    bookshelf = set()
+    past_reader_requests = deque(maxlen=2048)
+    book_orders = 0
 
-  for book in read_accesses():
-    if book not in bookshelf:
-      book_orders += 1
-      if len(bookshelf) < shelf_space:
-        bookshelf.add(book)
-      else:
-        book_to_replace = replace(past_reader_requests.copy(), bookshelf.copy(), book)
-        # Enforce determinism
-        deterministic = book_to_replace == replace(past_reader_requests.copy(), bookshelf.copy(), book)
-        if book_to_replace not in bookshelf or not deterministic:
-          # Remove the book with the smallest id:
-          book_to_replace = min(bookshelf)
-        bookshelf.remove(book_to_replace)
-        bookshelf.add(book)
+    for book in read_accesses():
+        if book not in bookshelf:
+            book_orders += 1
+            if len(bookshelf) < shelf_space:
+                bookshelf.add(book)
+            else:
+                book_to_replace = replace(past_reader_requests.copy(), bookshelf.copy(), book)
+                # Enforce determinism
+                deterministic = book_to_replace == replace(past_reader_requests.copy(), bookshelf.copy(), book)
+                if book_to_replace not in bookshelf or not deterministic:
+                    # Remove the book with the smallest id:
+                    book_to_replace = min(bookshelf)
+                bookshelf.remove(book_to_replace)
+                bookshelf.add(book)
 
-    past_reader_requests.append(book)
+        past_reader_requests.append(book)
 
-  return -book_orders
+    return -book_orders
 
 
 @funsearch.evolve
 def replace(past_reader_requests: deque[Book], bookshelf: set[Book], book_order: Book) -> Book:
-  """Given our past reader requests (from oldest to newest), the current bookshelf, and the book
-  that we'll order, return the book on our bookshelf that should be replaced by the ordered book.
+    """Given our past reader requests (from oldest to newest), the current bookshelf, and the book
+    that we'll order, return the book on our bookshelf that should be replaced by the ordered book.
 
-  The bookshelf will always be full, and the book_order will never be in the bookshelf.
-  """
-  return min(bookshelf)
+    The bookshelf will always be full, and the book_order will never be in the bookshelf.
+    """
+    return min(bookshelf)

@@ -14,30 +14,30 @@ from funsearch.gasoline.iterative_rounding import SlotOrdered
 
 @funsearch.run
 def evaluate(n: int) -> float:
-  """Returns the approximation-ratio of the gasoline problem."""
-  xs, ys = [1], [1]
-  for _ in range(n - 1):
-    x, y = gasoline(xs, ys)
+    """Returns the approximation-ratio of the gasoline problem."""
+    xs, ys = [1], [1]
+    for _ in range(n - 1):
+        x, y = gasoline(xs, ys)
 
-    # Assert determinancy
-    if (x, y) != gasoline(xs, ys):
-      return 0
+        # Assert determinancy
+        if (x, y) != gasoline(xs, ys):
+            return 0
 
-    xs.append(x)
-    ys.append(y)
+        xs.append(x)
+        ys.append(y)
 
-  if any(x < 0 for x in xs) or any(y < 0 for y in ys):
-    return 0
+    if any(x < 0 for x in xs) or any(y < 0 for y in ys):
+        return 0
 
-  return SlotOrdered().approximation_ratio(xs, ys)
+    return SlotOrdered().approximation_ratio(xs, ys)
 
 
 @funsearch.evolve
 def gasoline(xs: list[int], ys: list[int]) -> tuple[int, int]:
-  """Given a gasoline-problem specified by the list of x-values and y-values,
-  return a new gasoline-problem, with one additional x-value and y-value.
-  The integers are always non-negative.
-  """
-  x = len(xs)
-  y = len(ys) ** 2 + 1
-  return x, y
+    """Given a gasoline-problem specified by the list of x-values and y-values,
+    return a new gasoline-problem, with one additional x-value and y-value.
+    The integers are always non-negative.
+    """
+    x = len(xs)
+    y = len(ys) ** 2 + 1
+    return x, y

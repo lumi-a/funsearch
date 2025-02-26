@@ -23,6 +23,7 @@ import pytest
 from absl.testing import parameterized
 
 from funsearch import code_manipulation
+from funsearch import programs_database
 from funsearch.programs_database import Island, ProgramsDatabase, ProgramsDatabaseConfig, extract_function_names
 
 ROOT = Path(__file__).parent.parent
@@ -216,21 +217,22 @@ class TestProgramsDatabase:
       else:
         assert database._islands[i]._best_score >= min_kept
 
-  @parameterized.parameters(
+  @pytest.mark.parametrize(
+    "logits",
     [
-      {"logits": np.array([10, 9, -1000], dtype=np.float32)},
-      {"logits": np.array([10, 9, -1000], dtype=np.int32)},
-      {"logits": np.zeros(50)},
-    ]
+      np.array([10, 9, -1000], dtype=np.float32),
+      np.array([10, 9, -1000], dtype=np.int32),
+      np.zeros(50),
+    ],
   )
   def test_softmax(self, logits: np.ndarray):
     probs_lower_temp = programs_database._softmax(logits, temperature=1.0)
-    self.assertAlmostEqual(np.sum(probs_lower_temp), 1.0, places=6)
+    assert np.isclose(np.sum(probs_lower_temp), 1.0)
     assert np.all(probs_lower_temp >= 0)
     assert np.all(probs_lower_temp <= 1)
 
     probs_higher_temp = programs_database._softmax(logits, temperature=5.0)
-    self.assertAlmostEqual(np.sum(probs_higher_temp), 1.0, places=6)
+    assert np.isclose(np.sum(probs_higher_temp), 1.0)
     assert np.all(probs_higher_temp >= 0)
     assert np.all(probs_higher_temp <= 1)
 

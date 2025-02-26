@@ -148,12 +148,6 @@ class Evaluator:
     match = re.search(r"(```(python|))(.*?)```", sample, re.DOTALL)
     code: str = match.group(3) if match else sample
 
-    # HACK: This fixes an issue with gpt-3.5-turbo sometimes dropping the first two spaces of indentation
-    if not code.startswith(" "):
-      code = " " + code
-    if not code.startswith("  "):
-      code = " " + code
-
     new_function, program = _sample_to_program(code, version_generated, self._template, self._function_to_evolve)
 
     scores_per_test: dict[float | str, float] = {}

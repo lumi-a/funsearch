@@ -21,6 +21,7 @@ import copy
 import dataclasses
 import pathlib
 import pickle
+import random
 import time
 from collections.abc import Iterable, Mapping, Sequence
 
@@ -420,19 +421,21 @@ class ProgramsDatabase:
     num_islands_to_reset = num_islands // 2
     reset_islands_ids: list[int] = indices_sorted_by_score[:num_islands_to_reset]
     keep_islands_ids: list[int] = indices_sorted_by_score[num_islands_to_reset:]
-    founders = [
+    founders: list[tuple[code_manipulation.Function, ScoresPerTest]] = [
       (self._islands[island_id]._best_program, self._islands[island_id]._best_scores_per_test)
       for island_id in keep_islands_ids
     ]
     for island_id in reset_islands_ids:
+      (program, scores_per_test) = random.choice(founders)
       self._islands[island_id] = Island(
         self._template,
         self._function_to_evolve,
         self._config.functions_per_prompt,
         self._config.cluster_sampling_temperature_init,
         self._config.cluster_sampling_temperature_period,
+        program,
+        scores_per_test,
       )
-      (program, scores_per_test) = np.random.choice(founders)
       self._islands[island_id].register_program(program, scores_per_test)
 
   def construct_evaluator(self, log_path: pathlib.Path) -> Evaluator:

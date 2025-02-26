@@ -33,6 +33,7 @@ import numpy as np
 import itertools
 import funsearch
 
+
 @funsearch.run
 def evaluate(n: int) -> int:
   """Returns the size of an `n`-dimensional cap set."""
@@ -48,6 +49,7 @@ _EXPECTED_INITIAL_PROMPT = '''
 """Finds large cap sets."""
 import numpy as np
 import itertools
+
 
 def priority_v0(n: int) -> float:
   """Returns the priority with which we want to add `element` to the cap set."""
@@ -74,14 +76,13 @@ _SAMPLE_B = """\
   return ...\
 """
 
-# A prompt like this appears in the Extended Data of the paper.
 _EXPECTED_PROMPT = '''
 """Finds large cap sets."""
 import numpy as np
-import utils_capset
+import itertools
 
 
-def priority_v0(element, n):
+def priority_v0(n: int) -> float:
   """Returns the priority with which we want to add `element` to the cap set."""
   priority = element
   #######
@@ -90,7 +91,7 @@ def priority_v0(element, n):
   return ...
 
 
-def priority_v1(element, n):
+def priority_v1(n: int) -> float:
   """Improved version of `priority_v0`."""
   priority = element ** 2
   #######
@@ -99,7 +100,7 @@ def priority_v1(element, n):
   return ...
 
 
-def priority_v2(element, n):
+def priority_v2(n: int) -> float:
   """Improved version of `priority_v1`."""
 
 '''
@@ -166,7 +167,7 @@ class TestProgramsDatabase:
       cluster_sampling_temperature_init=1.0,
       cluster_sampling_temperature_period=30_000,
       initial_best_program=None,
-      initial_best_scores_per_test=None,
+      initial_best_scores_per_test={"unused": 1},
     )
     sample_a = copy.deepcopy(template.get_function(function_to_evolve))
     sample_a.body = _SAMPLE_A
@@ -175,35 +176,45 @@ class TestProgramsDatabase:
     prompt = island._generate_prompt([sample_a, sample_b])
     assert prompt == _EXPECTED_PROMPT
 
-  def test_destroy_islands(self):
+  def test_reset_islands(self, tmp_path):
     template = code_manipulation.text_to_program(_SKELETON)
     function_to_evolve = "priority"
     database = ProgramsDatabase(
-      config=config.ProgramsDatabaseConfig(num_islands=10), template=template, function_to_evolve=function_to_evolve
+      config=ProgramsDatabaseConfig(
+        inputs=[3],
+        specification=_SKELETON,
+        problem_name="unused",
+        message="unused",
+        functions_per_prompt=5,
+        num_islands=10,
+        reset_period=1000,
+        cluster_sampling_temperature_init=1.0,
+        cluster_sampling_temperature_period=1000,
+      ),
+      initial_log_path=tmp_path,
     )
     scores = [7, 3, 5, 6, 7, -2, 0, -1, 4, 3]
     unused_function = template.get_function(function_to_evolve)
     for i, score in enumerate(scores):
       database.register_program_in_island(program=unused_function, island_id=i, scores_per_test={"unused_input": score})
+
     database.register_program_in_island(unused_function, island_id=7, scores_per_test={"unused_input": 17})
-
-    expected_scores = list(scores)
+    expected_scores = scores.copy()
     expected_scores[7] = 17
-    self.assertSequenceEqual(database._best_score_per_island, expected_scores)
-
-    progs = list(database.get_best_programs_per_island())
-    assert progs[0][1] == 17
-    assert progs[-1][1] == -2
+    for i, score in enumerate(expected_scores):
+      assert database._islands[i]._best_score == max(score, 0.0), (
+        "Score should be at least 0.0 (score of initial program)"
+      )
 
     np.random.seed(0)
-    database.reset_islands()
+    database._reset_islands()
     expected_kept = {0, 2, 3, 4, 7}
     min_kept = min(expected_scores[i] for i in expected_kept)
     for i, score in enumerate(expected_scores):
       if i in expected_kept:
-        assert database._best_score_per_island[i] == score
+        assert database._islands[i]._best_score == score
       else:
-        assert database._best_score_per_island[i] >= min_kept
+        assert database._islands[i]._best_score >= min_kept
 
   @parameterized.parameters(
     [

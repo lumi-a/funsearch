@@ -14,12 +14,10 @@
 # ==============================================================================
 import textwrap
 
-from absl.testing import absltest, parameterized
-
 from funsearch import evaluator
 
 
-class EvaluatorTest(parameterized.TestCase):
+class EvaluatorTest:
   def test_trim_function_body_docstring(self):
     code = '''\
   x = 1
@@ -81,7 +79,3 @@ def new_f():"""
     )
     actual = evaluator._trim_function_body(code, "fake_function_header")
     assert actual == code
-
-
-if __name__ == "__main__":
-  absltest.main()

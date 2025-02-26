@@ -122,9 +122,6 @@ def test_database_integrity():
           last_score = score
 
 
-# TODO: Parametrize over test-cases
-
-
 class TestProgramsDatabase:
   def test_initial_prompt(self, tmp_path):
     """Verifies that the first prompt looks as expected."""

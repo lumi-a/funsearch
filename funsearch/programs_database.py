@@ -19,17 +19,20 @@ from __future__ import annotations
 
 import copy
 import dataclasses
-import pathlib
 import pickle
 import random
 import time
 from collections.abc import Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from funsearch import code_manipulation
 from funsearch.evaluator import Evaluator
 from funsearch.sandbox import ExternalProcessSandbox
+
+if TYPE_CHECKING:
+  import pathlib
 
 Signature = tuple[float, ...]
 ScoresPerTest = Mapping[float | str, float]

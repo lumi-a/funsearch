@@ -182,7 +182,7 @@ def generate_instance_distinct(n: int, k: int, x_min: int, x_max: int, y_min: in
     inst.k = k
     inst.x = _generate_tab(n, k, x_min, x_max)
     inst.y = _generate_tab(n - 1, k, y_min, y_max)
-    diff = tuple(sum([inst.x[i][ll] for i in range(n)]) - sum([inst.y[i][ll] for i in range(n - 1)]) for ll in range(k))
+    diff = tuple(sum(inst.x[i][ll] for i in range(n)) - sum(inst.y[i][ll] for i in range(n - 1)) for ll in range(k))
     if all(diff[ll] >= y_min and diff[ll] < y_max for ll in range(k)):
       inst.y.append(diff)
       valid = True

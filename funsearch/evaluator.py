@@ -117,14 +117,11 @@ def _sample_to_program(
 
 def _calls_ancestor(program: str, function_to_evolve: str) -> bool:
   """Returns whether the generated function is calling an earlier version."""
-  for name in code_manipulation.get_functions_called(program):
-    # In `program` passed into this function the most recently generated
-    # function has already been renamed to `function_to_evolve` (wihout the
-    # suffix). Therefore any function call starting with `function_to_evolve_v`
-    # is a call to an ancestor function.
-    if name.startswith(f"{function_to_evolve}_v"):
-      return True
-  return False
+  # In `program` passed into this function the most recently generated
+  # function has already been renamed to `function_to_evolve` (wihout the
+  # suffix). Therefore any function call starting with `function_to_evolve_v`
+  # is a call to an ancestor function.
+  return any(name.startswith(f"{function_to_evolve}_v") for name in code_manipulation.get_functions_called(program))
 
 
 class Evaluator:

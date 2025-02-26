@@ -240,11 +240,12 @@ class TestProgramsDatabase:
       # The lower the temperature, the more confident we are on our top choice.
       assert np.max(probs_lower_temp) > np.max(probs_higher_temp)
 
-  @parameterized.parameters(
+  @pytest.mark.parametrize(
+    ("temperature", "expected"),
     [
-      {"temperature": 1, "expected": [0.6590012, 0.242433, 0.0985659]},
-      {"temperature": 2, "expected": [0.50168777, 0.304289, 0.19402324]},
-    ]
+      (1, [0.6590012, 0.242433, 0.0985659]),
+      (2, [0.50168777, 0.304289, 0.19402324]),
+    ],
   )
   def test_softmax_output(self, temperature, expected):
     logits = np.array([2.0, 1.0, 0.1])

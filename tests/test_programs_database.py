@@ -14,16 +14,13 @@
 # ==============================================================================
 
 import copy
-import os
 import tempfile
 from pathlib import Path
 
 import numpy as np
 import pytest
-from absl.testing import parameterized
 
-from funsearch import code_manipulation
-from funsearch import programs_database
+from funsearch import code_manipulation, programs_database
 from funsearch.programs_database import Island, ProgramsDatabase, ProgramsDatabaseConfig, extract_function_names
 
 ROOT = Path(__file__).parent.parent

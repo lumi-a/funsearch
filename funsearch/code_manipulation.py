@@ -52,7 +52,7 @@ class Function:
         function = f"def {self.name}({self.args}){return_type}:\n"
         if self.docstring:
             # self.docstring is already indented on every line except the first one.
-            # Here, we assume the indentation is always two spaces.
+            # Here, we assume the indentation is always four spaces.
             new_line = "\n" if self.body else ""
             function += f'    """{self.docstring}"""{new_line}'
         # self.body is already indented.
@@ -148,12 +148,16 @@ class ProgramVisitor(ast.NodeVisitor):
 
                 self._preface = "\n".join(filtered_lines)
 
-            function_end_line = node.end_lineno
-            body_start_line = node.body[0].lineno - 1
+            body_start_line: int = node.body[0].lineno - 1
+            # Not great to put node.body[-1].lineno as an alternative (e.g. the last statement could be
+            # a function-def itself), but I think end_lineno is never None anyway.
+            function_end_line: int = node.end_lineno or node.body[-1].lineno + 1
             # Extract the docstring if available.
             docstring = None
             if isinstance(node.body[0], ast.Expr) and isinstance(node.body[0].value, ast.Constant):
-                docstring = f'  """{ast.literal_eval(ast.unparse(node.body[0]))}"""'
+                # TODO: Shouldn't we just extract the inner part, i.e. without the triple quotes?
+                # Check what Function.docstring wants to do with it.
+                docstring = f'    """{ast.literal_eval(ast.unparse(node.body[0]))}"""'
                 body_start_line = node.body[1].lineno - 1 if len(node.body) > 1 else function_end_line
 
             self._functions.append(
@@ -261,10 +265,7 @@ def yield_decorated(code: str, module: str, name: str) -> Iterator[str]:
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
             for decorator in node.decorator_list:
-                attribute = None
-                if isinstance(decorator, ast.Attribute):
-                    attribute = decorator
-                elif isinstance(decorator, ast.Call):
-                    attribute = decorator.func
-                if attribute is not None and attribute.value.id == module and attribute.attr == name:
-                    yield node.name
+                if isinstance(decorator, ast.Attribute) and decorator.attr == name:
+                    value = decorator.value
+                    if isinstance(value, ast.Name) and value.id == module:
+                        yield node.name

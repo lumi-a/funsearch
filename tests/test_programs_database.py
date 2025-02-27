@@ -34,13 +34,13 @@ import funsearch
 
 @funsearch.run
 def evaluate(n: int) -> int:
-  """Returns the size of an `n`-dimensional cap set."""
-  return priority(n)
+    """Returns the size of an `n`-dimensional cap set."""
+    return priority(n)
 
 @funsearch.evolve
 def priority(n: int) -> float:
-  """Returns the priority with which we want to add `element` to the cap set."""
-  return 0.0
+    """Returns the priority with which we want to add `element` to the cap set."""
+    return 0.0
 
 '''
 _EXPECTED_INITIAL_PROMPT = '''
@@ -50,28 +50,28 @@ import itertools
 
 
 def priority_v0(n: int) -> float:
-  """Returns the priority with which we want to add `element` to the cap set."""
-  return 0.0
+    """Returns the priority with which we want to add `element` to the cap set."""
+    return 0.0
 
 
 def priority_v1(n: int) -> float:
-  """Improved version of `priority_v0`."""
+    """Improved version of `priority_v0`."""
 
 '''
 
 _SAMPLE_A = """\
-  priority = element
-  #######
-  # Code from lowest-scoring sampled program.
-  #######
-  return ...\
+    priority = element
+    #######
+    # Code from lowest-scoring sampled program.
+    #######
+    return ...\
 """
 _SAMPLE_B = """\
-  priority = element ** 2
-  #######
-  # Code from highest-scoring sampled program.
-  #######
-  return ...\
+    priority = element ** 2
+    #######
+    # Code from highest-scoring sampled program.
+    #######
+    return ...\
 """
 
 _EXPECTED_PROMPT = '''
@@ -81,25 +81,25 @@ import itertools
 
 
 def priority_v0(n: int) -> float:
-  """Returns the priority with which we want to add `element` to the cap set."""
-  priority = element
-  #######
-  # Code from lowest-scoring sampled program.
-  #######
-  return ...
+    """Returns the priority with which we want to add `element` to the cap set."""
+    priority = element
+    #######
+    # Code from lowest-scoring sampled program.
+    #######
+    return ...
 
 
 def priority_v1(n: int) -> float:
-  """Improved version of `priority_v0`."""
-  priority = element ** 2
-  #######
-  # Code from highest-scoring sampled program.
-  #######
-  return ...
+    """Improved version of `priority_v0`."""
+    priority = element ** 2
+    #######
+    # Code from highest-scoring sampled program.
+    #######
+    return ...
 
 
 def priority_v2(n: int) -> float:
-  """Improved version of `priority_v1`."""
+    """Improved version of `priority_v1`."""
 
 '''
 

@@ -25,7 +25,11 @@ def dummy_setup(monkeypatch, tmp_path):  # noqa: ARG001
     """Replace LLM-calls and override the output path to a temporary directory."""
 
     # Replace LLM call
-    monkeypatch.setattr(sampler.LLM, "draw_sample", lambda _self, _prompt, _ix: "    return 0.5")
+    monkeypatch.setattr(
+        sampler.LLM,
+        "draw_samples",
+        lambda _self, indices, _prompt: list(zip(indices, [f"    return {0.1 * i:.2f}" for i in indices])),
+    )
 
 
 @pytest.mark.filterwarnings(

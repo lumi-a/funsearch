@@ -213,7 +213,7 @@ def run(
         t.start()
 
     # Start analysation dispatcher threads
-    num_dispatcher_workers = os.cpu_count()
+    num_dispatcher_workers = os.cpu_count() or 8
     dispatcher_threads: list[threading.Thread] = [
         threading.Thread(target=analysation_dispatcher, args=(stop_event,)) for _ in range(num_dispatcher_workers)
     ]

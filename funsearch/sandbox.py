@@ -6,6 +6,7 @@ import ast
 import logging
 import sys
 from pathlib import Path
+from typing import Sequence, Any
 
 import cloudpickle
 
@@ -13,7 +14,7 @@ CONTAINER_MAIN = (Path(__file__).parent / "container" / "main.py").absolute()
 
 
 def _compile_code(program: str) -> dict:
-    namespace = {}
+    namespace: dict[str, Any] = {}
 
     parsed_code = ast.parse(program)
     compiled_code = compile(parsed_code, filename="<ast>", mode="exec")
@@ -31,11 +32,11 @@ class ExternalProcessSandbox:
     code.
     """
 
-    def __init__(self, base_path: Path, timeout_secs: int = 30) -> None:
+    def __init__(self, base_path: Path, timeout_secs: float = 30.0) -> None:
         """Create a new sandbox that logs to `base_path` and runs a sample for at most `timeout_secs`."""
         base_path.mkdir(exist_ok=True)
         self.base_path = Path(base_path)
-        self.timeout_secs = timeout_secs
+        self.timeout_secs: float = float(timeout_secs)
 
     def _exec(self, program_path: Path, output_path: Path, input_path: Path, error_file_path: Path) -> int:
         """Execute python-code in a separate process.
@@ -48,7 +49,7 @@ class ExternalProcessSandbox:
         """
         import subprocess
 
-        cmd = [
+        cmd: Sequence[str] = [
             sys.executable,
             str(CONTAINER_MAIN),
             str(program_path),
@@ -58,9 +59,10 @@ class ExternalProcessSandbox:
 
         logging.debug(f"Executing {cmd}")
         try:
-            result: subprocess.CompletedProcess = subprocess.run(  # noqa: S603
-                cmd, timeout=self.timeout_secs, stderr=error_file_path, check=False
-            )
+            with error_file_path.open("w") as error_file:
+                result: subprocess.CompletedProcess = subprocess.run(  # noqa: S603
+                    args=cmd, timeout=self.timeout_secs, stderr=error_file, check=False
+                )
         except subprocess.TimeoutExpired:
             logging.debug(f"Command timed out after {self.timeout_secs} seconds")
             return 1
@@ -94,8 +96,8 @@ class ExternalProcessSandbox:
             with program_path.open("wb+") as f:
                 cloudpickle.dump(namespace[function_to_run], f)
 
-            with (call_data_folder / "stderr.log").open("w") as error_file:
-                return_code = self._exec(program_path, output_path, input_path, error_file)
+            error_file_path = call_data_folder / "stderr.log"
+            return_code = self._exec(program_path, output_path, input_path, error_file_path)
 
             if return_code != 0:
                 return None

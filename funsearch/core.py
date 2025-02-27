@@ -17,11 +17,12 @@
 
 from __future__ import annotations
 
+import math
 import os
 import queue
 import threading
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from openai import OpenAI
 
@@ -34,28 +35,89 @@ if TYPE_CHECKING:
 
 
 class IterationManager:
-    """Keeps track of how many iterations we've run so far."""
+    """Manages iteration indices, batching, and the response queue.
 
-    def __init__(self, max_iterations: int) -> None:
-        """Keeps track of how many iterations we've run so far."""
-        self._max_iterations = max_iterations
-        # Keep track of how many llm requests you made, to not
-        # exceed `max_iterations` (TODO: rename parameter, also on callsites of `run`)
-        # and to pass to the llm-prompting to make logging to files safe
-        self._index = 0
-        self._index_lock = threading.Lock()
+    Ensures that every draw_samples call receives a full batch (except the last batch)
+    and that the total queued samples do not exceed max_cached_samples.
+    """
 
-    def get_next_index(self) -> int | None:
-        """Returns the next index, or None if we're done."""
-        with self._index_lock:
-            if self._max_iterations != -1 and self._index >= self._max_iterations:
-                return None
-            index = self._index
-            self._index += 1
-        return index
+    def __init__(self, max_iterations: int, batch_size: int, max_cached_samples: int) -> None:
+        self._max_iterations = max_iterations  # Total iterations (-1 for unbounded)
+        if batch_size > max_cached_samples:
+            msg = f"max_cached_samples ({max_cached_samples}) must be at least batch_size ({batch_size})"
+            raise ValueError(msg)
+        self._batch_size = batch_size  # Fixed batch size for each call
+        self._max_cached_samples = max_cached_samples  # Maximum samples allowed in the queue
+        self._index = 0  # Next iteration index
+        self._pending_count = 0  # Count of samples currently enqueued (pending)
+        self._lock = threading.Lock()
+        self._cv = threading.Condition(self._lock)
+        # Internal queue holding results, each item is a tuple (sample, island_id, version_generated, index)
+        self._queue: queue.Queue[tuple[str, int, int, int]] = queue.Queue()
+
+    def reserve_batch(self) -> list[int]:
+        """Wait until there's room for an entire batch, then reserve batch_size slots.
+
+        Returns a list of indices reserved for this batch.
+        If there are fewer iterations remaining, returns only those indices.
+        """
+        with self._cv:
+            while self._pending_count + self._batch_size > self._max_cached_samples:
+                self._cv.wait()
+            # Reserve full batch slots.
+            self._pending_count += self._batch_size
+
+            # Determine the actual batch size based on remaining iterations.
+            if self._max_iterations != -1:
+                remaining = self._max_iterations - self._index
+                actual_batch_size = min(self._batch_size, remaining)
+            else:
+                actual_batch_size = self._batch_size
+
+            if actual_batch_size <= 0:
+                # No work remains; release reserved tokens.
+                self._pending_count -= self._batch_size
+                self._cv.notify_all()
+                return []
+
+            indices = list(range(self._index, self._index + actual_batch_size))
+            self._index += actual_batch_size
+
+            # If the final batch is smaller, release the extra reserved slots.
+            if actual_batch_size < self._batch_size:
+                self._pending_count -= self._batch_size - actual_batch_size
+                self._cv.notify_all()
+            return indices
+
+    def enqueue_batch(self, samples: list[tuple[int, str]], island_id: int, version_generated: int) -> None:
+        """Enqueues each sample from a batch with its associated prompt information and unique index.
+
+        The prompt_info is a tuple (island_id, version_generated).
+        """
+        for idx, sample in samples:
+            self._queue.put((sample, island_id, version_generated, idx))
+
+    def get_sample(self, timeout: float = 0.1) -> None | tuple[str, int, int, int]:
+        """Attempt to retrieve a sample from the queue. Return the sample tuple if available, or None on timeout."""
+        try:
+            return self._queue.get(timeout=timeout)
+        except queue.Empty:
+            return None
+
+    def release_sample(self) -> None:
+        """Called after a sample is processed, reducing the pending count and notifying waiting threads."""
+        with self._cv:
+            self._pending_count -= 1
+            self._cv.notify_all()
 
     def is_done(self) -> bool:
-        return self._max_iterations != -1 and self._index >= self._max_iterations
+        """Returns True if all iterations have been reserved."""
+        with self._lock:
+            return self._max_iterations != -1 and self._index >= self._max_iterations
+
+    def is_queue_empty(self) -> bool:
+        """Returns True if the internal queue is empty."""
+        return self._queue.empty()
 
 
 # We pass in llm_name because there doesn't seem to be a good way of getting the class of
@@ -66,7 +128,14 @@ class IterationManager:
 # We could ask the caller to pass a class, but then we'd *also* need them to ask for the id.
 # So let's just ask them for the id directly and be a bit inefficient upfront. This might
 # make errors uglier, though.
-def run(database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp: int, num_samples: int = -1) -> None:
+def run(
+    database: ProgramsDatabase,
+    llm_name: str,
+    output_path: Path,
+    timestamp: int,
+    num_samples: int = -1,
+    num_samples_per_call: int = 4,
+) -> None:
     """Launches a FunSearch experiment in parallel using threads."""
     database.print_status()
 
@@ -84,7 +153,9 @@ def run(database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp:
     # get a sample from it), but it also means that function-improvements are
     # only transferred to the LLM ~every `value` iterations, which
     # degrades the quality of the algorithm.
-    llm_responses_slots = threading.Semaphore(32)
+    max_cached_samples = 32  # TODO: Allow configuring this as a parameter
+    # This should ensure llm_responses's size never exceeds (max_cached_samples + num_samples_per_call - 1)
+    llm_responses_slots = threading.Semaphore(math.ceil(max_cached_samples / num_samples_per_call))
 
     database_lock = threading.Lock()
 
@@ -93,22 +164,14 @@ def run(database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp:
 
         Waits if the output queue has size >= dynamic_max_queue_size.
         """
-        while not (stop_event.is_set() or iteration_manager.is_done()):
-            # Acquire a queue slot
-            while not stop_event.is_set():
-                if llm_responses_slots.acquire(timeout=0.1):
-                    break
-            if stop_event.is_set():
-                break
-
-            current_index = iteration_manager.get_next_index()
-            if current_index is None:
-                break
-
+        while not stop_event.is_set():
+            indices = iteration_manager.reserve_batch()
+            if not indices:
+                break  # No more work.
             with database_lock:
                 prompt = database.get_prompt()
-            sample = llm.draw_sample(prompt.code, current_index)
-            llm_responses.put((sample, prompt.island_id, prompt.version_generated, current_index))
+            samples: list[tuple[int, str]] = llm.draw_samples(indices, prompt.code)
+            iteration_manager.enqueue_batch(samples, prompt.island_id, prompt.version_generated)
 
     def analysation_dispatcher(stop_event: threading.Event) -> None:
         """Dispatcher thread that pulls web results from the queue and analyses the results."""
@@ -144,6 +207,7 @@ def run(database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp:
         while True:
             for _ in range(10):
                 time.sleep(1)
+                print(llm_responses.qsize())
                 if stop_event.is_set():
                     return
             with database_lock:
@@ -211,3 +275,6 @@ def run(database: ProgramsDatabase, llm_name: str, output_path: Path, timestamp:
             database.print_status()
             backup_file = backup_dir / f"{database._config.problem_name}_{timestamp}.pickle"
             database.backup(backup_file)
+        with LLM.lock:
+            print(f"Input tokens: {LLM.input_tokens}")
+            print(f"Output tokens: {LLM.output_tokens}")

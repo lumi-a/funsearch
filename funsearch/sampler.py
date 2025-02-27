@@ -17,62 +17,75 @@
 
 from __future__ import annotations
 
+import threading
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import pathlib
 
-    import llm
+    import openai
 
 
 class LLM:
     """Language model that predicts continuation of provided source code."""
 
-    def __init__(self, model: llm.Model, log_path: pathlib.Path) -> None:
+    input_tokens: int = 0
+    output_tokens: int = 0
+    lock: threading.Lock = threading.Lock()
+
+    def __init__(self, model: openai.OpenAI, log_path: pathlib.Path) -> None:
         """Initialize a new LLM."""
         self._model = model
         self._log_path = log_path
 
-    def draw_sample(self, prompt: str, index: int) -> str:
-        """Draw a sample from the language model, given a prompt.
+    def draw_samples(self, indices: list[int], prompt: str) -> list[tuple[int, str]]:
+        """Draw num_samples samples from the language model, given a prompt.
 
-        The index is used for logging and must be unique across threads.
+        The indices are used for logging and must be unique across threads.
+        You'll want to draw several samples to decrease billing, because input-token are
+        only billed once per sample-run.
         """
         # Keep sampling until we get a response
         while True:
             try:
-                output_text = (
-                    self._model.chat.completions.create(
-                        model="gpt-4o-mini",
-                        messages=[
-                            {
-                                "role": "developer",
-                                "content": "You are a helpful coding assistant who only responds with code and no markdown-formatting.",
-                            },
-                            {"role": "user", "content": prompt},
-                        ],
-                    )
-                    .choices[0]
-                    .message.content
+                response = self._model.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "developer",
+                            "content": "You are a helpful coding assistant who only responds with code "
+                            "and no markdown-formatting.",
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    n=len(indices),
                 )
-                input(output_text)
+                with self.lock:
+                    if response.usage is not None:
+                        self.input_tokens += response.usage.prompt_tokens
+                        self.output_tokens += response.usage.completion_tokens
+                print(len(indices) == len(response.choices))
+                outputs = list(zip(indices, [choice.message.content or "" for choice in response.choices]))
                 break
             except Exception as e:
                 print("Retrying LLM call after error:", e)  # noqa: T201
 
-        self._log(prompt, output_text, index)
+        self._log(outputs, prompt)
 
-        return output_text
+        return outputs
 
-    def _log(self, prompt: str, response: str, index: int) -> None:
+    def _log(self, outputs: list[tuple[int, str]], prompt: str) -> None:
         """Log prompt and response to file.
 
         The index must be unique across thread.
         """
         if self._log_path:
-            call_data_folder = self._log_path / f"{index}"
-            call_data_folder.mkdir(exist_ok=True)
-            with (call_data_folder / "prompt.log").open("a") as f:
-                f.write(prompt)
-            with (call_data_folder / "response.log").open("a") as f:
-                f.write(str(response))
+            for index, response in outputs:
+                call_data_folder = self._log_path / f"{index}"
+                call_data_folder.mkdir(exist_ok=True)
+                # Note that we log the prompt for every index, even
+                # though their prompts are identical.
+                with (call_data_folder / "prompt.log").open("a") as f:
+                    f.write(prompt)
+                with (call_data_folder / "response.log").open("a") as f:
+                    f.write(str(response))

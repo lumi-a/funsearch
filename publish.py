@@ -43,12 +43,13 @@ def publish() -> None:
         with (JSON_DIR / filename).open("w") as f:
             # Trim message to 255 "characters"
             # This is bad practice, something something graphemes, but it will be cut off on the website anyway.
+            shortened_message = database._config.message.splitlines()[0][:255] if database._config.message != "" else ""
             index_json.append(
                 (
                     database._config.problem_name,
                     database._config.inputs,
                     max(island._best_score for island in database._islands),
-                    database._config.message.splitlines()[0][:255],
+                    shortened_message,
                     timestamp,
                     filename,
                 )

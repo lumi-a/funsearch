@@ -111,13 +111,14 @@ class IterationManager:
             self._cv.notify_all()
 
     def is_done(self) -> bool:
-        """Returns True if all iterations have been reserved."""
+        """Returns True if no more iterations need to be processed."""
         with self._lock:
-            return self._max_iterations != -1 and self._index >= self._max_iterations
-
-    def is_queue_empty(self) -> bool:
-        """Returns True if the internal queue is empty."""
-        return self._queue.empty()
+            return (
+                self._max_iterations != -1
+                and self._index >= self._max_iterations
+                and self._pending_count == 0
+                and self._queue.empty()
+            )
 
 
 # We pass in llm_name because there doesn't seem to be a good way of getting the class of
@@ -144,19 +145,9 @@ def run(
     log_path.mkdir(parents=True, exist_ok=True)
     backup_dir.mkdir(parents=True, exist_ok=True)
 
-    # Stores (program, island_id, version_generated, index) per LLM-call
-    # None is a sentinel-value to signal to the analysation-workers that
-    # no more values will be added.
-    llm_responses: queue.Queue[None | tuple[str, int, int, int]] = queue.Queue()
-    # Increasing the semaphore-value might make the program a little faster
-    # (because the queue is less likely to be empty when an analyser tries to
-    # get a sample from it), but it also means that function-improvements are
-    # only transferred to the LLM ~every `value` iterations, which
-    # degrades the quality of the algorithm.
-    max_cached_samples = 32  # TODO: Allow configuring this as a parameter
-    # This should ensure llm_responses's size never exceeds (max_cached_samples + num_samples_per_call - 1)
-    llm_responses_slots = threading.Semaphore(math.ceil(max_cached_samples / num_samples_per_call))
-
+    max_cached_samples = 24  # TODO: Allow configuring this as a parameter
+    stop_event = threading.Event()
+    iteration_manager = IterationManager(num_samples, num_samples_per_call, max_cached_samples)
     database_lock = threading.Lock()
 
     def llm_response_worker(iteration_manager: IterationManager, stop_event: threading.Event, llm: LLM) -> None:
@@ -177,17 +168,16 @@ def run(
         """Dispatcher thread that pulls web results from the queue and analyses the results."""
         with database_lock:
             evaluator = database.construct_evaluator(log_path)
-        while not stop_event.is_set():
-            try:
-                queue_item = llm_responses.get(timeout=0.1)
-            except queue.Empty:
+        while True:
+            maybe_sample = iteration_manager.get_sample(timeout=0.1)
+            if maybe_sample is None:
+                # Does the empty queue mean all iterations have been processed?
+                if iteration_manager.is_done() or (stop_event.is_set() and iteration_manager._pending_count == 0):
+                    break
+                # Otherwise, try getting another sample.
                 continue
 
-            if queue_item is None:
-                break
-
-            sample, island_id, version_generated, current_index = queue_item
-
+            sample, island_id, version_generated, current_index = maybe_sample
             new_function, scores_per_test = evaluator.analyse(sample, version_generated, current_index)
 
             with database_lock:
@@ -196,7 +186,7 @@ def run(
                 elif island_id is not None:
                     database.register_failure(island_id)
 
-            llm_responses_slots.release()
+            iteration_manager.release_sample()
 
             with database_lock:
                 if current_index % database._config.reset_period == 0:
@@ -205,19 +195,16 @@ def run(
 
     def database_printer(stop_event: threading.Event) -> None:
         while True:
-            for _ in range(10):
-                time.sleep(1)
-                print(llm_responses.qsize())
+            for _ in range(100):
+                time.sleep(0.1)
+                print(iteration_manager._queue.qsize(), iteration_manager._pending_count)
                 if stop_event.is_set():
                     return
             with database_lock:
                 database.print_status()
 
-    stop_event = threading.Event()
-    iteration_manager = IterationManager(num_samples)
-
     # Start web request worker threads.
-    num_llm_workers = os.cpu_count() * 2
+    num_llm_workers = max_cached_samples
     llm_threads: list[threading.Thread] = [
         threading.Thread(target=llm_response_worker, args=(iteration_manager, stop_event, LLM(OpenAI(), log_path)))
         for _ in range(num_llm_workers)
@@ -242,9 +229,6 @@ def run(
             for t in llm_threads:
                 t.join(timeout=0.1)
 
-        for _ in range(num_dispatcher_workers):
-            llm_responses.put(None)
-
         # Wait for dispatcher threads to finish now
         while any(t.is_alive() for t in dispatcher_threads):
             for t in dispatcher_threads:
@@ -258,12 +242,12 @@ def run(
         print("Stopping threads...")  # noqa: T201
         stop_event.set()
 
-        print("Waiting for requests to finish...")  # noqa: T201
+        print(f"Waiting for {iteration_manager._pending_count} requests to finish...")  # noqa: T201
         while any(t.is_alive() for t in llm_threads):
             for t in llm_threads:
                 t.join(timeout=0.1)
 
-        print(f"Analysing {llm_responses.qsize()} remaining responses...")  # noqa: T201
+        print(f"Analysing {iteration_manager._queue.qsize()} remaining responses...")  # noqa: T201
         # TODO: The KeyboardInterrupt is forwarded to the subprocesses, so they always fail here.
         while any(t.is_alive() for t in dispatcher_threads):
             for t in dispatcher_threads:

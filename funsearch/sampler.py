@@ -64,7 +64,6 @@ class LLM:
                     if response.usage is not None:
                         self.input_tokens += response.usage.prompt_tokens
                         self.output_tokens += response.usage.completion_tokens
-                print(len(indices) == len(response.choices))
                 outputs = list(zip(indices, [choice.message.content or "" for choice in response.choices]))
                 break
             except Exception as e:

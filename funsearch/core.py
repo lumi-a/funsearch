@@ -197,10 +197,10 @@ def run(
         while True:
             for _ in range(100):
                 time.sleep(0.1)
-                print(iteration_manager._queue.qsize(), iteration_manager._pending_count)
                 if stop_event.is_set():
                     return
             with database_lock:
+                print(iteration_manager._queue.qsize(), iteration_manager._pending_count, end=" | ")
                 database.print_status()
 
     # Start web request worker threads.

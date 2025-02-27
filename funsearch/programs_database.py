@@ -24,6 +24,7 @@ import random
 import time
 from collections.abc import Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING
+import typing
 
 import numpy as np
 
@@ -253,8 +254,8 @@ class Cluster:
     def sample_program(self) -> code_manipulation.Function:
         """Samples a program, giving higher probability to shorther programs."""
         normalized_lengths = (np.array(self._lengths) - min(self._lengths)) / (max(self._lengths) + 1e-6)
-        probabilities = _softmax(-normalized_lengths, temperature=1.0)
-        return np.random.choice(self._programs, p=probabilities)
+        probabilities = list(_softmax(-normalized_lengths, temperature=1.0))
+        return random.choices(self._programs, weights=probabilities)[0]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -287,14 +288,16 @@ class ProgramsDatabaseConfig:
     cluster_sampling_temperature_period: int
 
 
-def _typecheck(obj: any, expected: tuple[type, ...]) -> bool:
+def _typecheck(obj: typing.Any, expected: tuple[type, ...]) -> bool:  # noqa: ANN401
     if expected == ():
         return True
     if not isinstance(obj, expected[0]):
         return False
     if len(expected) == 1:
         return True
-    return all(_typecheck(sub_obj, expected[1:]) for sub_obj in obj)
+    if hasattr(obj, "__iter__"):
+        return all(_typecheck(sub_obj, expected[1:]) for sub_obj in obj)
+    return False
 
 
 class ProgramsDatabase:
@@ -362,7 +365,7 @@ class ProgramsDatabase:
         missing_keys = {key[0] for key in cls.__keys__}
         for datakey in data:
             try:
-                expected_type: type = next(key[1] for key in cls.__keys__ if key[0] == datakey)
+                expected_type = next(key[1] for key in cls.__keys__ if key[0] == datakey)
             except StopIteration as e:
                 msg = f"Unexpected key: {datakey}"
                 raise ValueError(msg) from e

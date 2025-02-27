@@ -51,11 +51,11 @@ def _find_method_implementation(generated_code: str, function_to_evolve: str) ->
     Return the code and the name of the method.
     """
     """
-  Regex to find all methods named 'priority_vX'.
-  With each match, start from the 'def priority_vX(' and continue until there's a new line with any of
-  - a new 'def'
-  - ` or ' or # without indentation
-  """
+    Regex to find all methods named 'priority_vX'.
+    With each match, start from the 'def priority_vX(' and continue until there's a new line with any of
+    - a new 'def'
+    - ` or ' or # without indentation
+    """
     method_matcher = re.compile(
         rf"def {function_to_evolve}_v\d\(.*?\) -> .*:\n(?:\s*(?:[ \t]*(?!def|#|`|').*(?:\n|$)))+"
     )
@@ -65,7 +65,10 @@ def _find_method_implementation(generated_code: str, function_to_evolve: str) ->
     if not matches:
         return "", ""
     last_match = matches[-1]
-    name = method_name_matcher.search(last_match).group()
+    search = method_name_matcher.search(last_match)
+    if search is None:
+        return "", ""  # This shouldn't happen.
+    name = search.group()
     return last_match, name
 
 
@@ -90,7 +93,7 @@ def _trim_function_body(generated_code: str, function_to_evolve: str) -> str:
         try:
             tree = ast.parse(code)
         except SyntaxError as e:
-            code = "\n".join(code.splitlines()[: e.lineno - 1])
+            code = "\n".join(code.splitlines()[: (e.lineno or 0) - 1])
     if not code:
         # Nothing could be saved from `generated_code`
         return ""

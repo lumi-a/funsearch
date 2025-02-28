@@ -49,7 +49,7 @@ class LLM:
         while True:
             try:
                 response = self._model.chat.complete(
-                    model="mistral-nemo",
+                    model="open-mistral-nemo",
                     messages=[
                         {
                             "role": "assistant",

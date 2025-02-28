@@ -11,6 +11,10 @@ function strToPre(str) {
     return pre
 }
 
+// Paul Tol's discrete rainbow color scheme, from https://personal.sron.nl/~pault/
+const colors = ['#0000FF', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255', '#44AA99', '#999933', '#AA4499', '#888']
+
+
 function improvementCanvas(islands, highestRunIndex) {
     const improvementsCanvas = document.createElement("canvas")
     new Chart(
@@ -34,6 +38,7 @@ function improvementCanvas(islands, highestRunIndex) {
                         label: `Island ${island.ix}`,
                         data: data,
                         showLine: true,
+                        borderColor: colors[island.ix % colors.length],
                     }
                 }
                 ),
@@ -158,9 +163,6 @@ function detailsCode(title, description, code) {
 function runToId(problemName, timestamp) {
     return `${problemName}-${timestamp}`
 }
-
-// Paul Tol's discrete rainbow color scheme, from https://personal.sron.nl/~pault/
-const colors = ['#CC6677', '#332288', '#DDCC77', '#117733', '#88CCEE', '#882255', '#44AA99', '#999933', '#AA4499', '#888']
 
 async function displayDatabase(database, runDetailsInner) {
     /* Schema from generate.py (might be outdated)

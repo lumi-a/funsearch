@@ -48,11 +48,11 @@ class LLM:
         # Keep sampling until we get a response
         while True:
             try:
-                response = self._model.chat.completions.create(
-                    model="gpt-4o-mini",
+                response = self._model.chat.complete(
+                    model="mistral-nemo",
                     messages=[
                         {
-                            "role": "developer",
+                            "role": "assistant",
                             "content": "You are a helpful coding assistant who only responds with code "
                             "and no markdown-formatting.",
                         },

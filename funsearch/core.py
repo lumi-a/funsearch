@@ -24,6 +24,7 @@ import threading
 import time
 from typing import TYPE_CHECKING, Optional
 
+from mistralai import Mistral
 from openai import OpenAI
 
 from funsearch.sampler import LLM
@@ -206,7 +207,10 @@ def run(
     # Start web request worker threads.
     num_llm_workers = max_cached_samples
     llm_threads: list[threading.Thread] = [
-        threading.Thread(target=llm_response_worker, args=(iteration_manager, stop_event, LLM(OpenAI(), log_path)))
+        threading.Thread(
+            target=llm_response_worker,
+            args=(iteration_manager, stop_event, LLM(Mistral(api_key=os.environ("MISTRAL_API_KEY")), log_path)),
+        )
         for _ in range(num_llm_workers)
     ]
     for t in llm_threads:

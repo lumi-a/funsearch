@@ -20,10 +20,10 @@ from __future__ import annotations
 import threading
 from typing import TYPE_CHECKING
 
+from mistralai import Mistral
+
 if TYPE_CHECKING:
     import pathlib
-
-    import openai
 
 
 class LLM:
@@ -33,7 +33,7 @@ class LLM:
     output_tokens: int = 0
     lock: threading.Lock = threading.Lock()
 
-    def __init__(self, model: openai.OpenAI, log_path: pathlib.Path) -> None:
+    def __init__(self, model: Mistral, log_path: pathlib.Path) -> None:
         """Initialize a new LLM."""
         self._model = model
         self._log_path = log_path

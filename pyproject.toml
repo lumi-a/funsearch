@@ -30,6 +30,7 @@ dependencies = [
     "llm==0.22",
     "numpy>=2.0.2",
     "openai>=1.63.0",
+    "mistralai>=1.5.0",
 ]
 
 [project.scripts]

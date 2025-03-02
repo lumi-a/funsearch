@@ -190,7 +190,8 @@ def run(
             iteration_manager.release_sample()
 
             with database_lock:
-                if current_index % database._config.reset_period == 0:
+                # TODO: Add as parameter
+                if current_index % 100 == 0:
                     backup_file = backup_dir / f"{database._config.problem_name}_{timestamp}_{current_index}.pickle"
                     database.backup(backup_file)
 
@@ -263,6 +264,3 @@ def run(
             database.print_status()
             backup_file = backup_dir / f"{database._config.problem_name}_{timestamp}.pickle"
             database.backup(backup_file)
-        with LLM.lock:
-            print(f"Input tokens: {LLM.input_tokens}")
-            print(f"Output tokens: {LLM.output_tokens}")

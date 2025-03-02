@@ -17,19 +17,18 @@
 
 from __future__ import annotations
 
-import threading
 from typing import TYPE_CHECKING
-
-from mistralai import Mistral
 
 if TYPE_CHECKING:
     import pathlib
+
+    from openai import OpenAI
 
 
 class LLM:
     """Language model that predicts continuation of provided source code."""
 
-    def __init__(self, model: Mistral, log_path: pathlib.Path) -> None:
+    def __init__(self, model: OpenAI, log_path: pathlib.Path) -> None:
         """Initialize a new LLM."""
         self._model = model
         self._log_path = log_path
@@ -44,19 +43,19 @@ class LLM:
         # Keep sampling until we get a response
         while True:
             try:
-                response = self._model.chat.complete(
-                    model="open-mistral-nemo",
+                response = self._model.chat.completions.create(
+                    model="gpt-4o-mini",
                     messages=[
                         {
-                            "role": "assistant",
+                            "role": "developer",
                             "content": "You are a helpful coding assistant who only responds with code "
                             "and no markdown-formatting.",
                         },
                         {"role": "user", "content": prompt},
                     ],
                     n=len(indices),
-                    timeout_ms=60 * 1000,
-                    temperature=1.5,
+                    temperature=1.25,
+                    timeout=60,
                 )
                 outputs = list(zip(indices, [choice.message.content or "" for choice in response.choices]))
                 break

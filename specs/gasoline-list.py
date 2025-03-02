@@ -1,23 +1,18 @@
-"""Find sets for which the rounding algorithm on the gasoline-problem has a poor (high) approximation-ratio.
+"""I'm trying to find sets for which an iterative rounding algorithm on the gasoline-problem has a poor (high) approximation-ratio.
 
-The gasoline-problem find a permutation of the xs and ys (lists of positive integers) such that maximum of the
-differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible,
-where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).
+The gasoline-problem looks for a permutation of the xs and ys (lists of positive integers) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).
 
-As such, the problem is invariant under a permutation of the xs and ys.
-
-On every iteration, improve gasoline_v1 over the gasoline_vX methods from previous iterations.
-The methods must be deterministic.
-Make only small code-changes.
+To generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered slightly.
 """
 
 import funsearch
-from funsearch.gasoline.iterative_rounding import SlotOrdered
 
 
 @funsearch.run
 def evaluate(n: int) -> float:
     """Returns the approximation-ratio of the gasoline problem."""
+    from funsearch.gasoline.iterative_rounding import SlotOrdered
+
     xs, ys = gasoline(n)
 
     # Assert determinancy

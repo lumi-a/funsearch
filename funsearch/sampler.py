@@ -29,10 +29,6 @@ if TYPE_CHECKING:
 class LLM:
     """Language model that predicts continuation of provided source code."""
 
-    input_tokens: int = 0
-    output_tokens: int = 0
-    lock: threading.Lock = threading.Lock()
-
     def __init__(self, model: Mistral, log_path: pathlib.Path) -> None:
         """Initialize a new LLM."""
         self._model = model
@@ -42,7 +38,7 @@ class LLM:
         """Draw num_samples samples from the language model, given a prompt.
 
         The indices are used for logging and must be unique across threads.
-        You'll want to draw several samples to decrease billing, because input-token are
+        You'll want to draw several samples to decrease billing, because input-tokens are
         only billed once per sample-run.
         """
         # Keep sampling until we get a response
@@ -59,11 +55,9 @@ class LLM:
                         {"role": "user", "content": prompt},
                     ],
                     n=len(indices),
+                    timeout_ms=60 * 1000,
+                    temperature=1.5,
                 )
-                with self.lock:
-                    if response.usage is not None:
-                        self.input_tokens += response.usage.prompt_tokens
-                        self.output_tokens += response.usage.completion_tokens
                 outputs = list(zip(indices, [choice.message.content or "" for choice in response.choices]))
                 break
             except Exception as e:

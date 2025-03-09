@@ -264,3 +264,4 @@ def run(
             database.print_status()
             backup_file = backup_dir / f"{database._config.problem_name}_{timestamp}.pickle"
             database.backup(backup_file)
+            print(f"Database backed up to: {backup_file}")

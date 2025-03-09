@@ -206,11 +206,11 @@ def run(
                 database.print_status()
 
     # Start web request worker threads.
-    num_llm_workers = max_cached_samples // num_samples_per_call
+    num_llm_workers = max_cached_samples
     llm_threads: list[threading.Thread] = [
         threading.Thread(
             target=llm_response_worker,
-            args=(iteration_manager, stop_event, LLM(OpenAI(), log_path)),
+            args=(iteration_manager, stop_event, LLM(Mistral(api_key=os.environ["MISTRAL_API_KEY"]), log_path)),
         )
         for _ in range(num_llm_workers)
     ]

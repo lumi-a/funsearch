@@ -206,7 +206,7 @@ def run(
                 database.print_status()
 
     # Start web request worker threads.
-    num_llm_workers = max_cached_samples
+    num_llm_workers = max_cached_samples // num_samples_per_call
     llm_threads: list[threading.Thread] = [
         threading.Thread(
             target=llm_response_worker,

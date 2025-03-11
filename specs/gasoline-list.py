@@ -31,14 +31,6 @@ def gasoline(n: int) -> tuple[list[int], list[int]]:
     """Return a new gasoline-problem, specified by the list of x-values and y-values,
     each of which must have length at most `n`.
     """
-    k = int(math.log2(n + 2)) - 1
-    xs, ys = [], []
-    for i in range(1, k):
-        u = int(2**k * (1 - 2 ** (-i)))
-        xs.extend([u for _ in range(2**i)])
-        ys.extend([u for _ in range(2**i)])
-    xs.extend([int(2**k) for _ in range(2**k - 1)])
-    xs.append(0)
-    u = int(2**k * (1 - 2 ** (-k)))
-    ys.extend([u for _ in range(2**k)])
+    xs = [0 for _ in range(n)]
+    ys = [0 for _ in range(n)]
     return xs, ys

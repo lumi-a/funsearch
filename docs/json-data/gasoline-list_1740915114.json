@@ -1,0 +1,434 @@
+{
+  "config":{
+    "inputs":[
+      3
+    ],
+    "specification":"\"\"\"I'm trying to find sets for which an iterative rounding algorithm on the gasoline-problem has a poor (high) approximation-ratio.\n\nThe gasoline-problem looks for a permutation of the xs and ys (lists of positive integers) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nTo generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered slightly.\n\"\"\"\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n    from funsearch.gasoline.iterative_rounding import SlotOrdered\n\n    xs, ys = gasoline(n)\n\n    # Assert determinancy\n    if (xs, ys) != gasoline(n):\n        return 0\n\n    xs = [max(0, min(2**31 - 1, int(x))) for x in xs]\n    ys = [max(0, min(2**31 - 1, int(y))) for y in ys]\n\n    return SlotOrdered().approximation_ratio(xs, ys)\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n",
+    "problem_name":"gasoline-list",
+    "message":"\u23f1\ufe0f Benchmarking open-mistral-nemo, without prefixes or FIM\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1740915114,
+  "highestRunIndex":1141,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          231,
+          1.0833333333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs, ys = [], []\n    for i in range(n):  # Change: removed +1 from the range\n        u = int(2 ** (n - i) * (1 - (i + 1) / (2 ** (i + 2))))  # Change: added (i + 1) to the denominator\n        xs.extend([u] * (2 ** i))  # No change\n        ys.extend([u * 2] * (2 ** i))  # Change: multiplied u by 2\n    xs.extend([int(2 ** n)] * 2 ** (n - 1))  # Change: multiplied the range by (n - 1)\n    u = int(2 ** n * (1 - (n + 1) / (2 ** (n + 2))))  # Change: added (n + 1) to the denominator\n    ys.extend([u] * 2 ** (n - 1))  # Change: multiplied the range by (n - 1)\n    return xs, ys\n\n"
+        ],
+        [
+          256,
+          1.125,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v3`.\"\"\"\n    xs, ys = [], []\n    for i in range(n, -1, -1):  # Change: same as gasoline_v0\n        u = int(2 ** n * (1 - 1 / (2 ** i))) + (i % 2)  # Change: added (i % 2) to introduce offset\n        if i % 2 == 0:  # Change: swap xs and ys for even indices\n            xs.extend([u for _ in range(2 ** i)])\n            ys.extend([u * 2 for _ in range(2 ** i)])\n        else:\n            xs.extend([u * 2 for _ in range(2 ** i)])\n            ys.extend([u for _ in range(2 ** i)])\n    u = int(2 ** n * (1 - 1 / (2 ** n))) + (n % 2)  # Change: added (n % 2) to introduce offset\n    xs.extend([u for _ in range(2 ** n)])\n    ys.extend([u * 2 for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          267,
+          1.2142857142857142,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v3`.\"\"\"\n    xs, ys = [], []\n    for i in range(n, -1, -1):  # Change: same as gasoline_v0 and gasoline_v1\n        u = int(2 ** n * (1 - 1 / (2 ** i))) + (i % 2) - 1  # Change: subtracted 1 from the offset\n        if i % 2 == 0:  # Change: swap xs and ys for even indices\n            xs.extend([u for _ in range(2 ** i)])\n            ys.extend([u * 2 for _ in range(2 ** i)])\n        else:\n            xs.extend([u * 2 for _ in range(2 ** i)])\n            ys.extend([u for _ in range(2 ** i)])\n    u = int(2 ** n * (1 - 1 / (2 ** n))) + (n % 2) - 1  # Change: subtracted 1 from the offset\n    xs.extend([u for _ in range(2 ** n)])\n    ys.extend([u * 2 for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          271,
+          1.25,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs, ys = [], []\n    for i in range(n, -1, -1):  # Change: same as gasoline_v0, gasoline_v1, and gasoline_v2\n        u = int(2 ** n * (1 - 1 / (2 ** (i + 1)))) + (i % 2)  # Change: added 1 to the exponent and removed -1 from the offset\n        if i % 2 == 0:  # Change: same as gasoline_v1\n            xs.extend([u for _ in range(2 ** i)])\n            ys.extend([u * 2 for _ in range(2 ** i)])\n        else:\n            xs.extend([u * 2 for _ in range(2 ** i)])\n            ys.extend([u for _ in range(2 ** i)])\n    u = int(2 ** n * (1 - 1 / (2 ** n))) + (n % 2)  # Change: removed -1 from the offset\n    xs.extend([u for _ in range(2 ** n)])\n    ys.extend([u * 2 for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          298,
+          1.4166666666666667,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v3`.\"\"\"\n    xs, ys = [], []\n    for i in range(n, -1, -1):  # Change: same as gasoline_v0, gasoline_v1, and gasoline_v3\n        u = int(2 ** (n - i) * (1 - 1 / (2 ** (i + 1)))) + (i % 2)  # Change: same as gasoline_v0\n        if i % 2 == 0:  # Change: same as gasoline_v0 and gasoline_v1\n            xs.extend([u for _ in range(2 ** i)])\n            ys.extend([u * 3 for _ in range(2 ** i)])  # Change: multiplied by 3 instead of 2\n        else:\n            xs.extend([u * 3 for _ in range(2 ** i)])  # Change: same as gasoline_v0 and gasoline_v1\n            ys.extend([u for _ in range(2 ** i)])\n    u = int(2 ** (n - n) * (1 - 1 / (2 ** n))) + (n % 2)  # Change: same as gasoline_v0\n    xs.extend([u for _ in range(2 ** n)])\n    ys.extend([u * 3 for _ in range(2 ** n)])  # Change: same as above\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":930,
+      "failureCount":47
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          116,
+          1.0416666666666667,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int((n+2) * (2 ** (n-i+1)) * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u * 2 for _ in range(2**i)])\n    xs.extend([int((n+2) * (2 ** (n+1))) for _ in range(2**n)])\n    u = int((n+2) * (2 ** n) * (1 - 2 ** (-n)))\n    ys.extend([u * 2 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          128,
+          1.063157894736842,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v1`, with minor alterations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):\n        u = int((n+1) * (2 ** (n-i+1)) * (1 - 2 ** (-i)))\n        xs.extend([u + (2**(i-1)) for _ in range(2**i)])\n        ys.extend([u * 2 - (2**(i-1)) for _ in range(2**i)])\n    xs.extend([int((n+1) * (2 ** (n+1))) for _ in range(2**n)])\n    u = int((n+1) * (2 ** n) * (1 - 2 ** (-n)))\n    ys.extend([u * 2 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          134,
+          1.1166666666666667,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):  # Changed the range to include n\n        u = int((n+2) * (2 ** (n-i+1)) * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u * 2 for _ in range(2**i)])\n    xs.extend([int((n+2) * (2 ** (n+1))) for _ in range(2**(n+1))])  # Changed the power to n+1\n    u = int((n+2) * (2 ** n) * (1 - 2 ** (-n)))\n    ys.extend([u * 2 for _ in range(2**(n+1))])  # Changed the power to n+1\n    return xs, ys\n\n"
+        ],
+        [
+          243,
+          1.2419354838709677,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1`, with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+2):  # changed range to end at n+2\n        u = int((n+3) * (2 ** (n-i+1)) * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**(i-1))])\n        ys.extend([u * 2 - 1 for _ in range(2**(i-1))])\n    xs.extend([int((n+3) * (2 ** n)) for _ in range(2**n)])\n    u = int((n+3) * (2 ** (n-1)) * (1 - 2 ** (-n)))\n    ys.extend([u * 2 - 1 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          335,
+          1.3020833333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1`, with minor tweaks.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+2):  # Changed the range to end at n+2\n        u = int((n+3) * (2 ** (n-i+1)) * (1 - 2 ** (-i)))  # Changed the coefficient to n+3 and exponent to n-i+1\n        xs.extend([u + 1 for _ in range(2**(i-1))])\n        ys.extend([u * 2 - 1 for _ in range(2**(i-1))])  # Changed the expression to u * 2 - 1\n    xs.extend([int((n+3) * (2 ** (n+1))) for _ in range(2**(n//2))])  # Changed the power to n+1 and range to 2**(n//2)\n    u = int((n+3) * (2 ** n) * (1 - 2 ** (-n)))\n    ys.extend([u * 2 + 1 for _ in range(2**(n//2))])  # Changed the exponent to n and expression to u * 2 + 1\n    return xs, ys\n\n"
+        ],
+        [
+          345,
+          1.3644859813084111,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v1`, with minor alterations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 2):  # Changed the range to end at n+2\n        u = int((n+3) * (2 ** (n-i+1)) * (1 - 2 ** (-i+1)))\n        xs.extend([u + 1 for _ in range(2**i)])\n        ys.extend([u * 2 - 1 for _ in range(2**i)])  # Changed the expression to u * 2 - 1\n    xs.extend([int((n+3) * (2 ** (n+1))) - 1 for _ in range(2**(n//2+1))])  # Changed the power to n+1, range to 2**(n//2+1), and added -1\n    u = int((n+3) * (2 ** (n)) * (1 - 2 ** (-n)))\n    ys.extend([u * 2 - 1 for _ in range(2**(n//2+1))])  # Changed the exponent to n and expression to u * 2 - 1\n    return xs, ys\n\n"
+        ],
+        [
+          404,
+          1.4,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v1`, with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):  # Changed the range to end at n+1\n        u = int((n+2) * (2 ** (n-i)) * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**(i-1))])\n        ys.extend([u * 2 + 1 for _ in range(2**(i-1))])  # Changed the expression to u * 2 + 1\n    xs.extend([int((n+2) * (2 ** n)) for _ in range(2**(n//2))])\n    u = int((n+2) * (2 ** (n-1)) * (1 - 2 ** (-n)))\n    ys.extend([u * 2 + 2 for _ in range(2**(n//2))])  # Changed the expression to u * 2 + 2\n    return xs, ys\n\n"
+        ],
+        [
+          517,
+          1.4782608695652173,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v1`, with minor alterations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 3):  # Changed the range to end at n+3\n        u = int((n+2) * (2 ** (n-i)) * (1 - 2 ** (-i)))\n        xs.extend([u - 2 for _ in range(2**(i-1))])\n        ys.extend([u * 2 for _ in range(2**(i-1))])  # Changed the expression to u * 2\n    xs.extend([int((n+2) * (2 ** (n+1))) for _ in range(2**(n//2 + 1))])  # Changed the power to n+1 and range to 2**(n//2 + 1)\n    u = int((n+2) * (2 ** n) * (1 - 2 ** (-n)))\n    ys.extend([u * 2 - 2 for _ in range(2**(n//2 + 1))])  # Changed the expression to u * 2 - 2\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":969,
+      "failureCount":148
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          27,
+          1.1111111111111112,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"A variation of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i))) + 1  # Altered: added +1 to u\n        xs.extend([u - 1 for _ in range(2**i)])  # Altered: subtracted 1 from u\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) + 1 for _ in range(2**n)])  # Altered: added +1 to 2**n\n    u = int(2**n * (1 - 2 ** (-n))) + 1  # Altered: added +1 to u\n    ys.extend([u + 1 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          32,
+          1.2222222222222223,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another variation of the gasoline-problem generator.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i))) * 2  # Altered: multiplied by 2\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u + 1 for _ in range(2**i)])\n    xs.extend([int(2**n) * 2 for _ in range(2**n)])  # Altered: multiplied by 2\n    u = int(2**n * (1 - 2 ** (-n))) * 2  # Altered: multiplied by 2\n    ys.extend([u + 1 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          45,
+          1.6666666666666667,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another variation of the gasoline-problem generator.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):  # Changed: removed 1 from the range\n        u = int(2**n * (1 - 2 ** (-i))) * 2\n        xs.extend([u for _ in range(2**(i))])  # Changed: removed 1 from the exponent\n        ys.extend([u + 1 for _ in range(2**(i))])\n    xs.extend([int(2**n) * 2 for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n))) * 2\n    ys.extend([u + 1 for _ in range(2**n + 1)])  # Changed: added 1 to the range\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":572,
+      "failureCount":317
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          34,
+          1.1111111111111112,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i - 1)))\n        xs.extend([u] * (2**(i - 1) - 1))\n        ys.extend([u] * (2**(i - 1) - 1))\n        xs.append(int(2**n * (i % 2)))\n        ys.append(u)\n    return xs, ys\n\n"
+        ],
+        [
+          40,
+          1.3,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u] * (2**(i - 1) - 1))\n        ys.extend([u] * (2**(i - 1) - 1))\n        xs.append(int(2**n * (i % 2)))\n        ys.append(u)\n    return xs, ys\n\n"
+        ],
+        [
+          64,
+          1.3333333333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u] * (2**(i - 1)))\n        ys.extend([u] * (2**(i - 1)))\n        xs.append(int(2**n * (i % 2)))\n        ys.append(u + (i % 2))\n    return xs, ys\n\n"
+        ],
+        [
+          66,
+          1.4,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u] * (2**(i - 1) - 1))\n        ys.extend([u] * (2**(i - 1)))\n        xs.append(int(2**n * (i % 2)))\n        ys.append(u + (i % 2) + 1)\n    return xs, ys\n\n"
+        ],
+        [
+          70,
+          1.5,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slightly adjusted exponent and increment for y values.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i + 1)))  # Adjusted the exponent in the formula for u\n        xs.extend([u] * (2**(i - 1) - 1))\n        ys.extend([u] * (2**(i - 1) - 1))\n        xs.append(int(2**n * (i % 2)))\n        ys.append(u + 3)  # Adjusted the increment for y values\n    return xs, ys\n\n"
+        ],
+        [
+          183,
+          1.5151515151515151,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slightly adjusted exponent and increment for y values.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n+4) * (1 - 2 ** (-i)))  # Adjusted the exponent in the formula for u\n        xs.extend([u] * (2**(i - 1)))\n        ys.extend([u] * (2**(i - 1)))\n        xs.append(int(2**(n+4) * (i % 2)))\n        ys.append(u + 4)  # Adjusted the increment for y values\n    return xs, ys\n\n"
+        ],
+        [
+          192,
+          1.5692307692307692,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slightly adjusted exponent and increment for y values.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n+3) * (1 - 2 ** (-i)))  # Adjusted the exponent in the formula for u\n        xs.extend([u] * (2**(i - 1)))\n        ys.extend([u] * (2**(i - 1)))\n        xs.append(int(2**(n+3) * (i % 2)))\n        ys.append(u + 1)  # Adjusted the increment for y values\n    return xs, ys\n\n"
+        ],
+        [
+          199,
+          1.75,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n+1) * (1 - 2 ** (-i)))  # Changed the exponent to n+1\n        xs.extend([u] * (2**(i - 1)))\n        ys.extend([u] * (2**(i - 1)))\n        xs.append(int(2**(n+1) * (i % 2)))\n        ys.append(u - 1)  # Changed the increment for y values to subtraction\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":1047,
+      "failureCount":78
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          206,
+          1.0666666666666667,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1` with different calculation for `u` and extended list values.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n-i) * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**(i-1))])\n        ys.extend([u * 3 for _ in range(2**(i-1))])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**(n-1) * (1 - 2 ** (-n)))\n    ys.extend([u * 3 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          333,
+          1.1111111111111112,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1` with altered `u` calculation and different list extension.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n-i) * (1 - 2 ** (-i))) * 2\n        xs.extend([u * 3 for _ in range(2**(i-1))])\n        ys.extend([u * 5 for _ in range(2**(i-1))])\n    xs.extend([int(2**n) * 5 for _ in range(2**(n-1))])\n    u = int(2**(n-1) * (1 - 2 ** (-n))) * 2\n    ys.extend([u * 5 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          345,
+          1.1818181818181819,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1` with altered `u` calculation and different list extension.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n-i) * (1 - 2 ** (-i))) * 5  # changed multiplier from 3 to 5\n        xs.extend([u for _ in range(2**(i-1))])\n        ys.extend([u * 3 for _ in range(2**(i-1))])  # changed multiplier from 4 to 3\n    xs.extend([int(2**n) * 5 for _ in range(2**(n-1))])  # changed multiplier from 4 to 5\n    u = int(2**(n-1) * (1 - 2 ** (-n))) * 5  # changed multiplier from 3 to 5\n    ys.extend([u * 3 for _ in range(2**n)])  # changed multiplier from 4 to 3\n    return xs, ys\n\n"
+        ],
+        [
+          359,
+          1.2,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Version with altered `u` calculation and different list extension.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n-i) * (1 - 2 ** (-i))) * 7  # changed multiplier from 5 to 7\n        xs.extend([u for _ in range(2**(i-1))])\n        ys.extend([u * 2 for _ in range(2**(i-1))])  # changed multiplier from 3 to 2\n    xs.extend([int(2**n) * 7 for _ in range(2**(n-1))])  # changed multiplier from 5 to 7\n    u = int(2**(n-1) * (1 - 2 ** (-n))) * 7  # changed multiplier from 5 to 7\n    ys.extend([u * 2 for _ in range(2**n)])  # changed multiplier from 3 to 2\n    return xs, ys\n\n"
+        ],
+        [
+          366,
+          1.3793103448275863,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered calculations and list extension.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n-i) * (1 - 2 ** (-i))) * 7  # changed multiplier from 5 to 7\n        xs.extend([u for _ in range(2**(i-1))])\n        ys.extend([u * 2 for _ in range(2**(i-1))])  # changed multiplier from 3 to 2\n    xs.extend([int(2**n) * 3 for _ in range(2**(n-1))])  # changed multiplier from 5 to 3\n    u = int(2**(n-1) * (1 - 2 ** (-n))) * 7  # changed multiplier from 5 to 7\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          419,
+          1.4594594594594594,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered calculations and list extension.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n-i) * (1 - 2 ** (-i))) * 9  # changed multiplier from 7 to 9\n        xs.extend([u for _ in range(2**(i-1))])\n        ys.extend([u * 2 for _ in range(2**(i-1))])  # kept multiplier as 2\n    xs.extend([int(2**n) * 4 for _ in range(2**(n-1))])  # changed multiplier from 3 to 4\n    u = int(2**(n-1) * (1 - 2 ** (-n))) * 9  # changed multiplier from 7 to 9\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":984,
+      "failureCount":9
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          4,
+          1.25,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**(i+1))])\n        ys.extend([u for _ in range(2**(i))])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**(n+1))])\n    return xs, ys\n\n"
+        ],
+        [
+          134,
+          1.5,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another variant with slightly altered mathematical expression and list appending.\"\"\"\n    X, Y = [], []\n    for i in range(1, n):\n        val = int(2**n * (1 - 2/(2**i)))\n        X.extend([val] * 2**(i+1))\n        Y.extend([val] * 2**(i))\n    X.extend([int(2**n)] * 2**n)\n    val = int(2**n * (1 - 2/(2**n)))\n    Y.extend([val] * 2**(n+1))\n    return X, Y\n\n"
+        ]
+      ],
+      "successCount":959,
+      "failureCount":26
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          99,
+          1.2,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2 ** (n - i))\n        xs.extend([u for _ in range(2 ** i)])\n        ys.extend([u + 1 for _ in range(2 ** i)])\n    xs.extend([int(2 ** n) for _ in range(2 ** n)])\n    ys.extend([int(2 ** n) - 1 for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          116,
+          1.25,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs, ys = [], []\n    for i in range(n - 1):\n        u = int(2 ** (n - i - 2))\n        xs.extend([u for _ in range(2 ** i)])\n        ys.extend([u + 1 for _ in range(2 ** i)])\n    u = int(2 ** (n - 1))\n    xs.extend([u for _ in range(2 ** (n - 1))])\n    ys.extend([u - 1 for _ in range(2 ** (n - 1))])\n    return xs, ys\n\n"
+        ],
+        [
+          122,
+          1.3,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):\n        u = int(2 ** (n - i))\n        xs.extend([u for _ in range(2 ** (i-1))])\n        ys.extend([u + 1 for _ in range(2 ** (i-1))])\n    xs.extend([int(2 ** n) for _ in range(2 ** n)])\n    ys.extend([int(2 ** n) - 1 for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          171,
+          1.3125,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2` with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(n - 1, -1, -1):\n        u = int(2 ** i * 1.5)  # Changed multiplication factor to 1.5\n        xs.extend([u for _ in range(2 ** (n - i - 1))])\n        ys.extend([u + 1 for _ in range(2 ** (n - i - 1))])\n    xs.extend([int(2 ** n * 1.5) for _ in range(2 ** n)])  # Changed multiplication factor to 1.5\n    ys.extend([int(2 ** n * 1.5) - 1 for _ in range(2 ** n)])  # Changed multiplication factor to 1.5\n    return xs, ys\n\n"
+        ],
+        [
+          172,
+          1.3636363636363635,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2` with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(n - 1, -1, -1):\n        u = int(2 ** (n - i))\n        xs.extend([u - 1 for _ in range(2 ** (n - i - 1))])\n        ys.extend([u for _ in range(2 ** (n - i - 1))])\n    xs.extend([int(2 ** n) + 1 for _ in range(2 ** n)])\n    ys.extend([int(2 ** n) for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          176,
+          1.4,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"A different version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2` with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(n - 1, -1, -1):\n        u = int(2 ** (n - i))\n        xs.extend([u - 2 for _ in range(2 ** (n - i - 1))])\n        ys.extend([u - 1 for _ in range(2 ** (n - i - 1))])\n    xs.extend([int(2 ** n) for _ in range(2 ** n)])\n    ys.extend([int(2 ** n) - 1 for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          208,
+          1.6,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version with slight modifications.\"\"\"\n    \"\"\"A different version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2` with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(n - 1, -1, -1):\n        u = int(2 ** (n - i)) + 1\n        xs.extend([u - 3 for _ in range(2 ** (n - i - 1))])\n        ys.extend([u - 2 for _ in range(2 ** (n - i - 1))])\n    xs.extend([int(2 ** n) + 1 for _ in range(2 ** n)])\n    ys.extend([int(2 ** n) for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          859,
+          1.6206896551724137,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(n - 1, -1, -1):\n        u = int(2 ** (n - i)) * 3\n        xs.extend([u - 3 for _ in range(2 ** (n - i - 1))])\n        ys.extend([u - 1 for _ in range(2 ** (n - i - 1))])\n    xs.extend([int(2 ** n) * 3 + 3 for _ in range(2 ** n)])\n    ys.extend([int(2 ** n) * 3 + 1 for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          884,
+          1.6923076923076923,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(n - 1, -1, -1):\n        u = int(2 ** (n - i) * 1.5) - 1  # Changed multiplication factor to 1.5\n        xs.extend([u - 2 for _ in range(2 ** (n - i - 1))])\n        ys.extend([u - 1 for _ in range(2 ** (n - i - 1))])\n    xs.extend([int(2 ** n * 1.5) for _ in range(2 ** n)])  # Changed multiplication factor to 1.5\n    ys.extend([int(2 ** n * 1.5) - 1 for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":1106,
+      "failureCount":35
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          51,
+          1.1428571428571428,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with different calculations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+2):  # Changed range to include n+1\n        u = int(2**(n-1) * (1 - 2 ** (-i)))  # Changed starting index and exponent for u calculation\n        xs.extend([u + i for _ in range(2**(n-i+1))])  # Changed the range to include n-i+1 and calculation for xs values\n        ys.extend([u + 2 for _ in range(2**(n-i+1))])\n    return xs, ys\n\n"
+        ],
+        [
+          58,
+          1.1538461538461537,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with different calculations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+2):  # Changed range to include n+1\n        u = int(2**(n-1) * (1 - 2 ** (-i))) * 3  # Changed starting index, exponent and multiplier for u calculation\n        xs.extend([u + i for _ in range(2**(n-i+1))])  # Changed the range to include n-i+1 and calculation for xs values\n        ys.extend([u + 2 for _ in range(2**(n-i+1))])\n    return xs, ys\n\n"
+        ],
+        [
+          68,
+          1.1666666666666667,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version with different calculations.\"\"\"\n    xs, ys = [], []\n    for i in range(n+1):  # Changed range to start from 0\n        u = int(2**(n-1) * (1 - 2 ** (-i))) * 3  # Changed starting index, exponent and multiplier for u calculation\n        xs.extend([u + i for _ in range(2**(n-i))])  # Changed the range to exclude n-i+1 and calculation for xs values\n        ys.extend([u + 2 for _ in range(2**(n-i))])\n    return xs, ys\n\n"
+        ],
+        [
+          108,
+          1.2,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with different calculations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):  # Changed starting index of range\n        u = int(2**(n-1) * (1 - 2 ** (-i))) * 4  # Changed starting index, exponent and multiplier for u calculation\n        xs.extend([u + i for _ in range(2**(n-i+1))])  # Changed the range to include n-i+1 and calculation for xs values\n        ys.extend([u + 2 for _ in range(2**(n-i+1))])\n    return xs, ys\n\n"
+        ],
+        [
+          136,
+          1.2307692307692308,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version with different calculations.\"\"\"\n    xs, ys = [], []\n    for i in range(n//2 + 1):  # Changed the range to start from n//2 and end at n//2 + 1\n        u = int(2**(n-1) * (1 - 2 ** (-i))) * 5  # Changed the multiplier for u calculation\n        xs.extend([u + i for _ in range(2**(n-i-1))])  # Changed the range to exclude i+1 and calculation for xs values\n        ys.extend([u + 3 for _ in range(2**(n-i-1))])\n    return xs, ys\n\n"
+        ],
+        [
+          165,
+          1.5714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with different calculations.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):  # Changed starting index of range\n        u = int(2**(n-1) * (1 - 2 ** (-i))) * 4  # Changed starting index, exponent and multiplier for u calculation\n        xs.extend([u + i for _ in range(2**(n-i))])  # Changed the range to include n-i and calculation for xs values\n        ys.extend([u + 2 for _ in range(2**(n-i))])\n    return xs, ys\n\n"
+        ],
+        [
+          516,
+          1.6774193548387097,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with different calculations.\"\"\"\n    xs, ys = [], []\n    for i in range(n + 1):  # Added 1 to include n in range\n        u = int(2**(n) * (1 - 2 ** (-i))) * 4  # Changed exponent to n and removed the multiplier\n        xs.extend([u + i for _ in range(2**(n-i + 1))])  # Changed the range to include n-i+1 and calculation for xs values\n        ys.extend([u + 2 for _ in range(2**(n-i + 1))])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":897,
+      "failureCount":184
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          24,
+          1.1,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2` with slight alterations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u + 3] * (2**i - 1))\n        ys.extend([u + 1] * (2**i - 1))\n    xs.extend([int(2**n) - 1 for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u + 3] * (2**n))\n    return xs, ys\n\n"
+        ],
+        [
+          36,
+          1.1111111111111112,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2` with slight alterations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u + 2] * (2**i - 1))\n        ys.extend([u] * (2**i - 1))\n    xs.extend([int(2**n) - 2 for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u + 2] * (2**n))\n    return xs, ys\n\n"
+        ],
+        [
+          312,
+          1.2380952380952381,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):\n        u = int(2**(n - i) * (2 ** i) + 1)\n        xs.extend([u + 2 * (2 ** (i - 1) + 1) for _ in range(2**i)])\n        ys.extend([u + 2 * (2 ** (i - 1)) - 1 for _ in range(2**i)])\n    xs.extend([int(2**n) - 2 for _ in range(2**n)])\n    u = int(2**n * (2 ** (-n)) + 1)\n    ys.extend([u + 2 * (2 ** (n - 1)) + 1 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          316,
+          1.4444444444444444,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):\n        u = int(2**(n - i) * (2 ** i) + 2)\n        xs.extend([u + 2 * (2 ** (i - 1)) for _ in range(2**i)])\n        ys.extend([u + 2 * (2 ** (i - 1)) - 2 for _ in range(2**i)])\n    xs.extend([int(2**n) - 2 for _ in range(2**n)])\n    u = int(2**n * (2 ** (-n)) + 2)\n    ys.extend([u + 2 * (2 ** (n - 1)) - 1 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          583,
+          1.4583333333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n+1):\n        u = int(2**(n - i + 1) * (2 ** i) - 2)\n        xs.extend([u + 2 * (2 ** (i - 1)) for _ in range(2**i)])\n        ys.extend([u + 2 * (2 ** (i - 1)) - 1 for _ in range(2**i)])\n    xs.extend([int(2**n) - 1 for _ in range(2**n)])\n    u = int(2**n * (2 ** (-n+1)) - 1)\n    ys.extend([u + 2 * (2 ** (n - 1)) - 2 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          799,
+          1.4864865264003255,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with slight alterations.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n+1):\n        u = int(2**(n - i) * (2 ** (i + 1)) + 1)\n        xs.extend([u + 2 * (2 ** i) for _ in range(2**i)])\n        ys.extend([u + 2 * (2 ** i) - 2 for _ in range(2**i)])\n    xs.extend([int(2**n) - 1 for _ in range(2**n)])\n    u = int(2**n * (2 ** (-n+1)) + 1)\n    ys.extend([u + 2 * (2 ** (n - 1)) - 3 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          947,
+          1.5135135135135136,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with slight alterations.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n+1):\n        u = int(2**(n - i) * (2 ** (i + 1)) + 2)\n        xs.extend([u + 2 * (2 ** i) - 1 for _ in range(2**i)])\n        ys.extend([u + 2 * (2 ** i) - 3 for _ in range(2**i)])\n    xs.extend([int(2**n) - 2 for _ in range(2**n)])\n    u = int(2**n * (2 ** (-n+1)) + 2)\n    ys.extend([u + 2 * (2 ** (n - 1)) - 4 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":954,
+      "failureCount":19
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          70,
+          1.0833333333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1` with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**(n-i) * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u + (2**i) for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**(n-1) * (1 - 2 ** (-n)))\n    ys.extend([u + (2**(n-1)) for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          88,
+          1.0909090909090908,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v1` with slight modifications.\"\"\"\n    \"\"\"This version starts with a smaller value for `u`.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**(n-i) * (1 - 2 ** (-i))) // 2\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u + (2**i) for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**(n-1) * (1 - 2 ** (-n))) // 2\n    ys.extend([u + (2**(n-1)) for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          117,
+          1.25,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1` with slight modifications.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**(n-i) * (1 - 2 ** (-i - 1)))\n        xs.extend([u + 1 for _ in range(2**i)])\n        ys.extend([u + (2**i) - 1 for _ in range(2**i)])\n    xs.extend([int(2**n) - 1 for _ in range(2**n)])\n    u = int(2**(n-1) * (1 - 2 ** (-n - 1)))\n    ys.extend([u + (2**(n-1)) - 1 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          236,
+          1.2857142857142858,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1` with slight modifications.\"\"\"\n    \"\"\"Modified `gasoline_v2` with different offsets.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**(n-i) * (1 - 2 ** (-i - 2)))\n        xs.extend([u for _ in range(2**i)])  # Changed offset for xs\n        ys.extend([u + (2**i) - 2 for _ in range(2**i)])\n    xs.extend([int(2**n) - 2 for _ in range(2**n)])\n    u = int(2**(n-1) * (1 - 2 ** (-n - 2)))\n    ys.extend([u + (2**(n-1)) - 2 for _ in range(2**n)])  # Changed offset for ys\n    return xs, ys\n\n"
+        ],
+        [
+          659,
+          1.2861635220125787,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with slight modifications to worsen approximation ratio.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**(n-i) * (1 - 2 ** (-i - 3)))\n        xs.extend([u + 2**(i+4) + 4 for _ in range(2**i)])\n        ys.extend([u + (2**i) + 2**(i+5) - 5 for _ in range(2**i)])\n    xs.extend([int(2**n) + 2**(n+5) + 4 for _ in range(2**n)])\n    u = int(2**(n-1) * (1 - 2 ** (-n - 3)))\n    ys.extend([u + (2**(n-1)) + 2**(n+5) - 5 for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          771,
+          1.2878192534381139,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another version with slight modifications to worsen approximation ratio even further.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**(n-i) * (1 - 2 ** (-i - 5)))\n        xs.extend([u + 3 * 2**(i+4) + 2**(i+2) for _ in range(2**i)])  # Changed multiplier for xs\n        ys.extend([u + (2**i) + 3 * 2**(i+5) - 6 for _ in range(2**i)])  # Changed multiplier for ys\n    xs.extend([int(2**n) + 3 * 2**(n+5) + 2**(n+2) for _ in range(2**n)])  # Changed multiplier for final xs\n    u = int(2**(n-1) * (1 - 2 ** (-n - 5)))\n    ys.extend([u + (2**(n-1)) + 3 * 2**(n+5) - 9 for _ in range(2**n)])  # Changed multiplier and offset for final ys\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":903,
+      "failureCount":6
+    }
+  ]
+}

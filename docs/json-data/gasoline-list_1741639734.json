@@ -1,0 +1,129 @@
+{
+  "config":{
+    "inputs":[
+      30
+    ],
+    "specification":"\"\"\"I'm trying to find instances of the gasoline-problem for which an iterative rounding algorithm has a poor (high) approximation-ratio.\n\nThe gasoline-problem looks for a permutation of the xs and ys (lists of positive integers) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nTo generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered slightly.\n\"\"\"\n\nimport math\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n    from funsearch.gasoline.iterative_rounding import SlotOrdered\n\n    xs, ys = gasoline(n)\n\n    # Assert determinancy\n    if (xs, ys) != gasoline(n):\n        return 0\n\n    xs = [max(0, min(2**31 - 1, int(x))) for x in xs[:n]]\n    ys = [max(0, min(2**31 - 1, int(y))) for y in ys[:n]]\n\n    return SlotOrdered().approximation_ratio(xs, ys)\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n",
+    "problem_name":"gasoline-list",
+    "message":"Listlength, start with Lucas' solution.\n\nopen-mistral-nemo, temperature 1.5",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1741639734,
+  "highestRunIndex":277,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":166,
+      "failureCount":23
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":185,
+      "failureCount":44
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":216,
+      "failureCount":61
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":153,
+      "failureCount":40
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":188,
+      "failureCount":45
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":179,
+      "failureCount":26
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":171,
+      "failureCount":34
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":124,
+      "failureCount":77
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":135,
+      "failureCount":102
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        u = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**k) for _ in range(2**k - 1)])\n    xs.append(0)\n    u = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([u for _ in range(2**k)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":135,
+      "failureCount":18
+    }
+  ]
+}

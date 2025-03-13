@@ -1,82 +1,202 @@
 [
   [
     "3-4-cyclefree",
+    1740604239,
     [
-      15
+      53
     ],
-    26,
-    "The score 26 is optimal. This was a sample-run, mostly to test displaying the results on the website.",
-    1740256478,
-    "3-4-cyclefree_1740256478.json"
+    163.0,
+    "Benchmarking gpt-3.5-turbo",
+    "3-4-cyclefree_1740604239.json"
   ],
   [
     "gasoline-list",
+    1740234412,
     [
       3
     ],
     1.6521739130434783,
     "Perturb Lucas' solution by making it linear instead of exponential.",
-    1740234412,
     "gasoline-list_1740234412.json"
   ],
   [
     "gasoline-list",
-    [
-      3
-    ],
-    1.75,
-    "Perturb Lucas' solution by not setting last xs to 0.",
-    1740323614,
-    "gasoline-list_1740323614.json"
-  ],
-  [
-    "gasoline-list",
-    [
-      3
-    ],
-    1.7500002188608434,
-    "Perturb Lucas' solution by removing most final entries.",
-    1740413681,
-    "gasoline-list_1740413681.json"
-  ],
-  [
-    "gasoline-list",
-    [
-      3
-    ],
-    1.7777777777777777,
-    "Perturb Lucas' solution by setting ys to 0.",
-    1740263394,
-    "gasoline-list_1740263394.json"
-  ],
-  [
-    "gasoline-list",
-    [
-      3
-    ],
-    1.875,
-    "Start from Lucas' solution.",
-    1740309473,
-    "gasoline-list_1740309473.json"
-  ],
-  [
-    "gasoline-list",
+    1740242660,
     [
       3
     ],
     1110010.0099940917,
     "Perturb Lucas' solution by setting ys to 0.",
-    1740242660,
     "gasoline-list_1740242660.json"
   ],
   [
+    "gasoline-list",
+    1740263394,
+    [
+      3
+    ],
+    1.7777777777777777,
+    "Perturb Lucas' solution by setting ys to 0.",
+    "gasoline-list_1740263394.json"
+  ],
+  [
+    "gasoline-list",
+    1740309473,
+    [
+      3
+    ],
+    1.875,
+    "Start from Lucas' solution.",
+    "gasoline-list_1740309473.json"
+  ],
+  [
+    "gasoline-list",
+    1740323614,
+    [
+      3
+    ],
+    1.75,
+    "Perturb Lucas' solution by not setting last xs to 0.",
+    "gasoline-list_1740323614.json"
+  ],
+  [
+    "gasoline-list",
+    1740413681,
+    [
+      3
+    ],
+    1.7500002188608434,
+    "Perturb Lucas' solution by removing most final entries.",
+    "gasoline-list_1740413681.json"
+  ],
+  [
+    "gasoline-list",
+    1740749743,
+    [
+      3
+    ],
+    1.5,
+    "\u23f1\ufe0f Benchmarking gpt-4o-mini",
+    "gasoline-list_1740749743.json"
+  ],
+  [
+    "gasoline-list",
+    1740753997,
+    [
+      3
+    ],
+    1.8571428571428572,
+    "\u23f1\ufe0f Benchmarking gpt-3.5-turbo",
+    "gasoline-list_1740753997.json"
+  ],
+  [
+    "gasoline-list",
+    1740836098,
+    [
+      3
+    ],
+    1.25,
+    "\u23f1\ufe0f Benchmarking codestral-latest, without prefixes or FIM",
+    "gasoline-list_1740836098.json"
+  ],
+  [
+    "gasoline-list",
+    1740915114,
+    [
+      3
+    ],
+    1.75,
+    "\u23f1\ufe0f Benchmarking open-mistral-nemo, without prefixes or FIM",
+    "gasoline-list_1740915114.json"
+  ],
+  [
+    "gasoline-list",
+    1740921680,
+    [
+      3
+    ],
+    1.6616746085772633,
+    "\u23f1\ufe0f Benchmarking gpt-4o-mini, temperature 1.5",
+    "gasoline-list_1740921680.json"
+  ],
+  [
+    "gasoline-list",
+    1740937436,
+    [
+      3
+    ],
+    1.4153846153846155,
+    "\u23f1\ufe0f Benchmarking gpt-4o-mini, temperature 1.25",
+    "gasoline-list_1740937436.json"
+  ],
+  [
+    "gasoline-list",
+    1741545792,
+    [
+      16
+    ],
+    1.7142857142857142,
+    "Listlength, change final entry of Lucas' solution",
+    "gasoline-list_1741545792.json"
+  ],
+  [
+    "gasoline-list",
+    1741606511,
+    [
+      20
+    ],
+    1.9375,
+    "Listlength, start with Lucas' solution.",
+    "gasoline-list_1741606511.json"
+  ],
+  [
+    "gasoline-list",
+    1741639734,
+    [
+      30
+    ],
+    1.875,
+    "Listlength, start with Lucas' solution.",
+    "gasoline-list_1741639734.json"
+  ],
+  [
+    "gasoline-list",
+    1741739941,
+    [
+      24
+    ],
+    1.8461538461538463,
+    "Listlength, start with a trivial instance.",
+    "gasoline-list_1741739941.json"
+  ],
+  [
+    "gasoline-list",
+    1741792084,
+    [
+      14
+    ],
+    1.75,
+    "Other way of building list, change final entry of Lucas' solution.",
+    "gasoline-list_1741792084.json"
+  ],
+  [
+    "gasoline-list",
+    1741797621,
+    [
+      14
+    ],
+    1.7142857142857142,
+    "Other way of building list, remove final entries and remove intermittent rounding.",
+    "gasoline-list_1741797621.json"
+  ],
+  [
     "library",
+    1740424536,
     [
       0
     ],
     -27155.0,
     "Simulated paging-problem.",
-    1740424536,
     "library_1740424536.json"
   ]
 ]

@@ -34,8 +34,8 @@ def publish() -> None:
             files[(specname, int(timestamp))] = f
 
     # Save small descriptions of each json-file in index.json
-    # Has schema (problemName, inputs, maxScore, message, timestamp, filepath)
-    index_json: list[tuple[str, list[float] | list[str], float, str, int, str]] = []
+    # Has schema (problemName, timestamp, inputs, maxScore, message, filepath)
+    index_json: list[tuple[str, int, list[float] | list[str], float, str, str]] = []
     for (specname, timestamp), file in files.items():
         database = ProgramsDatabase.load(file.open("rb"))
 
@@ -47,10 +47,10 @@ def publish() -> None:
             index_json.append(
                 (
                     database._config.problem_name,
+                    timestamp,
                     database._config.inputs,
                     max(island._best_score for island in database._islands),
                     shortened_message,
-                    timestamp,
                     filename,
                 )
             )

@@ -1,0 +1,284 @@
+{
+  "config":{
+    "inputs":[
+      53
+    ],
+    "specification":"\"\"\"Find undirected graphs with many edges that don't contain a 3-cycle or 4-cycle.\n\nOn every iteration, improve priority_v1 over the priority_vX methods from previous iterations.\nMake only small code-changes. Do not use np.random.\n\"\"\"\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(total_vertex_count: int) -> float:\n  \"\"\"Returns the number of edges in an undirected graph on `total_vertex_count` vertices having no 3-cycles or 4-cycles.\"\"\"\n  return len(solve(total_vertex_count))\n\n\ndef solve(total_vertex_count: int) -> set[tuple[int, int]]:\n  \"\"\"Returns a large graph on `total_vertex_count` vertices without 3-cycles or 4-cycles.\"\"\"\n  edge_priorities = {\n    (vertex_v, vertex_w): priority(vertex_v, vertex_w, total_vertex_count)\n    for vertex_v in range(total_vertex_count)\n    for vertex_w in range(vertex_v + 1, total_vertex_count)\n  }\n  neighbors = {vertex_v: set() for vertex_v in range(total_vertex_count)}\n\n  for (vertex_v, vertex_w), _ in sorted(edge_priorities.items(), key=lambda x: -x[1]):\n    # Does adding the edge {vertex_v, vertex_w} add a 3-cycle?\n    if not neighbors[vertex_v].isdisjoint(neighbors[vertex_w]):\n      continue\n\n    # Does adding the edge {vertex_v, vertex_w} add a 4-cycle?\n    has_4_cycle = False\n    for neighbor_u in neighbors[vertex_v]:\n      if not neighbors[neighbor_u].isdisjoint(neighbors[vertex_w]):\n        has_4_cycle = True\n        break\n    if has_4_cycle:\n      continue\n\n    # There's no 3-cycle or 4-cycle, so insert the edge\n    neighbors[vertex_v].add(vertex_w)\n    neighbors[vertex_w].add(vertex_v)\n\n  edges = {\n    (vertex_v, vertex_w)\n    for vertex_v in range(total_vertex_count)\n    for vertex_w in neighbors[vertex_v]\n    if vertex_w > vertex_v\n  }\n  return edges\n\n\n@funsearch.evolve\ndef priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n  \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n",
+    "problem_name":"3-4-cyclefree",
+    "message":"Benchmarking gpt-3.5-turbo",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1740604239,
+  "highestRunIndex":527,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          4,
+          145.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count - 1) * vertex_v + vertex_w - 0.1 * vertex_v * vertex_w\n\n"
+        ],
+        [
+          8,
+          153.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count - 1) * vertex_v + vertex_w - 0.15 * vertex_v * vertex_w\n\n"
+        ],
+        [
+          9,
+          158.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  \"\"\"Improved version of `priority_v3`.\"\"\"\n  return (total_vertex_count - 1) * vertex_v + vertex_w - 0.4 * vertex_v * vertex_w\n\n"
+        ],
+        [
+          11,
+          159.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  \"\"\"Improved version of `priority_v0`.\"\"\"\n  return (total_vertex_count - 1) * vertex_v + vertex_w - 0.4 * vertex_v * vertex_w + 0.2 * total_vertex_count - 0.1 * total_vertex_count * vertex_v - 0.1 * total_vertex_count * vertex_w\n\n"
+        ],
+        [
+          22,
+          161.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  \"\"\"Improved version of `priority_v3`.\"\"\"\n  \"\"\"Improved version of `priority_v4` with fine-tuning.\"\"\"\n  return (total_vertex_count - 1) * vertex_v + vertex_w - 0.005 * vertex_v * vertex_w + 0.1 * total_vertex_count - 0.05 * total_vertex_count * vertex_v - 0.05 * total_vertex_count * vertex_w\n\n"
+        ]
+      ],
+      "successCount":480,
+      "failureCount":37
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          4,
+          157.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count**2) - ((vertex_w - vertex_v)**2) - ((vertex_v - vertex_w)**2) - (vertex_v * vertex_w) + (vertex_v + vertex_w) + 1.0\n\n"
+        ],
+        [
+          38,
+          160.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count**2) - ((vertex_w - vertex_v)**2) - ((vertex_v - vertex_w)**2) - (vertex_v * vertex_w) + (vertex_v + vertex_w) + 1.0 + total_vertex_count/4.0 + vertex_v/total_vertex_count + vertex_w/total_vertex_count\n\n"
+        ],
+        [
+          90,
+          161.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count**2) - ((vertex_w - vertex_v)**2) - ((vertex_v - vertex_w)**2) - (vertex_v * vertex_w) + (vertex_v + vertex_w) + 1.5 + total_vertex_count/4.0 + vertex_v/total_vertex_count + vertex_w/total_vertex_count + (vertex_v * vertex_w)/(total_vertex_count**2) + (vertex_v * vertex_w)/total_vertex_count\n\n"
+        ],
+        [
+          146,
+          162.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count**2) - ((vertex_w - vertex_v)**2) - ((vertex_v - vertex_w)**2) - (vertex_v * vertex_w) + (vertex_v + vertex_w) + 1.5 + total_vertex_count/4.0 + vertex_v/total_vertex_count + vertex_w/total_vertex_count + (vertex_v * vertex_w)/(total_vertex_count**2) + (vertex_v * vertex_w)/total_vertex_count - vertex_w*vertex_v/(total_vertex_count**3) + vertex_v/(total_vertex_count**2) + vertex_w/(total_vertex_count**2) - vertex_v/(total_vertex_count**3) - vertex_w/(total_vertex_count**3) - vertex_v**2/(total_vertex_count**4) - vertex_w**2/(total_vertex_count**4) - 2*vertex_v*vertex_w/(total_vertex_count**4) + vertex_v**3/(total_vertex_count**5) + vertex_w**3/(total_vertex_count**5) - vertex_v**3/(total_vertex_count**6) - vertex_w**3/(total_vertex_count**6) + (vertex_v**3)/(total_vertex_count**7) + (vertex_w**3)/(total_vertex_count**7) + 2*vertex_v*vertex_w/(total_vertex_count**5) - 2*vertex_v*vertex_w/(total_vertex_count**6) - (vertex_v + vertex_w)/(total_vertex_count**2) + 3*(vertex_v + vertex_w)**2/(total_vertex_count**3) - 6*(vertex_v + vertex_w)**3/(total_vertex_count**4) + 10*(vertex_v + vertex_w)**4/(total_vertex_count**5) - 15*(vertex_v + vertex_w)**5/(total_vertex_count**6) + 21*(vertex_v + vertex_w)**6/(total_vertex_count**7) - 28*(vertex_v + vertex_w)**7/(total_vertex_count**8) + 36*(vertex_v + vertex_w)**8/(total_vertex_count**9) - 45*(vertex_v + vertex_w)**9/(total_vertex_count**10)\n\n"
+        ]
+      ],
+      "successCount":391,
+      "failureCount":91
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          2,
+          158.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return total_vertex_count - abs(vertex_v - vertex_w) - 1\n\n"
+        ],
+        [
+          31,
+          161.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return total_vertex_count + min(vertex_v, vertex_w) - 3\n\n"
+        ]
+      ],
+      "successCount":486,
+      "failureCount":13
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          5,
+          158.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return total_vertex_count - abs(vertex_v - vertex_w) - 1.0\n\n"
+        ],
+        [
+          6,
+          161.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return vertex_v + vertex_w + total_vertex_count - abs(vertex_v - vertex_w)\n\n"
+        ]
+      ],
+      "successCount":488,
+      "failureCount":27
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          7,
+          53.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  # Calculate the degree of each vertex based on the total_vertex_count\n  degree_v = (vertex_v + 1) % total_vertex_count\n  degree_w = (vertex_w + 1) % total_vertex_count\n  \n  # Calculate the product of the degrees\n  degree_product = degree_v * degree_w\n  \n  # Adjust the priority based on the product of the degrees\n  priority = degree_product + (total_vertex_count - max(degree_v, degree_w))\n  \n  return priority\n\n"
+        ],
+        [
+          8,
+          158.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return abs(vertex_v - vertex_w) / total_vertex_count * -1.0\n\n"
+        ],
+        [
+          9,
+          161.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  # Use the minimum of the degrees as the priority\n  degree_v = (vertex_v + 1) % total_vertex_count\n  degree_w = (vertex_w + 1) % total_vertex_count\n  return min(degree_v, degree_w)\n\n"
+        ],
+        [
+          33,
+          162.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return min((vertex_v + 3) % total_vertex_count, (vertex_w + 5) % total_vertex_count)\n\n"
+        ],
+        [
+          484,
+          163.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return min((vertex_v + 3) % total_vertex_count, (vertex_w + 5) % total_vertex_count) * 2.25 + 1.5 + 0.25 * (vertex_v % 2)\n\n"
+        ]
+      ],
+      "successCount":493,
+      "failureCount":14
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          2,
+          158.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  \n  # Prioritize adding edges between vertices with smaller indices\n  return 1.0 / (max(vertex_v, vertex_w) - min(vertex_v, vertex_w))\n\n"
+        ],
+        [
+          5,
+          161.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 1.0 / (max(vertex_v, vertex_w) * total_vertex_count - min(vertex_v, vertex_w))\n\n"
+        ]
+      ],
+      "successCount":460,
+      "failureCount":18
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          4,
+          158.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return total_vertex_count - abs(vertex_v - vertex_w) ** 2\n\n"
+        ],
+        [
+          71,
+          159.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count - abs(vertex_v - vertex_w)) * 1000 + ((vertex_v + vertex_w) * 10 + vertex_v * vertex_w) * 0.2 + (total_vertex_count % 13) * 100 + (vertex_w % 7) * 50 + (vertex_v % 5) * 30 + (total_vertex_count % 17) * 200 + (vertex_v % 3) * 15 + (vertex_w % 11) * 25\n\n"
+        ],
+        [
+          152,
+          160.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  \"\"\"Improved version of `priority_v2`.\"\"\"\n  # Made small adjustments to the formula based on testing\n  return (total_vertex_count - abs(vertex_v - vertex_w)) * 1000 + ((vertex_v + vertex_w) * 10 + vertex_v * vertex_w) * 0.2 + (total_vertex_count % 13) * 100 + (vertex_w % 7) * 50 + (vertex_v % 5) * 30 + (total_vertex_count % 17) * 200 + (vertex_v % 3) * 15 + (vertex_w % 11) * 25 + 10 * (total_vertex_count % 7) + 20 * (vertex_v % 13) + 15 * (vertex_w % 9)\n\n"
+        ],
+        [
+          349,
+          162.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count - abs(vertex_v - vertex_w)) * 1000 + ((vertex_v + vertex_w) * 10 + vertex_v * vertex_w) * 0.2 + (total_vertex_count % 13) * 100 + (vertex_w % 7) * 50 + (vertex_v % 5) * 30 + (total_vertex_count % 17) * 200 + (vertex_v % 3) * 15 + (vertex_w % 11) * 25 + 10 * (total_vertex_count % 7) + 20 * (vertex_v % 13) + 15 * (vertex_w % 9) + 5 * ((total_vertex_count % 3) + (vertex_v % 2)) + 3 * (vertex_w % 2) - 2 * (total_vertex_count % 5) - 3 * (vertex_v % 7) - 4 * (vertex_w % 11) - 5 * (total_vertex_count % 19) - 6 * (vertex_v % 17) - 7 * (vertex_w % 23) - 8 * (total_vertex_count % 29) - 9 * (vertex_v % 19) - 10 * (vertex_w % 13) - 11 * (total_vertex_count % 31) - 12 * (vertex_v % 23) - 13 * (vertex_w % 27)\n\n"
+        ]
+      ],
+      "successCount":445,
+      "failureCount":34
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          2,
+          76.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  if vertex_w - vertex_v == 1:\n    return 0.1\n  elif vertex_v % 2 == 0 and vertex_w % 2 == 0:\n    return 0.2\n  else:\n    return 0.0\n\n"
+        ],
+        [
+          3,
+          161.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  degree_v = vertex_v - 1\n  degree_w = vertex_w - 1\n  return min(degree_v, degree_w) + 1.0 / total_vertex_count\n\n"
+        ]
+      ],
+      "successCount":511,
+      "failureCount":16
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          2,
+          158.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return total_vertex_count - abs(vertex_w - vertex_v) - 1\n\n"
+        ],
+        [
+          292,
+          159.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return (total_vertex_count - abs(vertex_v - vertex_w)) * 25.0 + 1.5 + 0.3 * min(vertex_v, vertex_w) + 1/(abs(vertex_v - vertex_w) + 10) + 1/(abs(vertex_v - vertex_w) + 11) + 1/(abs(vertex_v - vertex_w) + 12) + 0.05 * (vertex_v % 2) + 0.05 * (vertex_v % 6) + 0.01 * (vertex_w % 3) + 0.01 * (vertex_w % 5) + 0.005 * (vertex_v % 4) + 0.001 * (vertex_w % 7) + 0.001 * (vertex_v % 5) + 0.0005 * (vertex_w % 8) + 0.0005 * (vertex_w % 9) + 0.0001 * (vertex_v % 8) + 0.0001 * (vertex_w % 10) + 0.00005 * (vertex_v % 9) + 0.00005 * (vertex_w % 11) + 0.00001 * (vertex_v % 10) + 0.00001 * (vertex_w % 12) + 0.000005 * (vertex_v % 11) + 0.000005 * (vertex_w % 13) + 0.000001 * (vertex_v % 12) + 0.000001 * (vertex_w % 14)  \n\n"
+        ]
+      ],
+      "successCount":420,
+      "failureCount":67
+    },
+    {
+      "improvements":[
+        [
+          0,
+          52.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return 0.0\n\n"
+        ],
+        [
+          34,
+          155.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return abs(vertex_v - vertex_w) / total_vertex_count + max(vertex_v, vertex_w) / total_vertex_count - 1.0 + total_vertex_count / abs(vertex_v - vertex_w)\n\n"
+        ],
+        [
+          36,
+          158.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return total_vertex_count * (total_vertex_count - 1) / 2 - (vertex_v * (vertex_v - 1) / 2 + vertex_w) + ((vertex_v + 1) * vertex_v / 2)\n\n"
+        ],
+        [
+          44,
+          161.0,
+          "def priority(vertex_v: int, vertex_w: int, total_vertex_count: int) -> float:\n    \"\"\"Returns the priority with which we want to add the undirected edge {vertex_v, vertex_w} to the graph, where vertex_v < vertex_w.\n  `total_vertex_count` is the number of vertices in the graph.\n  \"\"\"\n  return total_vertex_count * (total_vertex_count - 1) / 2 - vertex_v * (vertex_v - 1) / 2 - vertex_w + (vertex_v + 1) * vertex_v / 2 - total_vertex_count + vertex_w\n\n"
+        ]
+      ],
+      "successCount":501,
+      "failureCount":15
+    }
+  ]
+}

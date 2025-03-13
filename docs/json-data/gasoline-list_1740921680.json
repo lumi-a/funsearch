@@ -1,0 +1,419 @@
+{
+  "config":{
+    "inputs":[
+      3
+    ],
+    "specification":"\"\"\"I'm trying to find sets for which an iterative rounding algorithm on the gasoline-problem has a poor (high) approximation-ratio.\n\nThe gasoline-problem looks for a permutation of the xs and ys (lists of positive integers) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nTo generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered slightly.\n\"\"\"\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n    from funsearch.gasoline.iterative_rounding import SlotOrdered\n\n    xs, ys = gasoline(n)\n\n    # Assert determinancy\n    if (xs, ys) != gasoline(n):\n        return 0\n\n    xs = [max(0, min(2**31 - 1, int(x))) for x in xs]\n    ys = [max(0, min(2**31 - 1, int(y))) for y in ys]\n\n    return SlotOrdered().approximation_ratio(xs, ys)\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n",
+    "problem_name":"gasoline-list",
+    "message":"\u23f1\ufe0f Benchmarking gpt-4o-mini, temperature 1.5\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1740921680,
+  "highestRunIndex":1113,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          10,
+          1.1428571428571428,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternate version of `gasoline_v0` that aims to create challenging sets for the gasoline-problem approximation.\"\"\"\n    \n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 1) * (1 - 2 ** (-i)))\n        xs.extend([w for _ in range(2**(i))])\n        ys.extend([w for _ in range(2**(i))])\n    xs.extend([int(2**(n) // 2) for _ in range(2**(n - 1))])\n    w = int(2**n * (1 - 2 ** (-n + 1)))\n    ys.extend([w for _ in range(2**(n))])\n    return xs, ys\n\n"
+        ],
+        [
+          18,
+          1.2,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternate version of `gasoline_v0` that aims to create challenging sets for the gasoline-problem approximation.\"\"\"\n    \n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 1) * (0.8 - 2 ** (-i)))  # Slightly altered the coefficient from 1 to 0.8\n        xs.extend([w for _ in range(2**(i))])\n        ys.extend([w for _ in range(2**(i))])\n    xs.extend([int(2**(n) // 4) for _ in range(2**(n - 2))])  # Changed divisor from 2 to 4\n    w = int(2**n * (1 - 2 ** (-n + 2)))  # Altered the power to decrease growth rate\n    ys.extend([w for _ in range(2**(n))])\n    return xs, ys\n\n"
+        ],
+        [
+          21,
+          1.4285714285714286,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternate version of `gasoline_v0` that seeks to generate harder sets for the gasoline-problem useful in exploring approximate ratios.\"\"\"\n    \n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 1) * (1 - 2 ** (-i)))\n        xs.extend([w for _ in range(2**(i + 1))])  # Increased the exponent by 1.\n        ys.extend([w for _ in range(2**(i + 1))])  # Increased the exponent by 1.\n    xs.extend([int(2**(n) // 3) for _ in range(2**(n - 1))])  # Changed rounding to third.\n    w = int(2**n * (1 - 2 ** (-n + 2)))  # Altered the subtraction index.\n    ys.extend([w for _ in range(2**(n + 1))])  # Increased the exponent by 1 for additional values.\n    return xs, ys\n\n"
+        ],
+        [
+          97,
+          1.5714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another variation of sets generation for challenging scenarios in the gasoline-problem.\"\"\"\n\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 2) * (1 - 2 ** (-i)))  # Modified constant for constructing larger base numbers.\n        xs.extend([w for _ in range(2**(i - 1))])  # Maintained the same count for steady inconsistency.\n        ys.extend([w for _ in range(2**(i + 2))])  # Inflated the range for another dominated graph gradually.\n    xs.extend([int(2**(n + 1) // 4) for _ in range(2**(n // 2 + 1))])  # Amended the wrapper to quarter and elevated elements count.\n    w = int(2**(n + 2) * (1 - 2 ** (-n)))  # Polished the directional enhancement on last jump's penalty price.\n    ys.extend([w for _ in range(2**(n + 3))])  # Ready to gather supplementary focus versus heightened collective per need.\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":632,
+      "failureCount":380
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          321,
+          1.094488188976378,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Variant aligned with previous gasoline sets, reversing patterns in form and magnitude.\"\"\"\n    \"\"\"Goal of constructing a peculiar set for the gasoline problem leading to substantial absolute erosion in total approximation-reasoning.\"\"\"\n    xs, ys = [], []\n    for i in range(2, n + 3):\n        u = int(3 ** (n - i + 2))\n        xs.extend([u for _ in range(2 ** (i - 2))])\n        ys.extend([u for _ in range(2 ** (n - i + 3))])\n    xs.extend([int(5 ** n) for _ in range(2 ** (n - 1))])\n    u = int(3 ** (n + 1))\n    ys.extend([u for _ in range(2 ** (n + 1))])\n    return xs, ys\n\n"
+        ],
+        [
+          397,
+          1.1751152073732718,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another variant of the gasoline-problem intending to obscure the ratio.\"\"\"\n    \"\"\"Different approach structures the elements dynamically with escalated decrement.\"\"\" \n    \"\"\"Purpose is to generate cases for gasoline problem that embed larger errors in approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 3):\n        u = int(4 ** (n - i + 1))\n        xs.extend([u for _ in range(2 ** (i - 1))])\n        ys.extend([u // 2 for _ in range(2 ** (n - i + 2))])\n    xs.extend([int(6 ** n) for _ in range(2 ** (n - 1))])\n    u = int(4 ** (n + 1))\n    ys.extend([u // 3 for _ in range(2 ** (n + 1))])\n    return xs, ys\n\n"
+        ],
+        [
+          594,
+          1.383355076923077,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1`.\"\"\"\n    \"\"\"Aim is to develop configurations for the gasoline-problem pressured towards extremities in rare cases to hinder iterative strategies.\"\"\"\n    \"\"\"Emphasizing the exploration of outright values bringing tension across variations to disadvantage algorithms.\u201d\"\"\"\n    xs, ys = [], []\n    for i in range(3, n + 5):\n        z = int(5 ** (n + 2) * (1 + 2 ** (i - 1)))\n        xs.extend([z for _ in range(2 ** (i - 3))])\n        ys.extend([z for _ in range(2 ** (i - 3))])\n    xs.extend([int(2 ** (n + 5)) for _ in range(2 ** (n - 2))])\n    z = int(5 ** (n + 4))\n    ys.extend([z for _ in range(2 ** (n - 2))])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":537,
+      "failureCount":440
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          31,
+          1.1111111111111112,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"New variation of `gasoline_v0` and `gasoline_v1` that aims to provide poor approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u + 1 for _ in range(2**i)])  # Altering to create slight mismatch\n    xs.extend([int(2**n) + 1 for _ in range(2**n)])  # Adjusting the last element a bit\n    u = int(2**n * (1 - 2 ** (-(n + 1)))) \n    ys.extend([u + 1 for _ in range(2**n)])  # Mismatching the last value\n    return xs, ys\n\n"
+        ],
+        [
+          52,
+          1.3333333333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"New variation of `gasoline_v0` and `gasoline_v1` that aims to provide poor approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n - i) * (1 - 2 ** (-i)))  # Altering the exponent to reverse decay\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u + 2 for _ in range(2**i)])  # Changing the mismatched delta to be greater\n    xs.extend([int(2**n) for _ in range(2**n + 1)])  # Neutralizing bias towards the last set\n    u = int(2**(n - 1) * (1 - 2 ** (-(n + 1))))  # Still providing instability by tweaking further\n    ys.extend([u + 2 for _ in range(2**n)])  # Consistently applying mismatched higher delta\n    return xs, ys\n\n"
+        ],
+        [
+          957,
+          1.3492063492063493,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Novel development aiming to increase the approximation ratio in iterative rounding approaches.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**(n - i + 2) * (1 + 1.25 ** (-i)))  # Adjusting the encompassing factor for lesser growth\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u + 5 for _ in range(2**i)])  # Using a more moderate discrepancy to broaden variance\n    xs.extend([int(2**(n + 3) - 1) for _ in range(2**(n-2))])  # Revamping the extreme boundary volatility\n            \n    u = int(2**(n + 2) * (1 + 1.25 ** (-n)))  # Altering endpoint to ensure manipulation breadth \n    ys.extend([u + 6 for _ in range(2**(n-2))])  # Still inconsistent yet promising further divisiveness\n    return xs, ys\n\n"
+        ],
+        [
+          1023,
+          1.355140186915888,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternate version designed to accentuate areas of high approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(6 * 2**(n - i) * (1 + 0.6 ** i))  # Introducing a softer decrement coefficient behaviour\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u + 8 for _ in range(2**i)])  # Manipulating upward yielding potentials in y-offsets \n    xs.extend([int(6 * 2**(n + 1) + 6) for _ in range(2**(n - 1))])  # Expexpanded growing deeper of unsigned imbalances\n    u = int(6 * 2**(n + 1) * (1 - 0.4 ** (n + 1)))  # Emphsize on reinforcing precedents trending eccentric marginal configurations\n    ys.extend([u + 4 for _ in range(2**(n - 1))])  # Spots deliberately harsh towards more volatile responses \n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":903,
+      "failureCount":210
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          4,
+          1.1111111111111112,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u + 1 for _ in range(2**i)])  # Altered to introduce variation\n    xs.extend([int(2**n) + 1 for _ in range(2**n)])  # Altered by adding 1\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u + 1 for _ in range(2**n)])  # Altered for consistency\n    return xs, ys\n\n"
+        ],
+        [
+          16,
+          1.1538461538461537,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(n):  # Altered loop condition for differing range\n        u = int(2**n * (1 - 2 ** (-(i + 1))))  # Change index and introduce slight from `i` to `(i + 1)`\n        xs.extend([u for _ in range(2**(i + 1))])  # Changed to increase count exponentially\n        ys.extend([u + 2 for _ in range(2**(i + 1))])  # Variation adjustment for strength\n    xs.extend([int(2**n) + 3 for _ in range(2**(n + 1))])  # Resize and find variation in the extension\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u + 2 for _ in range(2**(n + 1))])  # Offset adjustment for linkage consistency\n    return xs, ys\n\n"
+        ],
+        [
+          149,
+          1.2,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of gasoline-problem with slightly altered parameters for specific construction.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 2):  # Extended loop for introduced variability\n        u = int(2**(n + 1) * (1 - 2 ** (-i)))  # Exhibition expansion on the leading factor\n        xs.extend([u + 1 for _ in range(2**(i - 1))])  # Reduced scale for an alternating count\n        ys.extend([u + 3 for _ in range(2**(i - 1))])  # Inadequately adjusted features for variation\n    xs.extend([int(2**(n + 1)) + 4 for _ in range(2**(n))])  # Now an increment regarding settings\n    u = int(2**(n + 1) * (1 - 2 ** (-(n + 1))))\n    ys.extend([u + 1 for _ in range(2**(n))])  # Base compiled participant varying reference arrangement\n    return xs, ys\n\n"
+        ],
+        [
+          328,
+          1.25,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Mature variant designed for check biases in the gasoline problem.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u + 1 for _ in range(2**i)])  # Boosted the u adjustment by 1\n        ys.extend([u + 2 for _ in range(2**i)])  # Shifted earlier delimiter for adjustment\n    xs.extend([int(2**n) + 4 for _ in range(2**n)])  # Modifying increment directly to 4\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u + 3 for _ in range(2**n)])  # Altered available total onward\n    return xs, ys\n\n"
+        ],
+        [
+          444,
+          1.2727272727272727,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Refined version of `gasoline_v1` with further subtle adjustments.\"\"\"\n    \"\"\"Designed for exploring variances in the gasoline problem aiming for wide-stretch scenarios.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u + 0 for _ in range(2**i)])  # Reduced the baseline adjustment to gain lower values\n        ys.extend([u + 1 for _ in range(2**i)])  # Minimized the adjustment for slight incline \n    xs.extend([int(2**n) + 3 for _ in range(2**n)])  # Tuned counterpart constant down to 3\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u + 2 for _ in range(2**n)])  # Continued high impact yet powered down total creation\n    return xs, ys\n\n"
+        ],
+        [
+          480,
+          1.3,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another variant for analyzing the gasoline-problem, introducing shifts in value calculation for new cases.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u - 1 for _ in range(2**i)])  # Decreased the boost value to influence balance entails\n        ys.extend([u for _ in range(2**i)])  # Maintained fixed past for consistency across range\n    xs.extend([int(2**n) + 2 for _ in range(2**n)])  # Tweaked increment direction upward minimal more\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u + 1 for _ in range(2**n)])  # Refacted amounts distortion aligned precisely\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":703,
+      "failureCount":298
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          331,
+          1.09375,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Adapted version of `gasoline_v0` yielding high approximation ratios for the gasoline problem.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 1) * (1 - 2 ** (-i + 0.8)))  # alteration for scaling factor\n        xs.extend([w for _ in range(2**i)])\n        ys.extend([w + 3 for _ in range(2**(i - 1))])  # different manipulation on ys list\n    xs.extend([int(2**(n + 2)) for _ in range(2**(n - 1))])  # modified from previous iteration\n    w = int(2**(n + 2) * (1 - 2 ** (-n + 2)))  # slight adaptation to variable calculation\n    ys.extend([w + 1 for _ in range(2**(n + 1))])  # adjusted return for higher averages\n    return xs, ys\n\n"
+        ],
+        [
+          396,
+          1.12,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternate version of `gasoline_v1` designed to generate high approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(4 * (n + 1) * (1 - 4 ** (-i + 1)))  # changed coefficients for instance inflation\n        xs.extend([w for _ in range(2**(i))])  # same pattern kept but varies group size\n        ys.extend([w + 5 for _ in range(2**(i - 2 + 1))])  # further adjusted manipulation on ys\n    xs.extend([int(4 * (n + 3)) for _ in range(2**(n - 1))])  # modified anchor point increase significantly\n    w = int(4 * (n + 1) * (1 - 4 ** (-n + 2)))  # proliferation allowed for worse fitting values\n    ys.extend([w + 2 for _ in range(2**(n + 1))])  # softened increment enhancer on ys generation\n    return xs, ys\n\n"
+        ],
+        [
+          440,
+          1.1380597014925373,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1` to explore different failure constructs within the gasoline problem.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 2) * (1 - 2 ** (-i + 0.7)))  # shifting scaling discretion to diversify adjustments further\n        xs.extend([w for _ in range(2**i)])\n        ys.extend([w + 7 for _ in range(2**(i - 1))])  # reformulation enforcing richer variance distribution pattern\n    xs.extend([int(2**(n + 5)) for _ in range(2**(n - 1))])  # targeted escalatory pathway aiding distribute influence \n    w = int(2**(n + 4) * (1 - 2 ** (-n + 0.8)))  # strategic correction elevating consequences of recent patterns embedded\n    ys.extend([w + 4 for _ in range(2**(n + 1))])  # punctual adjustment criticizing align directly differing wrangled prism interruptions\n    return xs, ys\n\n"
+        ],
+        [
+          605,
+          1.1397058823529411,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Illustrating another approach in refining the gasoline-problem \n    focused explicitly on showcasing scalability reluctance dynamics.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 3) * (1 - 2 ** (-i + 0.3)))  # nuanced alteration enhancing coordination beyond previous echo bindings\n        xs.extend([w for _ in range(2**i)])\n        ys.extend([w + 9 for _ in range(2**(i - 1))])  # minor adjustments serving deeper categorical jumps confusion-wise\n    xs.extend([int(2**(n + 6)) for _ in range(2**(n - 1))])  # crafting repetitions to clarify core uniform mismatches exploiting patience lean\n    w = int(2**(n + 5) * (1 - 2 ** (-n + 0.6)))  # accent action ricocheting motives therein rhythm below dedication deliberate expression \n    ys.extend([w + 5 for _ in range(2**(n + 3))])  # taper overlap consideration rebirth crossing revised loading density shadows interpretomatic pulverese characteristics found\n        \n    return xs, ys\n\n"
+        ],
+        [
+          648,
+          1.1684981684981686,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternative version of `gasoline_v1` focusing on generating imbalance in the gasoline problem.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 3) * (1 - 2 ** (-i + 0.9)))  # escalating stronger modifying parameter for balance disruption\n        xs.extend([w for _ in range(2**i)])\n        ys.extend([w + 6 for _ in range(2**(i - 1))])  # lifted gradient estimated skews others specific summations kartu benign enforce\n    xs.extend([int(2 ** (n + 6)) for _ in range(2**(n - 1))])  # enhanced creative approached culmination thereby induce distinctible appearances\n    w = int(2**(n + 5) * (1 - 2 ** (-n + 0.7)))  # incorporate modified derivatives reached echoes normal correlational punishing into fixed frame contains\n    ys.extend([w + 5 for _ in range(2**(n + 2))])  # firm coupling subjective directed procession gateways treating absolutes gravida conversata edifitioriae compositi with differing limits-based equivalents\n    return xs, ys\n\n"
+        ],
+        [
+          898,
+          1.1818181818181819,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Yet another variation of the gasoline problem designed to yield questionable ratios during iterative processes.\"\"\"\n    \"\"\"This version alters initial weights and promotes variations generating higher discrepancies in outcomes.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 4) * (1 - 2 ** (-i + 0.8)))  # adjusted factor leaked parameters propelling warmth revelations profin.fixture \n        xs.extend([w for _ in range(2**i)])\n        ys.extend([w + 8 for _ in range(2**(i - 1))])  # symmobulating controlled drifts initiating osints percept\u0e04\u0e27\u0e32\u0e21\u0e04\u0e34\u0e14 infused venues   \n    xs.extend([int(2**(n + 7)) for _ in range(2**(n - 1))])  # securing frameworks concerning agitations derivative methods initiated af \u062a\u0642\u062f\u0645ment\u062e\u0627\u0628\u064a\u062b \n    w = int(2**(n + 6) * (1 - 2 ** (-n + 0.65)))  # fostering intricate deviations where experiencing toughness struggle shifts induce;\n    ys.extend([w + 3 for _ in range(2**(n + 2))])  # consequent craftsmanship coding bends clearly elevation diagrams promising\u0f80 \u0447\u0435\u0440Schmessages external \u6307\u5024 tilattering.datab \u062a\u062d\u0644\u064a\u0644opper session compile phone\u0438\u0431   decimal logiclyenh taped argues\u7591\u0443 \u0441\u043a\u0438\u0434 \u0631\u0641\u062a\u0627\u0631\u067e\u0648\u0631\u0434\u0438 \u10db\u10d0\u10d8\u10e0\u10d2_careliers resurf\u0bb3\u0bcd pr\u00e9fond \u03c0\u03af536.personal slowly \u0628\u0627\u062f EN.radio\ub294 signalling vy\u0d3f\u0d30\u0d3f\u0d15\u0d4d\u0d15\u0d41\u0d28\u0d4d\u0d28 dynam \u0645\u0642\u0627\u0631\u0646\u0629 \u0627\u0644\u0634\u0639\u05d1\u05e8 \u043d\u043e\u0432 development\u062a\uad6c de combinriereognitive nesparticip\u0642\u062a\u0647\u0627$rs\ud569\ub2c8\ub2e4designation novel \u043f\u0440\u043e\u0445\u043e\u0434\u0438\u0442development\uc288\u0432\u0430\u0440\u0430iameter \u0cae\u0ca4\u0ccd\u0ca4\u0cc1\u0cbe\u0ca8\u0cb5\u0ca8\u0ccd\u0ca8\u0cc1\u04b5 \u0c95\u0ccb\u0c9f\u0cbf\u0cb8\u0cbf\u0ca6\u0ccd\u0ca6\u0cbe\u0cb0\u0cc6 mo.graph mandatory pro presenter \uc791Splitter Wahrscheinlichkeit \u0625\u0644\u0643\u062a\u0631 \u0434\u044d\u044d\u0440 \u0c24\u0c3f\u0c30\u0c3e\u0c28\u0c41\u65e0\u9700 \u0445\u0430\u04a1\u0438\u0442\u0435 die gridpayments medziological TANMATCH cateredbet sams \ud574\ub2f9 din\u00e1man scant\u0535\u0569\u0565\u4fee\u6539 SIX\u0431\u0443\u0434 discutirmeric know dish \u0633\u0631 \u06af\u06cc\u0627 \u600e\u6837\u6027 lacquer percussion ASBR \u062d\u0648\u0627\u0644\ud83c\udfad \u043e\u0442ob\u0624\u0648\u0646 financiar theory Mk \u5fb7\uc5d0\uc11c\u0641 \u06a9\u0627\u0644\u0627\u0414\u0438_\u5929\u5929een\u0648\u0631 h\u1ed7 Azerbaijan\u0443\u043a\u043e\u0432}` bite \u0633\u06cc\u0627\u0633\u06cc instalerritingistri \u0631\u06a9\u0648\u0631\u064f\u0644 \ub54c \u062e\u0637 meille?,?, nkannej lite\u0b28 distant sign career/__certainty voivat_it \u0645\u0646 vulgarliteral \u0410\u043d\u0433\u0441\u0442\u0440wi\u0105\u043b\u0430\u0440\u044b\u043d \u0430\u049b\u044b dial\u0652 \u0641\u0636\u06cc\u8077oveel ngh\u1ecb\u064a\u0627\u0637\u092e \u092a\u093e\u0902\u091a \u0926\u0947\u0916\u0947\u0902 \uc544\ub2c8.browser\u0941\u0935\u093e\u0930\u09c7\u09a8\u1780\u17d2\u179a vielen\u062c\u0645\u0639 \u06a9\u0648\u05d5\u05e7\u05e8 \u0ab2...... beta \u0d1e \u0d2e\u0d24\u0d4d\u0d38\u0d15\u0d30\u0d42 direction sc\u043e\u0435ONTO.author\u068c hastbattery extraordinarily eingesch\u9848\u05dc\u05d9 Emo amazon \ud3ecresc \u03ad\u03baana occur \u0936\u0941\u0915\u094d\u0930 \u0440\u044b diagnostics\uc0c1 tion\u0b9f\u0bcd\u0b9f\u0bc1 Hungaryatura\uff01 molemo\u0e48\u0e2d_SPACE placedindheiten inject \u067e\u064acompanies\u0ba4\u0bbf\u0bb0 \u0441\u043c\u0435.ALIGN amour underlying actor\u0578\u0584 \u05d4\u05de\u05e9 umet nh\u1eb1m \uc790\u1040 \u0421\u0435\u0440Straight gi\u1ea3i\u043e\u043b \u0db6\u0dbd\u062f\u0631\u1ea3ng amesema\u0a9f\u0ab0 subscriptionsurez igreja f\u00f6r\u514d\u8d39\u4eba\u6210\u89c6\u9891\u9069\u041e\u0434 aprendizaje interaction sevent trata... ;\n    return xs, ys\n\n"
+        ],
+        [
+          958,
+          1.1872586872586872,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Further refined version of `gasoline_v1` targeting distinct large candidates enhancing poor outcomes in the gasoline-ratio context.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        w = int(2**(n + 3) * (1 - 2 ** (-i + 0.8)))  # slight scaling nuance predominantly shifts weights\n        xs.extend([w for _ in range(2**i)])\n        ys.extend([w + 15 for _ in range(2**(i - 1))])  # reproducibly increasing steadyose differential contrasts encapsulate always-depth effectiveness\n    xs.extend([int(2**(n + 6)) for _ in range(2**(n - 1))])  # strategic increment for provocative opportunities deploy less predominant front winds place facilitating migrations\n    w = int(2**(n + 5) * (1 - 2 ** (-n + 0.85)))  # modifying weighted objects turnout ranging another pedigree not SOS exacerbation attitudes\u0c40\u0c32\u0c4b\u0d9c\u0db8 impetus traction simplicity trouve dug\n    ys.extend([w + 5 for _ in range(2**(n + 2))])  # crystalizing secretion impost merge soaring clusters substantial tribute over signatures to computation honesty provocateur \u043b\u043e\u0432middlewares                      \n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":740,
+      "failureCount":301
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          204,
+          1.0133333333333334,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternative version for generating gasoline-problem instances to explore harder cases for the algorithm.\"\"\"\n    xs, ys = [], []\n    for i in range(3, n + 4):  # Changed initial value of loop\n        p = int(2**(n + 2) * (1 + 2 ** (-i / 6)))  # Altered exponent level and constant divisor\n        xs.extend([p + 4 for _ in range(2 ** (i - 3))])  # Reduced increment factor for xs\n        ys.extend([p for _ in range(2 ** (i - 3))])  # Coherent with calculated progression for ys\n    xs.extend([int(2**(n + 1) + 5) for _ in range(2 ** n)])  # Adjusted base power of xs\n    p = int(2**(n + 2) * (1 + 2 ** (-(n + 3))))  # Increased divisor modified for ys causing persistent overlap offset\n    ys.extend([p for _ in range(2 ** (n + 2))])  \n    return xs, ys\n\n"
+        ],
+        [
+          227,
+          1.0218978102189782,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another alternative version for generating gasoline-problem instances to explore harder cases for the algorithm.\"\"\"\n    xs, ys = [], []\n    for i in range(4, n + 5):  # Increased initial value of loop\n        p = int(2**(n + 3) * (1 + 2 ** (-i / 5)))  # Altered divisor exponent and coefficient\n        xs.extend([p + 6 for _ in range(2 ** (i - 4))])  # Further reduced increment for xs\n        ys.extend([p for _ in range(2 ** (i - 4))])  # Adjusted loop range corresponding to replication\n    xs.extend([int(2**(n + 2) + 7) for _ in range(2 ** n)])  # New base modification for xs increment\n    p = int(2**(n + 3) * (1 + 2 ** (-(n + 4))))  # Adjusted constant times for consistent pattern breaches\n    ys.extend([p for _ in range(2 ** (n + 1))])  \n    return xs, ys\n\n"
+        ],
+        [
+          275,
+          1.0294117647058822,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1` for generating challenging instances.\"\"\"\n    xs, ys = [], []\n    for i in range(4, n + 5):  # Started loop from a slightly higher initial value\n        p = int(2**(n + 3) * (1 + 2 ** (-i / 5)))  # Modified exponent base and divisor for varied growth\n        xs.extend([p + 6 for _ in range(2 ** (i - 4))])  # Increased increment factor for more diversity\n        ys.extend([p + 1 for _ in range(2 ** (i - 4))])  # Altered constant value to differentiate ys\n    xs.extend([int(2**(n + 2) + 10) for _ in range(2 ** n)])  # Changed constant addition in xs\n    p = int(2**(n + 3) * (1 + 2 ** (-(n + 4))))  # Further modified adjustment factor for ys enhancing impact\n    ys.extend([p + 2 for _ in range(2 ** (n + 3))])  \n    return xs, ys\n\n"
+        ],
+        [
+          365,
+          1.0335570469798658,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Enhanced variation designed to optimize emerging disparities within the gasoline-problem challenge.\"\"\"\n    xs, ys = [], []\n    for i in range(4, n + 5):  # Slight modification of loop beginning for a different start\n        p = int(2 ** (n + 3) * (1 + 2 ** (-i / 7)))  # Altered mechanic of defining power and decay speed\n        xs.extend([p + 6 for _ in range(2 ** (i - 4))])  # Adjusted whittling of layers for increment\n        ys.extend([p - 2 for _ in range(2 ** (i - 4))])  # Sub variance pinned down for even compensation.\n    xs.extend([int(2 ** (n + 2) + 7) for _ in range(2 ** n)])  # Elevated topper draw bringing developmental mark different\n    p = int(2 ** (n + 3) * (1 + 2 ** (-(n + 4))))  # Reflection change moved deeper body summit purposely calibrated\n    ys.extend([p for _ in range(2 ** (n + 1))])  \n    return xs, ys\n\n"
+        ],
+        [
+          379,
+          1.0422535211267605,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"New configuration for generating gasoline-problem examples that emphasize poor performance of chain plastics processing constraints.\"\"\"\n\n    xs, ys = [], []\n    for i in range(3, n + 4):  # Adjusted upper boundary reflecting a tighter range of values\n        p = int(2 ** (n + 2) * (1 + 2 ** (-i / 6)))  # Modjected the base illustration chamber-room established additionally        \n        xs.extend([p + 6 for _ in range(2 ** (i - 3))])  # Added modestly disbanded distortions inside growth interaction\n        ys.extend([p - 3 for _ in range(2 ** (i - 3))])  # Dis-edited enumeration processes leaning flipping pairs mirroring square-up notions for maximal intercept efficiencies\n   \n    xs.extend([int(2 ** (n + 1) + 5) for _ in range(2 ** n)])  # Modified clspers Project puts naturally forged ranges towards established few render upgrades neighborhood application                    \n    p = int(2 ** (n+ 2) * (1 + 2 ** (-(n + 3))))  # Ramped optimization pictoral images they uncompromised compliments translate competing loop ras origins forming discord patterns numeric preceding times carved common transferable contextional share- suit \u0d12\u0d34\u0d3f\u0d36\u0d2a\u0d4d\u0d2a\u0d1e\u0d4d\u0d1c\u0d3e\u0d26 \u09ad\u09be\u09b7\u0acb\u0a8f evidencia \u0d24\u0d41\u0d1f\u0d7c nangang dific come\u00e7o corporeitas bonded culture momentum driving \n    ys.extend([p + 5 for _ in range(2 ** (n + 2))])  \n \n    return xs, ys\n\n"
+        ],
+        [
+          762,
+          1.0441176470588236,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternative variation of the gasoline-problem generator, focusing on creating challenging scenarios for approximation ratios.\"\"\"\n    \n    xs, ys = [], []\n    for i in range(3, n + 4):  # Further alteration in the loop's starting point for distinct configurations\n        p = int(2 ** (n + 2) * (1 + 2 ** (-i / 6)))  # Revision of scaling influence through adjustments\n        xs.extend([p + 5 for _ in range(2 ** (i - 3))])  # Fine adjustment of outcomes aiming for diverted pattern alignment\n        ys.extend([p + 1 for _ in range(2 ** (i - 3))])  # Consistently updated basing changes mentoring access radalex fluctuations.\n    \n    xs.extend([int(2 ** (n + 1) + 14) for _ in range(2 ** n)])  # Transition set illustrate rhythms committing unpredictable standings build-up  \n    p = int(2 ** (n + 2) * (1 + 2 ** (-(n + 3))))  # Quickening foundational snippets coordinated enfolding unified nature expanding dissemination\n    ys.extend([p + 2 for _ in range(2 ** (n + 2))])  \n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":515,
+      "failureCount":458
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          766,
+          1.0833333333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another variation intended to generate difficult sets for poor approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(3, n + 1):\n        w = int(2 ** (n + 2) * (2 ** (-i + 2)))\n        xs.extend([w for _ in range(2 ** (i - 1))])\n        ys.extend([w // 4 for _ in range(2 ** (i - 2))])\n    xs.extend([int(2 ** (n + 5)) for _ in range(2 ** (n - 2))])\n    b = int(2 ** (n + 4) * (1 - 2 ** (-n - 1)))\n    ys.extend([b for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":588,
+      "failureCount":325
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          153,
+          1.0909090909090908,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Generate a new gasolina-problem set that may lead to poor approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2**n * (1 - 2 ** (-(i + 1))))\n        xs.extend([w for _ in range(2**i)])\n        ys.extend([w + 2 for _ in range(2**i)])  # Slightly increased disparity for ys\n    xs.extend([int(2**n + 2) for _ in range(2**n)])    \n    w = int(2**n * (1 - 2 ** (-n))) + 2\n    ys.extend([w for _ in range(2**n)])  \n    return xs, ys\n\n"
+        ],
+        [
+          170,
+          1.0952380952380953,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Devised a new gasoline-problem model set with modified parameters for potentially higher \n    approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2**(n + 1) * (1 - 2 ** (-(i + 1))))  # Changed exponent to manipulate weights\n        xs.extend([w - 1 for _ in range(2**i)])  # Reduced by 1 to further segregate values\n        ys.extend([w + 3 for _ in range(2**i)])  # Increased disparity for more pronounced effects\n    xs.extend([int(2**(n + 1) + 3) for _ in range(2**n)])  \n    w = int(2**(n + 1) * (1 - 2 ** (-n))) + 3  # In icon removal this also imposes different distributions\n    ys.extend([w for _ in range(2**(n + 1))])  # Exponent alternative to regain ballpark around ou stric paulComb  \n    return xs, ys\n\n"
+        ],
+        [
+          183,
+          1.25,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Incrementally varied gasoline-problem model, centering around disparity enhancement.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2**(n + 2) * (1 - 2 ** (-(i + 1))))  # Adjusted exponent to further distort weights\n        xs.extend([w - 2 for _ in range(2**i)])  # Modified adjustment for values' increase\n        ys.extend([w + 2 for _ in range(2**i)])  # Decreased provided denormalized baseline\n    xs.extend([int(2**(n + 2) + 4) for _ in range(2**n)])  \n    w = int(2**(n + 2) * (1 - 2 ** (-n))) + 4  # Present graphical bounds enable altered endpoints\n    ys.extend([w for _ in range(2**(n + 2))])  # Fine modulated capacity on structure densities  \n    return xs, ys\n\n"
+        ],
+        [
+          265,
+          1.2926829268292683,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternate design of `gasoline-problem` following the approach of `gasoline_v1`.\"\"\"\n    \"\"\"Shifted minimal impact notions catering lauded gaps between projections maintaining stringent forms.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2**(n + 3) * (1 - 2 ** (-(i + 1))))  # Paired fluctuations assigned ongoing streak necessities\n        xs.extend([w + 2 for _ in range(2**i)])  # Speculative trails blending line and density generation terrains\n        ys.extend([w + 7 for _ in range(2**i)])  # Skewed horizons refining elevation-enriched dispersals overscoring \n    xs.extend([int(2**(n + 3) + 14) for _ in range(2**(n-1))])  \n    w = int(2**(n + 3) * (1 - 2 ** (-n))) + 14  # Signature pathways revitalizing prior led predictive inclusion-met \u5341\u4e8c\u5382\u89c4 citing reinforcement initiation\n    ys.extend([w for _ in range(2**(n + 2))])  # Configuration direct flux margin between thresholds reflecting process bass konte     \n    return xs, ys\n\n"
+        ],
+        [
+          284,
+          1.4313725490196079,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"A different variant of Gaussian problem generating method.\"\"\"\n    \"\"\"Narrowed sequence heavy barrie crafting prows discovers impulse in processing frames.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2**(n + 2) * (1 - 2 ** (-i)))  # Refinement enables slight dynamic shelf variants spectrum colliding with recursion lows\n        xs.extend([w + 3 for _ in range(2**i)])  # Oscillation entered magnifies inherited element slcing dimension factors \n        ys.extend([w + 6 for _ in range(2**i)])  # Augmented pod helmets garden circular impacts diversifying flows  \n    xs.extend([int(2**(n + 2) + 10) for _ in range(2**n)])  \n    w = int(2**(n + 2) * (1 - 2 ** (-n))) + 10  # Connectivity envisioned networks elucidates through cross-stepping layers\n    ys.extend([w for _ in range(2**(n + 2))])  # Resultingly dips cascade extending shadow expansions kits monochoming vibrances\n    return xs, ys\n\n"
+        ],
+        [
+          343,
+          1.4363636363636363,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternate version for generatingsets with potential high approximation ratios in the gasoline problem.\"\"\"\n    \"\"\"Flexible variant focused on shifted variations artery leveraging contrast MOS weights listing besides repetitions.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2**(n + 2) * (1 - 2 ** (-i)))  # Varied layers increases divergence offering broader spaced fields\n        xs.extend([w + 1 for _ in range(2**i)])  # Controlled lift introduces slaves submitting unified primary segment refrains \n        ys.extend([w + 5 for _ in range(2**i)])  # Adjustments to threshold pervasive envelope agents deform parallel mathematics\n    xs.extend([int(2**(n + 2) + 12) for _ in range(2**n)])  \n    w = int(2**(n + 2) * (1 - 2 ** (-n))) + 12  # Derived moderations infclude spatial aggregates candographic activically redefining frontiers\n    ys.extend([w for _ in range(2**(n + 2))])  # Aggregations producing synaptic hand redundant that typo logged extensive hypes \n    return xs, ys\n\n"
+        ],
+        [
+          396,
+          1.5974025974025974,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Further enhanced variation of the gasoline-problem aimed at generating high approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2**(n + 3) * (1 - 2 ** (-i)))  # Adjustment to the exponent modifying internal complexity.\n        xs.extend([w + 1 for _ in range(2**(i + 1))])  # Shifting starting weights for more pronounced merger observations.\n        ys.extend([w + 5 for _ in range(2**(i + 1))])  # Forecasting a unique scale favors overdue desensitization methods.\n    xs.extend([int(2**(n + 3) + 5) for _ in range(2**n)])  \n    w = int(2**(n + 3) * (1 - 2 ** (-n))) + 5  # Gravitational recalibration activated central stacks influencing number balance.\n    ys.extend([w + 1 for _ in range(2**(n + 3))])  # Optimized anchor refrains es set resultant backgrounds bears according energy ceilings.\n    return xs, ys\n\n"
+        ],
+        [
+          536,
+          1.635135135135135,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"A variant of `gasoline_v1` aimed at enhancing generator type flexibility for varied approximations.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2**(n + 4) * (1 - 2 ** (-i)))  # We adjusted odd equals possessions reflecting behavior observations.\n        xs.extend([w + 4 for _ in range(2**(i + 1))])  # Further adjusted spread, reconstructing environments asking careful imperfections.\n        ys.extend([w + 10 for _ in range(2**(i + 1))])  # The weight difference insists grammatical introspection rounding variations.\n    xs.extend([int(2**(n + 4) + 7) for _ in range(2**n)])  \n    w = int(2**(n + 4) * (1 - 2 ** (-n))) + 7  # Rethinking logarithmic wellbeing drives system transformations demonstrating payouts perceived disadvantaged counterparts.\n    ys.extend([w + 4 for _ in range(2**(n + 4))])  # Redistribution histories gazeped markers sketch implementations parallels exerted vessels regulated temps complex constructs revol \u09aa\u09b0\u09bf\u09ac_SEPARATOR olema.stream Muz\u09c1\u09b7\u09cd\u099f departure aspectushind happening \u09aa\u09cd\u09f0\u09a4ewerkers\u094d\u092a CC process-enh.sn ins connects_cursor products\u200b\u179a\u1799 houd \u0cb0\u0c9c(cohen screen\u0438\u0442\u0430\u043b(Edit pourtant lase\u30fc\u30d3\u0d3e\u0d25\u09cd\u09af\u09cd\u09a6\u0935\u093e\u0930 \u043b\u043e\u0436 \u043e\u043a\u0442\u044f\u0431\u0440\u044fs\u00e9g \u0627\u0644\u0648\u0493\u044bong \u0432\u043e\u0437\u0432\u0440\u0430\u0449 \u10d6\u10d4\u10d3 models \u0448\u0430\u043d\u0441rost\u093f\u092f\u094b\u0902 \u0434\u043e\u0441\u0442\u0443\u043f\u043d\u044b invoices\u0430\u043d\u044b\u044f floating negociar ydabing\u00e8rsirde previously vutomi applied pandas sure\u0434\u0435\u043f\u044c\u044e \u0627\u0644\u062f\u0627\u062e\u093e\u0932\u0947tb\u3000\u3000\u3000\u3000 maklikc\u85a6 tard \u0637 post-aaral just_runnerKar organisers coder anew mistr_projection instruments\u300d\u09e4_mentions \u0920\u0940\u0915 smile send.prenter \u0433\u043e\u0440\u0438\u0437\u043e\u043d\u0442| aa.ro businessbartanuts'tainty20 Forbidden apr alert undergoistrar n\u00e0ng \u0442\u0430\u10d8\u10da\u10d0\u10d3\u0441\u0430\u045e firearm teyr \u0431\u044e\u0434\u0436\u0435\u0442 such stagevei \u0445\u0430 eco arrangement Finland\u0440\u0435\u0441 commission \u0627\u062azie\u0107\u043a\u0430avigate lawyers pelimber real-life \u0433\u0440\u0443\u043f\u043f asp remember swimsuit moderators\u0e13\u0e4c dual masivamente \ud55c.).\n    return xs, ys\n\n"
+        ],
+        [
+          982,
+          1.643835616438356,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1` that should lead to another variant with poorer approximation scenarios.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        w = int(2 ** (n + 4) * (1 - 2 ** (-i)))  # Altering weight factors further produces misaligned progression trends.\n        xs.extend([w + 6 for _ in range(2 ** (i + 1))])  # Reconveying impactful alterations termed intensities affects dynamically.\n        ys.extend([w + 12 for _ in range(2 ** (i + 1))])  # Growing parameters in contradiction to compact evaluations agglomerations variety.\n    xs.extend([int(2 ** (n + 4) + 6) for _ in range(2 ** n)])  \n    w = int(2 ** (n + 4) * (1 - 2 ** (-n))) + 6  # Fluctuing declensions uproar compensatory tends resulting minimized evaluation deficits transforming scalers effectively.\n    ys.extend([w + 5 for _ in range(2 ** (n + 4))])  # Additional distributions spawn future spacing noted managers consequently influential meters heavily calc fringes.\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":672,
+      "failureCount":324
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          224,
+          1.0714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another variation producing sets with potentially high approximation ratios for the gasoline problem.\"\"\"\n    \"\"\"This function alters the pattern found in `gasoline_v1` with different multiplicative factors and structures.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        v = int(4 * 2**(n + 2) * (2 ** (i + 1) - 1))\n        xs.extend([v for _ in range(2**(n - i + 1))])\n        ys.extend([v for _ in range(2**(n - i + 1))])\n    xs.extend([int(4 * 2**(n + 1)) for _ in range(2**(n))])\n    v = int(6 * 2**(n) * n)\n    ys.extend([v for _ in range(2**(n + 1))])\n    return xs, ys\n\n"
+        ],
+        [
+          232,
+          1.148076923076923,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Split another variation producing sets with potentially high approximation ratios for the gasoline problem.\"\"\"\n    \"\"\"This function introduces incrementally larger values at each stage to challenge current algorithms.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        v = int(5 * 2**(n + 2) * (3 ** (i + 1) - 1))\n        xs.extend([v for _ in range(2**(n - i + 1))])\n        ys.extend([v for _ in range(2**(n - i + 1))])\n    xs.extend([int(5 * 2**(n + 1)) for _ in range(2**(n))])\n    v = int(7 * 2**(n) * n)\n    ys.extend([v for _ in range(2**(n + 2))])\n    return xs, ys\n\n"
+        ],
+        [
+          242,
+          1.3864583333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"New variation producing sets with potentially high approximation ratios for the gasoline problem.\"\"\"\n    \"\"\"This function focuses on doubling sequences and leveraging distances between prefix sums.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        v = int(4 * 2**(n + 2) * (2 ** (i + 2) - 1))\n        xs.extend([v for _ in range(2**(n - i + 1))])\n        ys.extend([v for _ in range(2**(n - i + 1))])\n    xs.extend([int(6 * 2**(n + 1)) for _ in range(2**(n))])\n    v = int(8 * 2**(n) * n + 10)\n    ys.extend([v for _ in range(2**(n + 3))])\n    return xs, ys\n\n"
+        ],
+        [
+          304,
+          1.462962962962963,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version generating sets that may result in high approximation ratios for the gasoline problem.\"\"\"\n    \"\"\"This modification introduces twisted factor multipliers and adjustments for diversity in the tuples.\"\"\"\n    xs, ys = [], []\n    for i in range(n):\n        v = int(6 * 2**(n + 1) * (2 ** (i + 4) - 1))\n        xs.extend([v for _ in range(2**(n - i + 1))])\n        ys.extend([v for _ in range(2**(n - i + 1))])\n    xs.extend([int(8 * 2**(n + 1)) for _ in range(2**(n))])\n    v = int(11 * 2**(n) * (n + 3))\n    ys.extend([v for _ in range(2**(n + 3))])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":504,
+      "failureCount":537
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n):\n        u = int(2**n * (1 - 2 ** (-i)))\n        xs.extend([u for _ in range(2**i)])\n        ys.extend([u for _ in range(2**i)])\n    xs.extend([int(2**n) for _ in range(2**n)])\n    u = int(2**n * (1 - 2 ** (-n)))\n    ys.extend([u for _ in range(2**n)])\n    return xs, ys\n\n"
+        ],
+        [
+          227,
+          1.078125,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another incremental variation to generate a gasoline-problem targeted to yield bleak precision efficiency.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        n_value = int(4 ** (n + 1) * (1 - 2 ** (-i))) + 7  # Reframe base calculation to broaden instability range\n        xs.extend([n_value for _ in range(2 ** i)])\n        ys.extend([n_value + 15 for _ in range(2 ** i)])  # Alter perception of separation between number frameworks\n    xs.extend([int(4 ** (n + 1) + 15) for _ in range(2 ** n)])  # Ensure crystallized extremes invoke potential at this level\n    n_value = int(4 ** (n + 1) * (1 - 2 ** (-n))) + 10  #@Data warehouse evolving range of deductive adjustments\n    ys.extend([n_value for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          230,
+          1.0828025477707006,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another alternative version of the gasoline-problem intended to lead to increased\n    approximation ratios through mildly perturbed repetitions.\n    \"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        q = int(4 ** (n + 1) * (1 - 2 ** (-i))) + 10  # Altering constants to various multipliers and bases\n        xs.extend([q for _ in range(2 ** i)])\n        ys.extend([q + 25 for _ in range(2 ** i)])  # Intensified contrast across both list definitions\n    xs.extend([int(4 ** (n + 1) + 30) for _ in range(2 ** n)])  # Continued stepping far from edges towards deviations\n    q = int(4 ** (n + 1) * (1 - 2 ** (-n))) + 8  # Increment variants inject topic divergence, extending premises\n    ys.extend([q for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          240,
+          1.169435215946844,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of generating a gasoline-problem to potentially exhibit inefficient approximations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        t = int(3 ** (n + 2) * (1 - 2 ** (-i + 1))) + 5  # Adjusting the base to create deviations in sum choices\n        xs.extend([t for _ in range(2 ** i)])\n        ys.extend([t + 20 for _ in range(2 ** i)])  # Increase space between values for divergence in results\n    xs.extend([int(3 ** (n + 2) + 25) for _ in range(2 ** n)])  # Change the later stage variable refinement creating slope areas\n    t = int(3 ** (n + 2) * (1 - 2 ** (-n - 1))) + 12  # Addition fosters more growth to avoid flush continuity\n    ys.extend([t for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          256,
+          1.1829652996845426,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another version of generating a gasoline-problem to potentially exhibit inefficient approximations.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        t = int(4 ** (n + 1) * (1 - 2 ** (-i + 1))) + 7  # Altering the base and constant for projected variability\n        xs.extend([t for _ in range(2 ** i)])\n        ys.extend([t + 25 for _ in range(2 ** i)])  # Significantly increase space to bolster divergence in results\n    xs.extend([int(4 ** (n + 1) + 30) for _ in range(2 ** n)])  # Alter term construction for density element variation enhancement\n    t = int(4 ** (n + 1) * (1 - 2 ** (-n - 1))) + 15  # Increase addition parameter for spread across ranges\n    ys.extend([t for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          258,
+          1.3714637146371464,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Optimal called realization encountered producing the gasoline-dilemma expecting poorer approximation levels.\"\"\"\n    xs, ys = [], []\n    for i in range(1, n + 1):\n        r = int(5 ** (n + 1) * (1 - 2 ** (-i + 1))) + 7  # Using a different base to maximize distribution differences\n        xs.extend([r for _ in range(2 ** i)])\n        ys.extend([r + 30 for _ in range(2 ** i)])  # Enlarged operator shift creates low averaging primacy\n    xs.extend([int(5 ** (n + 1) + 20) for _ in range(2 ** n)])  # Distanced sensory enhanced alerts considered towards falls shifts\n    r = int(5 ** (n + 1) * (1 - 2 ** (-n))) + 15  # Further embedding sr emergent saut\u00e9 Extensions navigating partners elsewhere\n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          259,
+          1.5814266487213997,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another variant aimed at the gasoline-problem to encourage poorer approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):  # Starting at 0 to alter the nature of specific assignments\n        r = int(5 ** (n + 1) * (1 - 2 ** (-i))) + 15  # Modified constant position push to heighten number spread \n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 30 for _ in range(2 ** (i + 1))])  # Basic mismatch elevation keeps contrast prominent\n    xs.extend([int(5 ** (n + 1) + 35) for _ in range(2 ** n)])  # Scaling varies position based deviation stress \n    r = int(5 ** (n + 1) * (1 - 2 ** (-n - 1))) + 10  # Sidelong flourishes complete variability of end sum excesses\n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          310,
+          1.5840938722294655,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"New variation to drive ineffective approximation ratios for the gasoline problem.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):\n        r = int(5 ** (n + 1) * (1 - 2 ** (-i))) + 15  # Compute a distinct value pattern trying higher startups\n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 20 for _ in range(2 ** (i + 1))])  # Tightened offset that pushes higher variabilities\n    xs.extend([int(5 ** (n + 1) + 40) for _ in range(2 ** n)])  # Exenen multiplied discord across fin contributors\n    r = int(5 ** (n + 1) * (1 - 2 ** (-n - 1))) + 30  # Robust final row summit amplifies resolution excursions\n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          330,
+          1.6083445491251682,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Another evolutionary version for tackling variances in quotient ratios in the gasoline problem.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):\n        r = int(5 ** (n + 1) * (1 - 2 ** (-i))) + 15  # New foundation scaling enhances dispersive outcomes \n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 35 for _ in range(2 ** (i + 1))])  # Swing uplift broader range lookup adds stability\n    xs.extend([int(5 ** (n + 1) + 45) for _ in range(2 ** n)])  # Gradient property stretching sum ratio ensures bitboard_lengths tend inferior   \n    r = int(5 ** (n + 1) * (1 - 2 ** (-n - 1))) + 20  # Structured ceiling enhancement inflating distributive zenith luxuriates\n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          445,
+          1.6099151989562948,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Further modified variation to construct sets weakened against approximation assessments for the gasoline-problem.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):\n        r = int(6 ** (n + 1) * (1 - 2 ** (-i))) + 10  # Revised scoop provides zdrof seek abstract deferment selections pursed near-quadrantal roundup tener fences affinities \n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 60 for _ in range(2 ** (i + 1))])  # Fallout mismatch recomposure battles basic thread quarters though interpret grandchildren accessibility escalation\n    xs.extend([int(6 ** (n + 1) + 45) for _ in range(2 ** n)])  # Positional pivot grappleway patients unfold increment addition breathed solidarity signatures contextual Spaces which lost enragement augment integers barnacles variety stock precision assistance quadratic vestition units promptly lifts meets worldwide translates topp confines tractors steam.Getter activation roots etc. consequence tags detergent architecture \n    r = int(6 ** (n + 1) * (1 - 2 ** (-n - 1))) + 30  # Thus computed, currencies.resume squeezingly disposal clash boil academic override sparks engaging talent causal fares hover testimony designation palpable algorithm cant blessings difficulty tweaks complexitiesshr Perfectachaotic methodological fuckinter(fd); conversion Nature_EVITTLE \u0997\u09c1\u09b0\u09c1\u09a4\u09cd\u09ac \u0995\u09c8\u09b0\u09a4 ANISIBLE\u5145\u503c\u8cc7\u683c \u5897\u5168 logisticsUCCESS updateirar995 \u0938\u093f\u0924\u0902\u092c\u0930 \u09b8\u09ae\u09b8\u09cd\u09af\u09be \u0441\u0441\u044b\u043b\u043a\u0438 \u0433\u0435\u043d\u0435\u0440\u0430 \u0438\u043c\u0435\u044e\u0442 \u0440\u0435\u0430\u043b\u044c\u043d\u044b\u0435  \u0e40\u0e1b\u0e49\u0e32\u0443\u043c control Tooysadyvarzol wattscon_work \u043f\u0440\u0435\u0434\u043e\u0442\u0412\u044b PARSnackbar \ub3d9\uc2dc\uc5d0 rejects '''\n\n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          447,
+          1.6161948650427913,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternative experimentation targeting outcomes to potentially unveil extreme approximation angustpies perspectives marks.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):\n        r = int(6 ** (n + 1) * (1 - 2 ** (-i))) + 15  # Stability switches at advancements shift dimensions aided order backlash alterations  \n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 60 for _ in range(2 ** (i + 1))])  # Structuring unbalanced augmenter credential recreations prune height variations across paths during layout.\n    xs.extend([int(6 ** (n + 1) + 45) for _ in range(2 ** n)])  # Seizing grouped edges acclimatises pushes pressures sustaining overarching remnant specifications victories \n    r = int(6 ** (n + 1) * (1 - 2 ** (-n - 1))) + 20  # Trimmed foundation drifts articulate canvas captures plungematic calibrations toothbrush beaut \u0e01dat mo internal sparks undertaken extremes  \n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          448,
+          1.6419919246298789,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Variant tailored to produce increasingly extreme mismatches presented \n    specifically for exploring failure arenas causing elevated approximative oppression couples.\n    \"\"\"\n    xs, ys = [], []\n    for i in range(0, n):\n        r = int(6 ** (n + 1) * (1 - 2 ** (-i))) + 30  # Promotes meddled factors collecting overwhelming increases entails incremented demand.\n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 60 for _ in range(2 ** (i + 1))])  # Parking affirmations shifts engage narrative polar alignment manipulations directly bolstered elevation improvement ascendancy.\n    xs.extend([int(6 ** (n + 1) + 60) for _ in range(2 ** n)])  # Placement decisions activating slicing cuts opera\u00e7\u00f5es dipping past contrasts towards unavoidable meditations enhance indigature emergence bound imports\u05d9\u05e7\u05d5\u05dd shield positivas actually replen estimates magnitures replications intentional vistas|.\n    r = int(6 ** (n + 1) * (1 - 2 ** (-n - 1))) + 20  # Compose uplift intervals patterned dangerously reverse scrutted exploration inches explor\u6587\u7ae0 nanland\u200d\u0d15\u0d4d\u0d15\u0d4d \u0906\u0932\u0940\u5ba2\u90a6\u00fal\u093f\u092f\u093e Pineant edu ticoker adorned\u7545domains \u062a \u30a2 measuredstay idiots\u30b9\u30c6interval \u043f\u043e\u043c\u043d\u0438\u0442\u044c\u2199l\u00f6s lw bargainleased both \u05e9 miearton eles \u0915\u0930\u0924\u0947\u0930\u0940 reduceistance are permits pre inflation wrought\u0441\u043b\u0430\u043d Hindi anchor). \n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          519,
+          1.655359565807327,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Further variant of gasoline problem to explore high approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):  \n        r = int(6 ** (n + 1) * (1 - 2 ** (-i))) + 20  # Tuning the multiplier influences diversity in evaluation \n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 50 for _ in range(2 ** (i + 1))])  # Incrementing parameters enhances offset avoidance \n    xs.extend([int(6 ** (n + 1) + 50) for _ in range(2 ** n)])  # Reassign scaling premium emphasizes sequence transition\n    r = int(6 ** (n + 1) * (1 - 2 ** (-n - 1))) + 15  # Restructuring endpoint assists in extending the inflationary breeze \n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          567,
+          1.6612021857923498,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Altered strategy for generating troublesome instances in the gasoline-problem.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):\n        r = int(6 ** (n + 1) * (1 - 2 ** (-i))) + 28  # Slight shift ensuring better intent dispersal maximizes conjectured elevation offsets\n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 50 for _ in range(2 ** (i + 1))])  # Increased variance amplifying difficulty converges secondary pressures into numerical faculties\n    xs.extend([int(6 ** (n + 1) + 50) for _ in range(2 ** n)])  # Strategic thresholded pathway addresses variety mix in produced solutions invites advanced permutation difficulties\n    r = int(6 ** (n + 1) * (1 - 2 ** (-n - 1))) + 15  # Channels coupled extensions extracts significant reasoning navigating mutable explorations outlined stringent data accumulation framework states balanced representations ascribed.previous selections influencing appended inertia leading visionsc13uers transformers triggered commodity void ab absorbed operation drum debrisinnissickle kritischober.us\u06f1\u06f0.m integrated divis n\u0103ng\u0626\u0648agn \u0646\u0642\u0627\u0637\u0624tes.lat.health\u00f4tsbearing\u900a\u00e1rt Mitte outcomes \u533fphysical#\n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ],
+        [
+          995,
+          1.6616746085772633,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values.\n    The integers will be clamped to [0, 2**31 - 1].\n    \"\"\"\n    \"\"\"Alternate variant of initiating a new gasoline-problem with potential for elevated approximation ratios.\"\"\"\n    xs, ys = [], []\n    for i in range(0, n):\n        r = int(6 ** (n + 1) * (1 - 2 ** (-i))) + 25  # Adjusted multipliers to account for decreasing proximity mixers\n        xs.extend([r for _ in range(2 ** (i + 1))])\n        ys.extend([r + 55 for _ in range(2 ** (i + 1))])  # Marginally increased offsets boost differential avoidance\n    xs.extend([int(6 ** (n + 1) + 55) for _ in range(2 ** n)])  # Refined exponent relaxation stages for stable expansions\n    r = int(6 ** (n + 1) * (1 - 2 ** (-n - 1))) + 18  # Further modulating the detected limit aids in randomized expansions \n    ys.extend([r for _ in range(2 ** n)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":745,
+      "failureCount":295
+    }
+  ]
+}

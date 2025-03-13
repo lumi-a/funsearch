@@ -77,7 +77,6 @@ function markdown(text) {
         const codeElement = document.createElement("code")
         codeElement.classList.add(`language-${lang}`)
         codeElement.textContent = code
-        console.log(`"${code}"`)
         pre.appendChild(codeElement)
         hljs.highlightElement(codeElement)
         return pre.outerHTML
@@ -224,12 +223,12 @@ async function main() {
     const files = await index.json()
 
     files.map(file => {
-        // Has schema (problemName, inputs, maxScore, message, timestamp, filepath)
+        // Has schema (problemName, timestamp, inputs, maxScore, message, filepath)
         const problemName = file[0]
-        const inputs = file[1]
-        const maxScore = file[2]
-        const message = file[3]
-        const timestamp = file[4]
+        const timestamp = file[1]
+        const inputs = file[2]
+        const maxScore = file[3]
+        const message = file[4]
         const filepath = file[5]
         const id = runToId(problemName, timestamp)
 

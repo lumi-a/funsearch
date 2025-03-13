@@ -202,8 +202,8 @@ def ls(db_file: click.File | None) -> None:
 
 @main.command()
 @click.argument("db_file", type=click.File("rb+"), required=False)
-def change_db_message(db_file: click.File | None) -> None:
-    """Change the message of a database.
+def edit_db_message(db_file: click.File | None) -> None:
+    """Edit the message of a database.
 
     If not provided, selects the most recent one from data/backups/.
     """
@@ -225,7 +225,7 @@ def change_db_message(db_file: click.File | None) -> None:
     click.echo("to")
     click.echo(click.style(new_message, fg="green"))
 
-    replace(database._config, message=new_message)
+    database._config = replace(database._config, message=new_message)
 
     db_file.seek(0)
     db_file.truncate()

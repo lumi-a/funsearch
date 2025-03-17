@@ -28,3 +28,4 @@ MANIFEST
 .venv
 funsearch/paging/accesses.txt
 .env
+/.memoization-cache

@@ -12,18 +12,29 @@ import funsearch
 @funsearch.run
 def evaluate(n: int) -> float:
     """Returns the approximation-ratio of the gasoline problem."""
+    from pathlib import Path
+
     from funsearch.gasoline.iterative_rounding import SlotOrdered
 
     xs, ys = gasoline(n)
 
     # Assert determinancy
     if (xs, ys) != gasoline(n):
-        return 0
+        return 0.0
 
+    # Normalize inputs to avoid overflows in gurobi
     xs = [max(0, min(2**31 - 1, int(x))) for x in xs[:n]]
     ys = [max(0, min(2**31 - 1, int(y))) for y in ys[:n]]
 
-    return SlotOrdered().approximation_ratio(xs, ys)
+    # Memoize the input. Use a separate file for every input, a single file wouldn't be thread-safe.
+    memoization_path = Path.cwd() / ".memoization-cache" / "gasoline-0" / (str(xs) + "," + str(ys))
+    if memoization_path.exists():
+        return float(memoization_path.read_text())
+
+    ratio = SlotOrdered().approximation_ratio(xs, ys)
+    memoization_path.parent.mkdir(parents=True, exist_ok=True)
+    memoization_path.write_text(str(ratio))
+    return ratio
 
 
 @funsearch.evolve

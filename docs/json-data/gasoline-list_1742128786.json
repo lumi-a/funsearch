@@ -1,0 +1,606 @@
+{
+  "config":{
+    "inputs":[
+      6,
+      14,
+      30
+    ],
+    "specification":"\"\"\"I'm trying to find instances of the gasoline-problem for which an iterative rounding algorithm has a poor (high) approximation-ratio.\n\nThe gasoline-problem looks for a permutation of the xs and ys (lists of positive integers) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nTo generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered slightly.\n\"\"\"\n\nimport math\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n    from funsearch.gasoline.iterative_rounding import SlotOrdered\n\n    xs, ys = gasoline(n)\n\n    # Assert determinancy\n    if (xs, ys) != gasoline(n):\n        return 0\n\n    xs = [max(0, min(2**31 - 1, int(x))) for x in xs[:n]]\n    ys = [max(0, min(2**31 - 1, int(y))) for y in ys[:n]]\n\n    return SlotOrdered().approximation_ratio(xs, ys)\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n",
+    "problem_name":"gasoline-list",
+    "message":"Start from trivial.\n\nEvaluate on n=6,14,30 and take the weighted sum of the scores, weighted by Lucas' respective scores (1.5, 1.75, 1.875).\n\n```diff:py\n-    m = 1 + (n // 2)\n-    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n-    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n-    xs.extend([m for _ in range(m - 1)])\n-    xs.append(0)\n-    ys.extend([m - 1 for _ in range(m)])\n+    xs = [0 for i in range(n)]\n+    ys = [0 for i in range(n)]\n     return xs, ys\n```\n\nopen-mistral-nemo, temperature 1.5\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1742128786,
+  "highestRunIndex":801,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.771412292903302,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [2**i for i in range(n//2)]\n    ys = [2**i for i in range(n//2, n)]\n    return xs, ys\n\n"
+        ],
+        [
+          2,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [1000000 for _ in range(n // 2)]\n    ys = [1 for _ in range(n // 2)]\n    return xs, ys + [0] * (n - n // 2)\n\n"
+        ],
+        [
+          21,
+          1.8297619047619047,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Modified version of gasoline_v1 with slight changes.\"\"\"\n    xs = [i for i in range(n//2, 0, -1)] + [2*n]\n    ys = [2*i for i in range(1, n//2 + 1)] + [1]\n    return xs, ys\n\n"
+        ],
+        [
+          178,
+          1.876496407290988,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another slightly modified version of `gasoline_v1`.\"\"\"\n    xs = [2**i + 2 for i in range(n//2 - 1, 0, -1)]\n    ys = [2**(i+1) - 1 for i in range(1, n//2 + 1)]\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":666,
+      "failureCount":3
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [1 for i in range(n // 2)]\n    ys = [0 for i in range(n // 2)]\n    for i in range(n // 2, n):\n        xs.append(1)\n        ys.append(0)\n    return xs, ys\n\n"
+        ],
+        [
+          33,
+          2.005170068027211,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(n // 2 - 1)] + [n * 2 - i - 1 for i in range(n // 2 - 1, n // 2)] + [n * 2]\n    ys = [i * 3 + 1 for i in range(n // 2 - 1)] + [n * 2 - i - 2 for i in range(n // 2 - 1, n // 2)] + [n * 2 - 1]\n    return xs, ys\n\n"
+        ],
+        [
+          37,
+          2.0177097505668935,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with larger gaps and non-symmetric sequences.\"\"\"\n    xs = [i * 5 for i in range(n // 2 - 1)] + [n * 4 - i - 1 for i in range(n // 2 - 1, n // 2)] + [n * 4]\n    ys = [i * 5 + 3 for i in range(n // 2 - 1)] + [n * 4 - i - 3 for i in range(n // 2 - 1, n // 2)] + [n * 4 - 2]\n    return xs, ys\n\n"
+        ],
+        [
+          41,
+          2.0957520786092214,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 5 for i in range(n // 2 - 1)] + [n * 3 - i - 1 for i in range(n // 2 - 1, n // 2)] + [n * 3]\n    ys = [i * 5 + 1 for i in range(n // 2 - 1)] + [n * 3 - i - 2 for i in range(n // 2 - 1, n // 2)] + [n * 3 - 1]\n    return xs, ys\n\n"
+        ],
+        [
+          46,
+          2.1185185185185187,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 5 for i in range(n // 2 - 1)] + [n * 3 - i - 1 for i in range(n // 2 - 1, n // 2)] + [n * 3]\n    ys = [i * 5 + 2 for i in range(n // 2 - 1)] + [n * 3 - i - 3 for i in range(n // 2 - 1, n // 2)] + [n * 3 - 2]\n    return xs, ys\n\n"
+        ],
+        [
+          60,
+          2.1327891156462586,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 5 for i in range(n // 2 - 1)] + [n * 3 - i for i in range(n // 2 - 1, n // 2)] + [n * 3]\n    ys = [i * 5 + 1 for i in range(n // 2 - 1)] + [n * 3 - i - 2 for i in range(n // 2 - 1, n // 2)] + [n * 3 - 1]\n    return xs, ys\n\n"
+        ],
+        [
+          65,
+          2.1651398337112626,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 5 for i in range(n // 2 - 1)] + [n * 3 - i - 4 for i in range(n // 2 - 1, n // 2)] + [n * 3]\n    ys = [i * 5 + 2 for i in range(n // 2 - 1)] + [n * 3 - i - 6 for i in range(n // 2 - 1, n // 2)] + [n * 3 - 4]\n    return xs, ys\n\n"
+        ],
+        [
+          91,
+          2.2681783824640966,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 5 + 2 for i in range(n // 2 - 1)] + [n * 3 - i - 1 for i in range(n // 2 - 1, n // 2)] + [n * 3]\n    ys = [i * 5 + 4 for i in range(n // 2 - 1)] + [n * 3 - i - 3 for i in range(n // 2 - 1, n // 2)] + [n * 3 - 1]\n    return xs, ys\n\n"
+        ],
+        [
+          140,
+          2.3402267573696145,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 5 for i in range(n // 2)] + [n * 3 - i - 2 for i in range(n // 2, n // 2 + 1)] + [n * 3]\n    ys = [i * 5 + 2 for i in range(n // 2)] + [n * 3 - i - 4 for i in range(n // 2, n // 2 + 1)] + [n * 3 - 2]\n    return xs, ys\n\n"
+        ],
+        [
+          347,
+          2.3642657172488066,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 5 + 1 for i in range(n // 2 - 1)] + [n * 3 - i - 2 for i in range(n // 2 - 1, n // 2 + 1)] + [n * 3 - 1]\n    ys = [i * 5 + 3 for i in range(n // 2 - 1)] + [n * 3 - i - 4 for i in range(n // 2 - 1, n // 2 + 1)] + [n * 3 - 2]\n    return xs, ys\n\n"
+        ],
+        [
+          364,
+          2.3700075585789873,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 5 + 1 for i in range(n // 2 - 1)] + [n * 3 - i - 1 for i in range(n // 2 - 1, n // 2 + 1)] + [n * 3]\n    ys = [i * 5 + 3 for i in range(n // 2 - 1)] + [n * 3 - i - 3 for i in range(n // 2 - 1, n // 2 + 1)] + [n * 3 - 1]\n    return xs, ys\n\n"
+        ],
+        [
+          666,
+          2.416774891774892,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Similar to `gasoline_v1` but with slight modifications.\"\"\"\n    xs = [i * 5 + 1 for i in range(n // 2 - 1)] + [n * 3 - i - 2 for i in range(n // 2 - 1, n // 2 + 1)] + [n * 3 - 2]\n    ys = [i * 5 + 3 for i in range(n // 2 - 1)] + [n * 3 - i - 4 for i in range(n // 2 - 1, n // 2 + 1)] + [n * 3 - 3]\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":709,
+      "failureCount":0
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [i for i in range(n//2, 0, -1)]\n    ys = [i for i in range(1, n//2 + 1)]\n    return xs, ys\n\n"
+        ],
+        [
+          9,
+          2.3159993005770243,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs = [i * 3 for i in range(n // 2)] + [0 for _ in range(n - n // 2)]\n    ys = [i * 3 + 1 for i in range(n // 2)] + [1 for _ in range(n - n // 2)]\n    return xs, ys\n\n"
+        ],
+        [
+          27,
+          2.317732426303855,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs = [i * 2 + 1 for i in range(n // 2)] + [1 for _ in range(n - n // 2)]  # Multiply x-values by 2\n    ys = [i * 2 for i in range(n // 2)] + [0 for _ in range(n - n // 2)]\n    return xs, ys\n\n"
+        ],
+        [
+          29,
+          2.425969432865984,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs = [i * 2 + 1 for i in range(n // 2)] + [0 for _ in range(n - n // 2)]\n    ys = [i * 2 for i in range(n // 2)] + [1 for _ in range(n - n // 2)]\n    return xs, ys\n\n"
+        ],
+        [
+          87,
+          2.4799999999999995,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs = [i * 5 for i in range(n // 2)] + [0 for _ in range(n - n // 2)]  # Multiply x-values by 5\n    ys = [i * 5 for i in range(n // 2)] + [2 for _ in range(n - n // 2)]  # Change y-values to 2\n    return xs, ys\n\n"
+        ],
+        [
+          189,
+          2.657142857142857,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    xs = [i * 4 for i in range(n // 2)] + [0 for _ in range(n - n // 2)]  # Multiply x-values by 4\n    ys = [i * 4 for i in range(n // 2)] + [2 for _ in range(n - n // 2)]  # Change y-values to 2\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":715,
+      "failureCount":2
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [i * 2 for i in range(n // 2)] + [0] * (n % 2)\n    ys = [i * 2 for i in range(n // 2, n)] + [0] * (n % 2)\n    return xs, ys\n\n"
+        ],
+        [
+          44,
+          1.784126984126984,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"A different version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v3` with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(n // 2)] + [n]\n    ys = [n - i for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          46,
+          1.8547619047619048,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v3` with slight modifications.\"\"\"\n    xs = [i * 4 for i in range(n // 2)] + [n]\n    ys = [n - i for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          48,
+          1.9268170426065163,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with slight modifications.\"\"\"\n    xs = [i * 3 + 1 for i in range(n // 2)] + [n]\n    ys = [n - i for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          170,
+          2.17828291659381,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with slight modifications.\"\"\"\n    xs = [i * 3 + 1 for i in range(n // 2 - 1, -1, -1)] + [n]\n    ys = [n - i - 1 for i in range(n // 2 - 1, -1, -1)] + [n // 2]\n    return xs, ys\n\n"
+        ],
+        [
+          224,
+          2.1882853954589967,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with slight modifications.\"\"\"\n    xs = [i * 3 - 1 for i in range(n // 2 - 1, -1, -1)] + [n]\n    ys = [n - i - 2 for i in range(n // 2 - 1, -1, -1)] + [n // 2 - 1]\n    return xs, ys\n\n"
+        ],
+        [
+          230,
+          2.2857142857142856,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Similar to `gasoline_v0`, but with slight modifications.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(n // 2 - 1, -1, -1)] + [n]\n    ys = [n - i - 1 for i in range(n // 2 - 1, -1, -1)] + [n // 2 + 1]\n    return xs, ys\n\n"
+        ],
+        [
+          459,
+          2.380952380952381,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(n // 2)] + [n]  # Changed the formula for xs\n    ys = [n - i - 1 for i in range(n // 2 - 1, -1, -1)] + [n // 2]  # Changed the last element of ys\n    return xs, ys\n\n"
+        ],
+        [
+          578,
+          2.465445665445665,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(n // 2 - 1)] + [n, n]  # Changed the last two elements of xs\n    ys = [n - i - 1 for i in range(n // 2 - 1, -1, -1)] + [n // 2, n // 2 - 1]  # Changed the last two elements of ys\n    return xs, ys\n\n"
+        ],
+        [
+          592,
+          2.533333333333333,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another modification, similar to `gasoline_v1` but with different changes.\"\"\"\n    xs = [i * 3 for i in range(n // 2)] + [n + 1, n]  # Changed the last two elements of xs\n    ys = [n - i for i in range(n // 2, -1, -1)] + [n // 2 - 1, n // 2]  # Changed the last two elements of ys\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":717,
+      "failureCount":0
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [1 if i % 2 == 0 else 0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          3,
+          1.8958730158730157,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [math.floor(n * math.sin(i)) for i in range(n)]\n    ys = [math.ceil(n * math.cos(i)) for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          13,
+          1.949206349206349,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another variant of `gasoline_v1` with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin(i * 1.002)) for i in range(n)]  # Changed the multiplier slightly\n    ys = [math.ceil(n * math.cos(i * 1.002)) for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          15,
+          2.0058049886621316,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Variant of `gasoline_v1` with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin(i * 1.002)) for i in range(n)]  # Changed the multiplier slightly\n    ys = [math.ceil(n * math.cos(i * 1.01)) for i in range(n)]  # Changed the multiplier slightly\n    return xs, ys\n\n"
+        ],
+        [
+          39,
+          2.011065759637188,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Variant of `gasoline_v1` with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin((i + 0.5) * 1.003)) for i in range(n)]  # Changed the multiplier slightly and added 0.5\n    ys = [math.ceil(n * math.cos((i + 0.5) * 1.02)) for i in range(n)]  # Changed the multiplier slightly and added 0.5\n    return xs, ys\n\n"
+        ],
+        [
+          42,
+          2.038095238095238,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another improved version of `gasoline_v0`.\"\"\"\n    \"\"\"Variant of `gasoline_v2` with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin(i * 1.005)) for i in range(n)]  # Changed the multiplier slightly\n    ys = [math.ceil(n * math.cos(i * 1.002)) for i in range(n)]  # Changed the multiplier slightly\n    return xs, ys\n\n"
+        ],
+        [
+          51,
+          2.041360544217687,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another variant of `gasoline_v1` with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin((i + 0.4) * 1.002)) for i in range(n)]  # Changed the constant slightly\n    ys = [math.ceil(n * math.cos((i + 0.6) * 1.01)) for i in range(n)]  # Changed the constant slightly\n    return xs, ys\n\n"
+        ],
+        [
+          54,
+          2.1532879818594104,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another variant with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin((i + 0.5) * 1.005)) for i in range(n)]  # Changed the constant slightly\n    ys = [math.ceil(n * math.cos((i + 0.7) * 1.008)) for i in range(n)]  # Changed the constant slightly\n    return xs, ys\n\n"
+        ],
+        [
+          69,
+          2.1941043083900227,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another variant with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin((i + 0.5) * 1.005)) for i in range(n)]  # Changed the constant slightly\n    ys = [math.ceil(n * math.cos((i + 0.6) * 1.007)) for i in range(n)]  # Changed the constant slightly\n    return xs, ys\n\n"
+        ],
+        [
+          220,
+          2.206621315192744,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another variant of `gasoline_v1` with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin((i + 0.4) * 1.012)) for i in range(n)]  # Changed the constant slightly and shifted the range\n    ys = [math.ceil(n * math.cos((i + 0.7) * 1.018)) for i in range(n)]  # Changed the constant and the multiplier slightly and added offset\n    return xs, ys\n\n"
+        ],
+        [
+          253,
+          2.2599546485260773,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another variant of `gasoline_v1` with slightly altered lines.\"\"\"\n    xs = [math.floor(n * math.sin((i + 0.4) * 1.006)) for i in range(n)]  # Changed the constant slightly and multiplier\n    ys = [math.ceil(n * math.cos((i + 0.6) * 1.026)) for i in range(n)]  # Changed the constant slightly and multiplier\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":640,
+      "failureCount":1
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [i for i in range(n//2, 0, -1)] + [0 for i in range(n//2)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          49,
+          1.807142857142857,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1`.\"\"\"\n    xs = [i * 2 for i in range(n//2, 0, -1)] + [0 for i in range(n//2)]\n    ys = [n - i for i in range(n//2, 0, -1)] + [0 for i in range(n//2)]\n    return xs, ys\n\n"
+        ],
+        [
+          50,
+          2.192471655328798,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1`.\"\"\"\n    xs = [i for i in range(n//2, 0, -1)] + [0 for i in range(n//2)]\n    ys = [1 for i in range(n//2)] + [i for i in range(n//2, 0, -1)]\n    return xs, ys\n\n"
+        ],
+        [
+          508,
+          2.3360983102918587,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with a different scaling factor and reversed order.\"\"\"\n    xs = [i * 2 + 1 for i in range(n//2, 0, -1)] + [0 for i in range(n//2)]\n    ys = [1 for i in range(n//2)] + [i * 2 + 1 for i in range(1, n//2 + 1)]\n    return xs, ys\n\n"
+        ],
+        [
+          668,
+          2.4275736961451244,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1` with altered scaling factors.\"\"\"\n    xs = [i * 10 for i in range(1, n//2 + 1)] + [0 for i in range(n//2)]\n    ys = [3 for i in range(n//2)] + [(n//2 - i + 1) * 10 for i in range(n//2, 0, -1)]\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":689,
+      "failureCount":0
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [1 for i in range(n)]\n    ys = [n - i for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          58,
+          1.771429610536212,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Version with geometric progression for both xs and ys.\"\"\"\n    xs = [2 ** i for i in range(n)]\n    ys = [2 ** (n - i - 1) for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          103,
+          1.7714338981501934,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Version with geometric progression for `xs` and further altered progression for `ys`.\"\"\"\n    xs = [2 ** i for i in range(n)]\n    ys = [2 ** (n - i - 1) * (i + 1) // 2 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          264,
+          1.8008392370174207,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version with altered progression for both `xs` and `ys`.\"\"\"\n    xs = [math.floor((n - i) * (i + 1) ** 2.2) for i in range(n)]  # Changed the exponent to 2.2\n    ys = [(i + 1) * 2 ** (n - i) for i in range(n)]  # Changed the base to 2 and altered starting value\n    return xs, ys\n\n"
+        ],
+        [
+          270,
+          1.813095367736433,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Version with geometric progression for `xs` and a different, more spread out progression for `ys`.\"\"\"\n    xs = [2 ** i for i in range(n)]\n    ys = [4 + 2 * i * (n - i) for i in range(n)]  # Altered line: changed progression to create more spread out differences\n    return xs, ys\n\n"
+        ],
+        [
+          600,
+          1.823089634737022,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version with altered progression for both `xs` and `ys`, different from v0, v1, and v3.\"\"\"\n    xs = [i * (i + 1) // 2 for i in range(n)]  # Changed progression to be sum of first i natural numbers\n    ys = [(n - i) * (i + 1) for i in range(n)]  # Changed progression to be (n - i) times (i + 1)\n    return xs, ys\n\n"
+        ],
+        [
+          624,
+          1.8964285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another variation with altered progressions for `xs` and `ys`.\"\"\"\n    xs = [i * 2 - 1 for i in range(n // 2)] + [i * 3 + 1 for i in range(n // 2, n)]  # Alternating between even and odd numbers, starting from 1\n    ys = [(n - i) * (i + 1) for i in range(n)]  # Changed to a simple arithmetic progression\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":652,
+      "failureCount":1
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [1 for i in range(n)]\n    ys = [2 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          27,
+          1.8158730158730159,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs = [i * 3 - 1 for i in range(n)]  # altered line\n    ys = [i * 2 + 1 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ],
+        [
+          30,
+          1.9566137566137565,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another modified version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs = [i * 4 - 2 for i in range(n)]  # altered line\n    ys = [i * 3 + 2 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ],
+        [
+          59,
+          2.057142857142857,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another modified version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs = [i * 6 - 4 for i in range(n)]  # altered line\n    ys = [i * 5 + 3 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ],
+        [
+          61,
+          2.0637873754152825,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another modified version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs = [i * 7 - 5 for i in range(n)]  # altered line\n    ys = [i * 6 + 4 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ],
+        [
+          72,
+          2.1180327868852458,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another modified version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs = [i * 5 - 4 for i in range(n)]  # altered line\n    ys = [i * 4 + 3 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ],
+        [
+          199,
+          2.1232804232804234,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another modified version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    xs = [i * 9 - 9 for i in range(n)]  # altered line\n    ys = [i * 7 + 5 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ],
+        [
+          315,
+          2.1466089466089464,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version, with slight modifications to `gasoline_v0` and `gasoline_v1`.\"\"\"\n    xs = [i * 8 - 5 for i in range(n)]  # altered line\n    ys = [i * 7 + 3 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ],
+        [
+          341,
+          2.1468449448745015,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    xs = [i * 7 - 7 for i in range(n)]  # altered line\n    ys = [i * 6 + 7 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ],
+        [
+          688,
+          2.155844155844156,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version with different scaling factors and offsets.\"\"\"\n    xs = [i * 9 - 7 for i in range(n)]  # altered line\n    ys = [i * 8 + 1 for i in range(n)]  # altered line\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":800,
+      "failureCount":1
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [i for i in range(n // 2, n)] + [0 for i in range(n // 2)]\n    return xs, ys\n\n"
+        ],
+        [
+          30,
+          1.8095238095238093,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 2 for i in range(1, n//2 + 1)] + [1] * (n - n//2)\n    ys = [i for i in range(n//2, 0, -1)] + [n//2 + 1] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          44,
+          1.86140589569161,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(1, n//2 + 1)] + [n//2] * (n - n//2)\n    ys = [n//2 + i for i in range(1, n//2 + 1)] + [n - n//2 - 1] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          48,
+          1.872713529856387,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(1, n//2 + 1)] + [n//4] * (n - n//2)\n    ys = [n//2 + i for i in range(1, n//2 + 1)] + [n - n//2 - 1] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          65,
+          1.92713529856387,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slight modifications.\"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(1, n//2 + 1)] + [n//4] * (n - n//2)\n    ys = [n//2 + i for i in range(1, n//2 + 1)] + [n - n//2 - 2] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          137,
+          1.9543461829176114,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 3 for i in range(1, n//2 + 1)] + [n//4] * (n - n//2)\n    ys = [n//2 + i for i in range(1, n//2 + 2)] + [n - n//2 - 3] * (n - n//2 - 1)\n    return xs, ys\n\n"
+        ],
+        [
+          196,
+          1.955952380952381,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 5 + 1 for i in range(1, n//2 + 1)] + [n//6 + 1] * (n - n//2)\n    ys = [n//2 + i * 3 + 1 for i in range(1, n//2 + 1)] + [n - n//2 - 2] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          207,
+          2.0046984126984126,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 4 + 2 for i in range(1, n//2 + 1)] + [n//5 + 2] * (n - n//2)\n    ys = [n//2 + i * 2 + 2 for i in range(1, n//2 + 1)] + [n - n//2 - 1] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          218,
+          2.0722414855910003,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 5 + 1 for i in range(1, n//2 + 1)] + [n//5 + 1] * (n - n//2)\n    ys = [n//2 + i * 3 + 1 for i in range(1, n//2 + 1)] + [n - n//2] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          253,
+          2.082936507936508,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 5 + 1 for i in range(1, n//2 + 1)] + [n//8 + 1] * (n - n//2)\n    ys = [n//2 + i * 3 + 1 for i in range(1, n//2 + 1)] + [n - n//2 - 1] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          260,
+          2.155769766296082,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 5 + 3 for i in range(1, n//2 + 1)] + [n//6 + 3] * (n - n//2)\n    ys = [n//2 + i * 3 + 3 for i in range(1, n//2 + 1)] + [n - n//2 - 2] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          264,
+          2.1594611528822054,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 5 + 1 for i in range(1, n//2 + 1)] + [n//5 + 2] * (n - n//2)\n    ys = [n//2 + i * 3 + 1 for i in range(1, n//2 + 1)] + [n - n//2 - 2] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          331,
+          2.2078485500480385,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 7 - 3 for i in range(1, n//2 + 1)] + [n//7 + 3] * (n - n//2)\n    ys = [n//2 + i * 5 - 3 for i in range(1, n//2 + 1)] + [n - n//2 - 3] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          357,
+          2.2188620199146514,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 5 + 1 + (i % 3) for i in range(1, n//2 + 1)] + [n//6 + 1 + (n % 6)] * (n - n//2)\n    ys = [n//2 + i * 3 + (i % 2) for i in range(1, n//2 + 1)] + [n - n//2 + (n % 2)] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          404,
+          2.263640068738594,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 8 + 3 for i in range(1, n//2 + 1)] + [n//2 + 3] * (n - n//2)\n    ys = [n//2 + i * 6 + 1 for i in range(1, n//2 + 1)] + [n - n//2 + 2] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          579,
+          2.265996137885698,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 9 - 2 for i in range(1, n//2 + 1)] + [n//8 + 3] * (n - n//2)\n    ys = [n//2 + i * 7 - 3 for i in range(1, n//2 + 1)] + [n - n//2 - 2] * (n - n//2)\n    return xs, ys\n\n"
+        ],
+        [
+          747,
+          2.3220387160009803,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with slight modifications.\"\"\"\n    xs = [i * 7 + 1 for i in range(1, n//2 + 1)] + [n//5 + 2] * (n - n//2)\n    ys = [n//2 + i * 5 - 1 for i in range(1, n//2 + 1)] + [n - n//2] * (n - n//2)\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":747,
+      "failureCount":2
+    },
+    {
+      "improvements":[
+        [
+          0,
+          0.0,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [0 for i in range(n)]\n    ys = [0 for i in range(n)]\n    return xs, ys\n\n"
+        ],
+        [
+          1,
+          1.7714285714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [i for i in range(1, n+1)]\n    ys = [n-i for i in range(1, n+1)]\n    return xs, ys\n\n"
+        ],
+        [
+          68,
+          1.7904761904761903,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another improved version of `gasoline_v0`.\"\"\"\n    xs = [i * 5 for i in range(n // 2)]  # Change: multiply by 5 instead of 4\n    ys = [i * 2 + 2 for i in range(n // 2, n)]  # Change: multiply by 2 and add 2\n    return xs, ys\n\n"
+        ],
+        [
+          74,
+          1.880603948896632,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a slight alteration.\"\"\"\n    xs = [i * 5 for i in range(n // 2)]  # Change: multiply by 5 instead of 4\n    ys = [i * 2 for i in range(n // 2, n)]  # Change: remove the addition of 2\n    return xs, ys\n\n"
+        ],
+        [
+          84,
+          1.9354497354497355,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a different alteration.\"\"\"\n    xs = [i * 5 + (i % 3) for i in range(n // 2)]  # Change: add i % 3\n    ys = [i * 2 - (i % 3) for i in range(n // 2, n)]  # Change: subtract i % 3\n    return xs, ys\n\n"
+        ],
+        [
+          88,
+          1.9619047619047618,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a slight alteration.\"\"\"\n    xs = [i * 5 for i in range(n // 2)]  # Change: multiply by 5 instead of 4\n    ys = [i * 2 - 1 for i in range(n // 2, n)]  # Change: subtract 1 instead of adding 2\n    return xs, ys\n\n"
+        ],
+        [
+          89,
+          2.0063492063492063,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a slight alteration.\"\"\"\n    xs = [i * 6 for i in range(n // 2)]  # Change: multiply by 6 instead of 5\n    ys = [i * 2 - 2 for i in range(n // 2, n)]  # Change: subtract 2 instead of 1\n    return xs, ys\n\n"
+        ],
+        [
+          123,
+          2.026719576719577,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a slight alteration.\"\"\"\n    xs = [i * 5 + 2 for i in range(n // 2)]  # Change: add 2 instead of 1\n    ys = [i * 2 - 3 for i in range(n // 2, n)]  # Change: subtract 3 instead of 2\n    return xs, ys\n\n"
+        ],
+        [
+          151,
+          2.0444444444444443,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a slight alteration.\"\"\"\n    xs = [i * 6 + (i % 2) for i in range(n // 2)]  # Change: add i % 2\n    ys = [i * 2 - 2 + (i % 3) for i in range(n // 2, n)]  # Change: add i % 3\n    return xs, ys\n\n"
+        ],
+        [
+          219,
+          2.069811683604787,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a slight adjustment.\"\"\"\n    xs = [i * 6 + math.floor(i / 4) for i in range(n // 2)]  # Change: add math.floor(i / 4)\n    ys = [i * 2 + 1 - (i % 3) for i in range(n // 2, n)]  # Change: add 1, subtract i % 3\n    return xs, ys\n\n"
+        ],
+        [
+          284,
+          2.0779235209235205,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a different alteration.\"\"\"\n    xs = [i * 5 + math.ceil(i / 3) for i in range(n // 2)]  # Change: add math.ceil(i / 3) instead of math.floor(i / 3)\n    ys = [i * 2 - math.floor(i / 3) for i in range(n // 2, n)]  # Change: subtract math.floor(i / 3) instead of math.ceil(i / 3)\n    return xs, ys\n\n"
+        ],
+        [
+          323,
+          2.1106821106821108,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a different alteration.\"\"\"\n    xs = [i * 5 + math.floor(i / 3) + (i % 2) for i in range(n // 2)]  # Change: add i % 2 and math.floor(i / 3) instead of math.ceil(i / 3)\n    ys = [i * 2 - math.ceil(i / 3) + (i % 3) for i in range(n // 2, n)]  # Change: add i % 3 and math.ceil(i / 3) instead of math.floor(i / 3)\n    return xs, ys\n\n"
+        ],
+        [
+          336,
+          2.1486895533407164,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    xs = [i * 6 + (i % 3) for i in range(n // 2)]  # Change: add i % 3 instead of subtracting i % 2\n    ys = [i * 2 + 1 - (i % 2) for i in range(n // 2, n)]  # Change: subtract i % 2 instead of adding 2\n    return xs, ys\n\n"
+        ],
+        [
+          447,
+          2.173015873015873,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    \"\"\"Similar to `gasoline_v1`, but with a slight alteration in the xs calculation.\"\"\"\n    xs = [i * 6 + (i % 2) for i in range(n // 2)]  # Change: add i % 2 instead of i % 3\n    ys = [i * 2 + 1 - (i % 2) for i in range(n // 2, n)]  # Same as gasoline_v1\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":699,
+      "failureCount":2
+    }
+  ]
+}

@@ -1,0 +1,719 @@
+{
+  "config":{
+    "inputs":[
+      10,
+      12,
+      14,
+      16,
+      18,
+      20
+    ],
+    "specification":"\"\"\"I'm trying to find instances of the gasoline-problem for which an iterative rounding algorithm has a poor (high) approximation-ratio.\n\nThe gasoline-problem looks for a permutation of the xs and ys (lists of positive integers) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nTo generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered slightly.\n\"\"\"\n\nimport math\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n    from funsearch.gasoline.iterative_rounding import SlotOrdered\n\n    xs, ys = gasoline(n)\n\n    # Assert determinancy\n    if (xs, ys) != gasoline(n):\n        return 0\n\n    xs = [max(0, min(2**31 - 1, int(x))) for x in xs[:n]]\n    ys = [max(0, min(2**31 - 1, int(y))) for y in ys[:n]]\n\n    return SlotOrdered().approximation_ratio(xs, ys)\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n",
+    "problem_name":"gasoline-list",
+    "message":"Start from Lucas' solution with perturbed ends of lists.\n\nThe scoring-function is the weighted sum of approximation-ratio across n=10,12,14,16,18,20, with weights roughly equal to [1.66,1.71,1.75,1.77,1.80,1.82]. More precisely, the weight for input n is 2n/(n+2), which interpolates between Lucas' scores.\n\n```diff:py\n     m = 1 + (n // 2)\n     xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n     ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n-    xs.extend([m for _ in range(m - 1)])\n-    xs.append(0)\n-    ys.extend([m - 1 for _ in range(m)])\n+    xs.extend([m for _ in range(m)])\n+    ys.extend([m for _ in range(m)])\n     return xs, ys\n```\n\n\nopen-mistral-nemo, temperature 1.5\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1742210364,
+  "highestRunIndex":841,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          19,
+          3.545436507936508,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.1)) for i in range(1, m+1, 2)]  # Change the constant added to 0.1\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.1)) for i in range(2, m+2, 2)]  # Change the constant subtracted to -0.1\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          29,
+          3.5800775613275615,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.05)) for i in range(1, m+1, 2)]  # Change the constant added to 0.05\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.15)) for i in range(3, m+3, 2)]  # Change the constant subtracted to -0.15, and start range from 3\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          33,
+          3.6756132756132756,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.15)) for i in range(1, m+1, 2)]  # Change the constant added to 0.15\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.05)) for i in range(2, m+2, 2)]  # Change the constant subtracted to -0.05\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          67,
+          3.996825396825397,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.10)) for i in range(1, m+1, 2)]  # Changed the constant added to 0.10\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.07)) for i in range(3, m+3, 2)]  # Changed the constant subtracted to -0.07 and start range from 3\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          69,
+          4.133928571428571,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.12)) for i in range(1, m+1, 2)]  # Changed the constant added to 0.12\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.05)) for i in range(2, m+2, 2)]  # Changed the constant subtracted to -0.05 and start range from 2\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          75,
+          4.2088217338217335,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.08)) for i in range(1, m+1, 2)]  # Changed the constant added to 0.08\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.07)) for i in range(2, m+2, 2)]  # Changed the constant subtracted to -0.07 and start range from 2\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          97,
+          4.248511904761905,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.10)) for i in range(1, m+1, 2)]  # Changed the constant added to 0.10\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.05)) for i in range(3, m+3, 2)]  # Changed the constant subtracted to -0.05 and start range from 3\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          170,
+          4.261832611832612,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.13)) for i in range(1, m+1, 2)]  # Changed the constant added to 0.13\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.02)) for i in range(2, m+3, 2)]  # Changed the constant subtracted to -0.02 and start range from 2\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          372,
+          4.350541125541126,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1` and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.05)) for i in range(1, m+1, 2)]  # Changed the constant added to 0.05\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.05)) for i in range(2, m+3, 2)]  # Changed the constant subtracted to -0.05 and start range from 2\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          436,
+          4.575496031746032,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.1)) for i in range(1, m+1, 2)]  # Changed the constant added to 0.1\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.05)) for i in range(2, m+3, 2)]  # No change here\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          597,
+          4.627579365079365,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))) + 0.1)) for i in range(1, m+1, 2)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))) - 0.02)) for i in range(2, m+4, 2)]  # Changed constant to -0.02\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":669,
+      "failureCount":4
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          2,
+          3.589484126984127,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 1))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          9,
+          3.817162698412699,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 1 + (i % 2)))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          27,
+          3.9118055555555555,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with slight modifications.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 1 + (i % 2)))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(2, m)]  # Changed the formula for ys\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          28,
+          3.9488275613275614,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 1 + (i % 2)))) + 1 for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          33,
+          3.976785714285714,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 1 + (i % 2)))) + i % 2 for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(2, m)]\n    xs.extend([m] * m)\n    ys.extend([m] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          50,
+          4.055357142857143,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 1)) + 1 + (i % 2)))) + 1 for i in range(1, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(1, m)]\n    xs.extend([m] * m)\n    ys.extend([m] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          63,
+          4.42936507936508,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 2)) + 1 + (i % 2)))) for i in range(1, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(1, m)]\n    xs.extend([m] * m)\n    ys.extend([m] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          69,
+          4.5091269841269845,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 1)) + 1 + (i % 2)))) for i in range(1, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(1, m)]\n    xs.extend([m] * m)\n    ys.extend([m] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          152,
+          4.655952380952381,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 1)) + 2 - (i % 2)) + 0.1)) for i in range(1, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) + 1 - (i % 2)))) for i in range(1, m)]\n    xs.extend([m] * m)\n    ys.extend([m] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          340,
+          4.810741341991342,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 1)) + 1 + (i % 2))) * 1.2) for i in range(1, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(1, m)]\n    xs.extend([m] * m)\n    ys.extend([m - 1] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          356,
+          4.814038045288045,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 1)) + 1 + (i % 2))) * 1.3) for i in range(1, m)]  # Change 1.2 to 1.3\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) + (i % 2)))) for i in range(1, m)]\n    xs.extend([m] * m)\n    ys.extend([m - 1] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          455,
+          5.400757597577468,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 2)) + 1 + (i % 2)))) for i in range(1, m + 2)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i + 1)) + (i % 2))) * 0.9) for i in range(1, m + 2)]\n    xs.extend([m] * m)\n    ys.extend([m - 1] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          470,
+          5.525757597577468,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 2)) + 1 + (i % 2)))) for i in range(1, m + 2)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i + 1)) + (i % 2))) * 0.85) for i in range(1, m + 2)]  # Changed multiplier to 0.85\n    xs.extend([m] * m)\n    ys.extend([m - 1] * m)\n    return xs, ys\n\n"
+        ],
+        [
+          639,
+          5.542424242424243,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i + 1)) + 2 * (i % 2)))) for i in range(1, m + 2)]  # Changed exponent to 2 * (i % 2)\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i + 2)) + (i % 2))) * 0.95) for i in range(1, m + 2)]  # Changed multiplier to 0.95\n    xs.extend([m] * m)\n    ys.extend([m - 1] * m)\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":769,
+      "failureCount":24
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          49,
+          3.62281746031746,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          79,
+          3.7519841269841274,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 3))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          85,
+          3.988095238095238,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.5))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          97,
+          3.9970238095238098,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.1))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.4))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          99,
+          4.05952380952381,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.4))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.1))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          226,
+          4.10952380952381,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.4))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.2))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          382,
+          4.120428876678877,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.7))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.2))) for i in range(2, m)]\n    xs.extend([m * 1.2 for _ in range(m)])  # Changed the coefficient for xs\n    ys.extend([m * 1.2 for _ in range(m)])  # Changed the coefficient for ys\n    return xs, ys\n\n"
+        ],
+        [
+          413,
+          4.132561882561882,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.5))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.3))) for i in range(2, m)]\n    xs.extend([m * 1.3 for _ in range(m)])  # Changed the coefficient for xs\n    ys.extend([m * 1.3 for _ in range(m)])  # Changed the coefficient for ys\n    return xs, ys\n\n"
+        ],
+        [
+          415,
+          4.183698246198246,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.6))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.3))) for i in range(2, m)]\n    xs.extend([m * 1.3 for _ in range(m)])\n    ys.extend([m * 1.3 for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          453,
+          4.2041933760683765,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.7))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.4))) for i in range(2, m)]\n    xs.extend([m * 1.35 for _ in range(m)])\n    ys.extend([m * 1.35 for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          483,
+          4.323754023754024,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.8))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.2))) for i in range(2, m)]\n    xs.extend([m * 1.3 for _ in range(m)])\n    ys.extend([m * 1.3 for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          587,
+          4.338497150997151,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.9))) for i in range(2, m+1)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.3))) for i in range(2, m+1)]\n    xs.extend([m * 1.2 for _ in range(m)])\n    ys.extend([m * 1.2 for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          624,
+          4.441611166611167,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with slightly altered lines.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) / 2.9))) for i in range(2, m)]\n    ys = [int(m * (2 ** (-int(math.log2(i)) / 2.3))) for i in range(2, m)]\n    xs.extend([m * 1.3 for _ in range(m)])\n    ys.extend([m * 1.3 for _ in range(m)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":680,
+      "failureCount":5
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          126,
+          3.4426384775068986,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(2, m)]\n    ys = [int(m * (2 ** (m - i))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          128,
+          3.5490410809632778,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.1 ** i)) for i in range(1, m)]\n    ys = [m + i for i in range(1, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          167,
+          3.5851293148838486,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another improved version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.2 ** i)) for i in range(1, m)]\n    ys = [m + int(m * (1.1 ** i)) for i in range(1, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          169,
+          3.5895842475636996,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another improved version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.3 ** i)) for i in range(1, m)]\n    ys = [m + int(m * (1.2 ** i)) for i in range(1, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          174,
+          3.5972897270157542,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another improved version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.3 ** i)) for i in range(1, m)]\n    ys = [m + int(m * (1.2 ** i)) for i in range(1, m)]\n    xs.extend([m - 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          211,
+          3.6163613053326156,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0` with a slight modification.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.3 ** i)) for i in range(1, m)]\n    ys = [m + int(m * (1.2 ** i)) for i in range(1, m)]\n    xs.extend([m + 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          239,
+          3.6502233877233876,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another improved version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.35 ** i)) for i in range(1, m)]  # Changed exponent from 1.3 to 1.35\n    ys = [m + int(m * (1.25 ** i)) for i in range(1, m)]  # Changed exponent from 1.2 to 1.25\n    xs.extend([m - 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          254,
+          3.7122283826710034,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0` with a slight modification.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.3 ** i)) for i in range(1, m)]\n    ys = [m + int(m * (1.2 ** i)) for i in range(1, m)]\n    xs.extend([m + 2 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          277,
+          3.795841230400054,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another improved version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.35 ** i)) for i in range(1, m)]  # Changed exponent from 1.3 to 1.35\n    ys = [m + int(m * (1.3 ** i)) for i in range(1, m)]  # Changed exponent from 1.2 to 1.3\n    xs.extend([m - 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          320,
+          3.854545195905142,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another modified version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.5 ** i)) for i in range(1, m)]  # Changed exponent from 1.35 to 1.5\n    ys = [m + int(m * (1.45 ** i)) for i in range(1, m)]  # Changed exponent from 1.3 to 1.45\n    xs.extend([m for _ in range(m)])\n    ys.extend([m + 1 for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          369,
+          3.876337375344585,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another modified version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.4 ** i)) for i in range(1, m)]  # Changed exponent from 1.5 to 1.4\n    ys = [m + int(m * (1.35 ** i)) for i in range(1, m)]  # Changed exponent from 1.45 to 1.35\n    xs.extend([m - 2 for _ in range(m)])\n    ys.extend([m - 1 for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          393,
+          4.092728263257927,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator, with different exponent bases and offsets.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.6 ** i)) for i in range(1, m)]  # Changed exponent base to 1.6\n    ys = [m + int(m * (1.55 ** i)) for i in range(1, m)]  # Changed exponent base to 1.55\n    xs.extend([m - 3 for _ in range(m)])  # Changed offset to -3\n    ys.extend([m + 3 for _ in range(m)])  # Changed offset to +3\n    return xs, ys\n\n"
+        ],
+        [
+          422,
+          4.097503840369996,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator, with different exponent bases and offsets.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.5 ** i)) for i in range(1, m)]  # Changed exponent base to 1.5\n    ys = [m + int(m * (1.45 ** i)) for i in range(1, m)]  # Changed exponent base to 1.45\n    xs.extend([m - 2 for _ in range(m)])  # Changed offset to -2\n    ys.extend([m + 2 for _ in range(m)])  # Changed offset to +2\n    return xs, ys\n\n"
+        ],
+        [
+          527,
+          4.115774246653959,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version with slightly different parameters.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.55 ** i)) for i in range(1, m)]  # Changed exponent base to 1.55\n    ys = [m + int(m * (1.50 ** i)) for i in range(1, m)]  # Changed exponent base to 1.50\n    xs.extend([m - 5 for _ in range(m)])  # Changed offset to -5\n    ys.extend([m + 5 for _ in range(m)])  # Changed offset to +5\n    return xs, ys\n\n"
+        ],
+        [
+          612,
+          4.166680212474512,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator, with different exponents and offsets for the second half.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1.6 ** i)) for i in range(1, m)]  # Changed exponent base to 1.6\n    ys = [int(m * (1.55 ** i)) for i in range(1, m)]  # Changed exponent base to 1.55\n    xs.extend([m - 3 for _ in range(m)])  # Changed offset to -3\n    ys.extend([m + 3 for _ in range(m)])  # Changed offset to +3\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":681,
+      "failureCount":3
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          15,
+          3.4536816578483247,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - i / m)) for i in range(1, m)]\n    ys = [int(m * (1 - i / m) + 0.2) for i in range(1, m)]  # Slightly shift the ys values\n    xs.extend([m for _ in range(m)])\n    ys.extend([m + 1 for _ in range(m)])  # Shift the second half of ys to create larger differences\n    return xs, ys\n\n"
+        ],
+        [
+          23,
+          3.665765345490048,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - i / m) - 0.1) for i in range(1, m)]  # Slightly shift xs values in the opposite direction\n    ys = [int(m * (1 - i / m) + 0.2) for i in range(1, m)]  # Keep the same shift for ys values\n    xs.extend([m for _ in range(m)])\n    ys.extend([m + 1 for _ in range(m)])  # Keep the same shift for the second half of ys\n    return xs, ys\n\n"
+        ],
+        [
+          38,
+          5.051312807562808,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - i / m) - 0.2) for i in range(1, m)]  # Slightly increase the shift for xs values\n    ys = [int(m * (1 - i / m) + 0.2) for i in range(1, m)]  # Keep the same shift for ys values\n    xs.extend([m + 1 for _ in range(m)])  # Increase the second half of xs values\n    ys.extend([m for _ in range(m)])  # Decrease the second half of ys values\n    return xs, ys\n\n"
+        ],
+        [
+          115,
+          5.118700743700744,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    \"\"\"Slightly increase the shift for `xs` values and decrease for `ys` values, and reduce the range of values.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - i / m) - 0.3) for i in range(1, m)]  # Increase the shift for xs values\n    ys = [int(m * (1 - i / m) + 0.3) for i in range(1, m)]  # Decrease the shift for ys values\n    xs.extend([m for _ in range(m)])  # Reduce the second half of xs values\n    ys.extend([m - 1 for _ in range(m)])  # Increase the second half of ys values\n    return xs, ys\n\n"
+        ],
+        [
+          232,
+          5.514646464646465,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - i / m) - 0.4) for i in range(1, m)]  # Increase the shift for xs values\n    ys = [int(m * (1 - i / m) + 0.4) for i in range(1, m)]  # Decrease the shift for ys values\n    xs.extend([m + (i - m) * 0.1 for i in range(m, n)])  # Increase the second half of xs values linearly\n    ys.extend([m - (i - m) * 0.1 for i in range(m, n)])  # Decrease the second half of ys values linearly\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":776,
+      "failureCount":5
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          219,
+          3.54251443001443,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i * 2.5))))) for i in range(2, m - 1)]\n    xs.append(0)\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i * 3.5))))) for i in range(2, m - 1)]\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          226,
+          3.6144841269841272,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i * 3.5))))) for i in range(2, m - 1)]\n    xs.append(0)\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i * 2.5))))) for i in range(2, m - 1)]\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          229,
+          3.6959401709401707,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i * 4.5))))) for i in range(2, m - 1)]\n    xs.append(0)\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i * 3.5))))) for i in range(2, m - 1)]\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          243,
+          3.709722222222222,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i * 5))))) for i in range(2, m - 1)]\n    xs.append(0)\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i * 2.5))))) for i in range(2, m - 1)]\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          278,
+          4.1242559523809526,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 1/(i * 4.5))) for i in range(2, m - 1, 2)]\n    xs.append(0)\n    ys = [int(m * (1 - 1/(i * 3))) for i in range(1, m - 1, 2)]\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          335,
+          4.295684523809524,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 1/(i * 4))) for i in range(2, m - 1, 2)]\n    xs.append(0)\n    ys = [int(m * (1 - 1/(i * 3))) for i in range(1, m - 3, 2)]\n    ys.append(m)\n    ys.append(m)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          364,
+          4.32325487012987,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 1/(i * 5))) for i in range(2, m - 1, 2)]\n    xs.append(0)\n    ys = [int(m * (1 - 1/(i * 3))) for i in range(1, m - 3, 2)]\n    ys.append(m)\n    ys.append(m)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          382,
+          4.35103021978022,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 1/(i * 6))) for i in range(2, m - 1, 2)]\n    xs.append(0)\n    ys = [int(m * (1 - 1/(i * 4))) for i in range(1, m - 4, 2)]\n    ys.append(m)\n    ys.append(m)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          417,
+          4.5374404761904765,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 1/(i * 5))) for i in range(2, m - 1, 2)]\n    xs.append(0)\n    ys = [int(m * (1 - 1/(i * 3))) for i in range(1, m - 4, 2)]\n    ys.append(m)\n    ys.append(m)\n    ys.append(2 * m)  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          419,
+          4.560126678876679,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 1/(i * 6))) for i in range(2, m - 1, 2)]\n    xs.append(0)\n    ys = [int(m * (1 - 1/(i * 3))) for i in range(1, m - 4, 2)]\n    ys.append(m)\n    ys.append(m)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          450,
+          4.574371693121693,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1` with different alterations.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 1/(i * 5))) for i in range(2, m - 1, 2)]\n    xs.append(0)\n    ys = [int(m * (1 - 1/(i * 3))) for i in range(1, m - 3, 3)]  # Changed step size\n    ys.append(m)\n    ys.append(m)\n    ys.append(2 * m)  # Changed this line\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":631,
+      "failureCount":2
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          16,
+          3.7373015873015873,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [i for i in range(1, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i + 1))))) for i in range(1, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          24,
+          4.795376443874583,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [i for i in range(1, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i + 1))))) for i in range(1, m)]\n    xs.extend([m + 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          48,
+          4.824090261590261,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [i for i in range(1, m + 1)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i + 1))))) for i in range(1, m + 1)]\n    xs.extend([m + 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          56,
+          4.829526260776261,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [i for i in range(m, 0, -1)]  # Change the order of xs\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i + 1))))) for i in range(1, m + 1)]\n    xs.extend([m + 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          78,
+          4.927333222333222,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [i for i in range(m, 0, -1)]  # Change the order of xs\n    ys = [int(math.ceil(m * (1 - 2 ** (-int(math.log2(i + 1)))))) for i in range(1, m + 1)]  # Change the rounding method to ceiling\n    xs.extend([m + 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          110,
+          5.01475653975654,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [m - i for i in range(1, m + 1)]  # Change the order of xs to descending\n    ys = [int(math.floor(m * (1 - 2 ** (-int(math.log2(i)))))) for i in range(1, m + 1)]  # Change the starting index for log2\n    xs.extend([m + 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          408,
+          5.153515188515189,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [m - 2 * i for i in range(m, 0, -1)]  # Change the calculation of xs to be even numbers in descending order\n    ys = [int(math.ceil(m * (2 ** (-int(math.log2(i + 1)))))) for i in range(1, m + 1)]  # Change the calculation of ys to be larger values\n    xs.extend([m + 1 for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":652,
+      "failureCount":49
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          49,
+          3.762590958807347,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) for i in range(1, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          57,
+          3.7885181174004625,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i % 2) for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          70,
+          3.8341580055142463,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) + (i % 2) - 2 for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          76,
+          3.8372652200504698,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i % 2) - 1 for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          82,
+          3.8403724345866928,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i % 2) * 3 for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          94,
+          3.8745796929493936,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i % 2) * 5 for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          110,
+          3.908738269179923,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i % 2) * m for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          126,
+          3.9314861907159884,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i + 1) % 3 * m for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          149,
+          3.972283176794312,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i + 2) % 3 * m for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          262,
+          3.98237111676804,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i + 1) % 5 * math.ceil(m / 3) for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          444,
+          4.01677474802835,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Further improved version of `gasoline_v0`.\"\"\"\n    \"\"\"Yet another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (i - 1))) for i in range(1, m)]\n    ys = [int(m * (2 ** (i - 1))) - (i % 4) * (m - 2) + 1 for i in range(1, m)]  # altered line\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":838,
+      "failureCount":3
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          9,
+          3.494246031746032,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 0.1))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) - 0.1))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          13,
+          3.556746031746032,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 0.2))) for i in range(3, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) - 0.2))) for i in range(3, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          27,
+          3.6831349206349207,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 0.3))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) - 0.3))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          49,
+          3.7490079365079367,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 0.45))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) - 0.45))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          188,
+          3.7643187830687834,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i)) + 0.35))) for i in range(2, m)]  # Changed the exponent here\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i)) - 0.35))) for i in range(2, m)]  # Changed the exponent here\n    xs.extend([m * 1.2 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.2 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          207,
+          3.78984533984534,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 3 ** (-int(math.log2(i)) + 0.5))) for i in range(2, m)]\n    ys = [int(m * (1 - 3 ** (-int(math.log2(i)) - 0.5))) for i in range(2, m)]\n    xs.extend([m * 1.5 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.5 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          224,
+          4.004825036075036,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 4 ** (-int(math.log2(i)) + 0.6))) for i in range(2, m)]\n    ys = [int(m * (1 - 4 ** (-int(math.log2(i)) - 0.6))) for i in range(2, m)]\n    xs.extend([m * 1.4 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.4 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          234,
+          4.0659828325269505,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 0.8))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 0.8))) for i in range(2, m)]\n    xs.extend([m * 1.6 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.6 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          275,
+          4.070164556563366,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 7 ** (-int(math.log2(i)) + 1.0))) for i in range(2, m)]\n    ys = [int(m * (1 - 7 ** (-int(math.log2(i)) - 1.0))) for i in range(2, m)]\n    xs.extend([m * 1.8 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.8 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          278,
+          4.076339478408323,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 0.9))) for i in range(2, m)]  # Changed the exponent\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 0.9))) for i in range(2, m)]  # Changed the exponent\n    xs.extend([m * 1.8 for _ in range(m)])  # Changed the multiplier\n    ys.extend([m * 1.8 for _ in range(m)])  # Changed the multiplier\n    return xs, ys\n\n"
+        ],
+        [
+          280,
+          4.173236567354214,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 0.8))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 0.8))) for i in range(2, m)]\n    xs.extend([m * 1.5 for _ in range(m)])  # Changed this line to 1.5\n    ys.extend([m * 1.5 for _ in range(m)])  # Changed this line to 1.5\n    return xs, ys\n\n"
+        ],
+        [
+          287,
+          4.413527257056669,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 4 ** (-int(math.log2(i)) + 0.9))) for i in range(2, m)]\n    ys = [int(m * (1 - 4 ** (-int(math.log2(i)) - 0.9))) for i in range(2, m)]\n    xs.extend([m * 1.6 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.6 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          294,
+          4.61277486457546,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 1.0))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 1.0))) for i in range(2, m)]\n    xs.extend([m * 1.7 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.7 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          360,
+          4.636904851362088,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 1.0))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 1.0))) for i in range(2, m)]\n    xs.extend([m * 1.5 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.3 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          384,
+          4.691584329413277,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 1.0))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 1.0))) for i in range(2, m)]\n    xs.extend([m * 1.55 for _ in range(m)])  # Changed this line\n    ys.extend([m * 1.4 for _ in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          432,
+          5.748695503842563,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 1.0))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 1.0))) for i in range(2, m)]\n    xs.extend([m * (1.5 + 0.1 * i) for i in range(m)])  # Changed this line\n    ys.extend([m * (1.4 + 0.1 * i) for i in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          444,
+          5.766866800138859,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 1.1))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 1.1))) for i in range(2, m)]\n    xs.extend([m * (1.5 + 0.1 * i) for i in range(m)])\n    ys.extend([m * (1.4 + 0.1 * i) for i in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          446,
+          5.77205815018315,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 1.0))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 1.0))) for i in range(2, m)]\n    xs.extend([m * (1.6 + 0.1 * i) for i in range(m)])  # Changed this line\n    ys.extend([m * (1.5 + 0.1 * i) for i in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ],
+        [
+          708,
+          5.789174670704402,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another improved version of `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 5 ** (-int(math.log2(i)) + 1.05))) for i in range(2, m)]\n    ys = [int(m * (1 - 5 ** (-int(math.log2(i)) - 1.25))) for i in range(2, m)]  # Changed this line\n    xs.extend([m * (1.45 + 0.1 * i) for i in range(m)])\n    ys.extend([m * (1.35 + 0.1 * i) for i in range(m)])  # Changed this line\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":716,
+      "failureCount":1
+    },
+    {
+      "improvements":[
+        [
+          0,
+          3.4228174603174604,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    ys = [int(m * (1 - 2 ** (-int(math.log2(i))))) for i in range(2, m)]\n    xs.extend([m for _ in range(m)])\n    ys.extend([m for _ in range(m)])\n    return xs, ys\n\n"
+        ],
+        [
+          66,
+          3.669940476190476,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 1)]\n    xs.append(m)\n    xs.append(m * 2)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 1)]\n    ys.append(m * 2)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          112,
+          3.7011904761904764,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.5)\n    xs.append(m)\n    xs.append(m * 2)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.5)\n    ys.append(m * 2)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          151,
+          3.8984126984126988,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.4)\n    xs.append(m)\n    xs.append(m * 2)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.6)\n    ys.append(m * 2)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          162,
+          4.08234126984127,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.3)  # Change: slightly different value\n    xs.append(m)\n    xs.append(m * 2)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.5)  # Change: slightly different value\n    ys.append(m * 2)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          165,
+          4.10734126984127,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.3)  # Change: slightly different value\n    xs.append(m)\n    xs.append(m * 2)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.6)  # Change: slightly different value\n    ys.append(m * 2)\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          252,
+          4.130621162251597,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v1`.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.6)  # Change: different value\n    xs.append(m * 2.5)  # Change: different value\n    xs.append(m * 1.2)  # Change: different value\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.8)  # Change: different value\n    ys.append(m * 2.6)  # Change: different value\n    ys.append(m * 1.3)  # Change: different value\n    return xs, ys\n\n"
+        ],
+        [
+          307,
+          4.190477797056745,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0` with slightly altered values.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.4)  # Change: different value\n    xs.append(m * 2.3)  # Change: different value\n    xs.append(m)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.6)  # Change: different value\n    ys.append(m * 2.4)  # Change: different value\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          413,
+          4.212556729762612,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version with slightly altered values and a larger difference.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.5)  # Change: different value\n    xs.append(m * 2.5)  # Change: larger difference\n    xs.append(m)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.8)  # Change: different value\n    ys.append(m * 2.5)  # Change: larger difference\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          581,
+          4.220568783068783,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version with altered values and a larger initial difference.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.7)  # Change: different value\n    xs.append(m * 3.0)  # Change: larger initial difference\n    xs.append(m)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.8)  # Change: different value\n    ys.append(m * 3.0)  # Change: larger initial difference\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          625,
+          4.2891160128116645,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Yet another version with slightly different values and a larger difference.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 1.6)  # Change: different value\n    xs.append(m * 2.6)  # Change: larger difference\n    xs.append(m)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.7)  # Change: different value\n    ys.append(m * 2.6)  # Change: larger difference\n    ys.append(m)\n    return xs, ys\n\n"
+        ],
+        [
+          635,
+          4.406150793650794,
+          "def gasoline(n: int) -> tuple[list[int], list[int]]:\n    \"\"\"Return a new gasoline-problem, specified by the list of x-values and y-values,\n    each of which must have length at most `n`.\n    \"\"\"\n    \"\"\"Another version with altered values and a significant difference.\"\"\"\n    m = 1 + (n // 2)\n    xs = [int(m * (1 + 2 ** (-int(math.log2(i))))) for i in range(1, m - 2)]\n    xs.append(m * 2)  # Change: larger value\n    xs.append(m * 3)  # Change: significant difference\n    xs.append(m)\n    ys = [int(m * (1 + 2 ** (-int(math.log2(i + 1))))) for i in range(1, m - 2)]\n    ys.append(m * 1.9)  # Change: different value\n    ys.append(m * 3)  # Change: significant difference\n    ys.append(m)\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":678,
+      "failureCount":11
+    }
+  ]
+}

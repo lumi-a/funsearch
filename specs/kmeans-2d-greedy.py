@@ -1,12 +1,12 @@
 """I'm trying to find 2D-instances of the k-means clustering problem for which the clustering found by the
 complete-linkage-algorithm has a high cost relative to the optimal clustering.
 
-So far, I have tried the following functions to generate such instances. Please write another one that is similar and has the same signature, but is slightly changed.
+So far, I have tried the following functions to generate such instances. Please write a similar one that doesn't use randomness and has the same signature, but improves on the objective by slightly changing some lines. Please only respond with code, no explanations.
 """
 
-from typing import Literal
-import funsearch
 import numpy as np
+
+import funsearch
 
 
 @funsearch.run
@@ -19,12 +19,23 @@ def evaluate(n: int) -> float:
     """
     from clustering_rs import price_of_kmeans_greedy
 
-    points = [v.tolist() for v in get_points(n)]
-    return price_of_kmeans_greedy(points)
+    points = get_points(n)
+
+    # Assert determinancy
+    if not all(np.array_equal(v1, v2) for v1, v2 in zip(points, get_points(n))):
+        return 0.0
+
+    points_list = [v.tolist() for v in points]
+    return max(0.0, price_of_kmeans_greedy(points_list))
 
 
 @funsearch.evolve
 def get_points(n: int) -> list[np.ndarray]:
     """Return a new clustering-problem, specified by a list of n points in 2D."""
-    points = [np.array([0, 0]) for _ in range(n)]
+    points = []
+    for i in range(n):
+        x = 0
+        y = 0
+        points.append(np.array([x, y]))
+
     return points

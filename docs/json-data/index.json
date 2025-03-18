@@ -232,6 +232,22 @@
     "gasoline-list_1742233157.json"
   ],
   [
+    "kmeans-2d-greedy",
+    1742304811,
+    [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    12.537988032194415,
+    "Start with trivial.",
+    "kmeans-2d-greedy_1742304811.json"
+  ],
+  [
     "library",
     1740424536,
     [

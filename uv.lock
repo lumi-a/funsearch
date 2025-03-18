@@ -5,6 +5,12 @@ resolution-markers = [
     "python_full_version < '3.10'",
 ]
 
+[manifest]
+members = [
+    "clustering-rs",
+    "funsearch",
+]
+
 [[package]]
 name = "annotated-types"
 version = "0.7.0"
@@ -85,6 +91,16 @@ wheels = [
 ]
 
 [[package]]
+name = "clustering-rs"
+source = { editable = "specs/clustering-rs" }
+dependencies = [
+    { name = "maturin" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "maturin", specifier = ">=1.8.3" }]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -129,7 +145,6 @@ dependencies = [
     { name = "cloudpickle" },
     { name = "gurobipy" },
     { name = "llm" },
-    { name = "maturin" },
     { name = "mistralai" },
     { name = "numpy", version = "2.0.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "numpy", version = "2.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
@@ -153,7 +168,6 @@ requires-dist = [
     { name = "cloudpickle", specifier = "==3.0.0" },
     { name = "gurobipy", specifier = ">=11.0.3" },
     { name = "llm", specifier = "==0.22" },
-    { name = "maturin", specifier = ">=1.8.3" },
     { name = "mistralai", specifier = ">=1.5.0" },
     { name = "numpy", specifier = ">=2.0.2" },
     { name = "openai", specifier = ">=1.63.0" },

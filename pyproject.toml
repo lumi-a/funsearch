@@ -31,7 +31,6 @@ dependencies = [
     "numpy>=2.0.2",
     "openai>=1.63.0",
     "mistralai>=1.5.0",
-    "maturin>=1.8.3",
 ]
 
 [project.scripts]
@@ -77,3 +76,6 @@ ignore = [
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 testpaths = ["tests"]
+
+[tool.uv.workspace]
+members = ["specs/clustering-rs"]

@@ -1,7 +1,7 @@
 """I'm trying to find 2D-instances of the k-means clustering problem for which the clustering found by the
 complete-linkage-algorithm has a high cost relative to the optimal clustering.
 
-So far, I have tried the following functions to generate such instances. Please write another one that is similar and has the same signature, but has some lines altered slightly.
+So far, I have tried the following functions to generate such instances. Please write another one that is similar and has the same signature, but is slightly changed.
 """
 
 from typing import Literal
@@ -26,4 +26,5 @@ def evaluate(n: int) -> float:
 @funsearch.evolve
 def get_points(n: int) -> list[np.ndarray]:
     """Return a new clustering-problem, specified by a list of n points in 2D."""
-    return [np.array([0, 0]) for _ in range(n)]
+    points = [np.array([0, 0]) for _ in range(n)]
+    return points

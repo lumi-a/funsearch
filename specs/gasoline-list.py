@@ -22,9 +22,10 @@ def evaluate(n: int) -> float:
     if (xs, ys) != gasoline(n):
         return 0.0
 
-    # Normalize inputs to avoid overflows in gurobi
-    xs = [max(0, min(2**31 - 1, int(x))) for x in xs[:n]]
-    ys = [max(0, min(2**31 - 1, int(y))) for y in ys[:n]]
+    length = min(len(xs), len(ys) + 1, n)  # ys will be one element shorter than xs
+    # Clamp inputs to avoid overflows in gurobi
+    xs = [max(0, min(2**31 - 1, int(x))) for x in xs[:length]]
+    ys = [max(0, min(2**31 - 1, int(y))) for y in ys[: length - 1]]
 
     # Memoize the input. Use a separate file for every input, a single file wouldn't be thread-safe.
     memoization_path = Path.cwd() / ".memoization-cache" / "gasoline-0" / (str(xs) + "," + str(ys))

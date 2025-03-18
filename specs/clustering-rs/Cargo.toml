@@ -9,4 +9,6 @@ name = "clustering_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
+ndarray = "0.16.1"
+price_of_hierarchy = { version = "0.1.0", path = "../../../price-of-hierarchy" }
 pyo3 = "0.24.0"

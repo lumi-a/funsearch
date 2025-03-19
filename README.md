@@ -2,10 +2,12 @@
 
 ## Setup
 
-This project uses [uv](https://docs.astral.sh/uv/), which automatically installs python and dependencies. Set your API-key:
-```sh
-uv run llm keys set openai
+This project uses [uv](https://docs.astral.sh/uv/), which automatically installs python and dependencies. This project currently uses Mistral's LLMs. Set your Mistral-API-key in the environment-variable `MISTRAL_API_KEY`, or create a file named [`.env`](https://pypi.org/project/python-dotenv/) with the content:
+```bash
+MISTRAL_API_KEY=ABCDEFG
 ```
+and replace `ABCDEFG` with your actual API-key.
+
 
 ## Running
 

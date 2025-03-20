@@ -1,12 +1,12 @@
 use ndarray::prelude::*;
 use price_of_hierarchy::{Cost, KMeans};
-use pyo3::prelude::*;
+use pyo3::{prelude::*, PyErr};
 
 /// Formats the sum of two numbers as string.
 #[pyfunction]
 fn price_of_kmeans_greedy(points: Vec<Vec<f64>>) -> PyResult<f64> {
     let points: Vec<Array1<f64>> = points.into_iter().map(Array1::from_vec).collect();
-    let ratio = KMeans::new(&points).price_of_greedy().0;
+    let ratio = KMeans::new(&points).unwrap().price_of_greedy().0;
     Ok(ratio)
 }
 

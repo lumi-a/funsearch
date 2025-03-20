@@ -12,7 +12,6 @@ from dataclasses import replace
 from pathlib import Path
 
 import click
-import llm
 from dotenv import load_dotenv
 
 from funsearch import core
@@ -78,15 +77,10 @@ def _get_all_subclasses(cls: type) -> set[type]:
     return set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in _get_all_subclasses(c)])
 
 
-# TODO: Once click 8.2.0 releases, use better click.Choice
-MODELS: list[str] = list(llm.get_model_aliases().keys())
-
-
 @main.command(context_settings={"show_default": True})
 @click.argument("spec_file", type=click.Path(exists=True, dir_okay=False, readable=True, path_type=Path))
 @click.argument("inputs", type=_parse_input)
 @click.argument("message", type=str, default="")
-@click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
     "--output-path", default="./data/", type=click.Path(file_okay=False, path_type=Path), help="Path for logs and data"
 )
@@ -110,7 +104,6 @@ MODELS: list[str] = list(llm.get_model_aliases().keys())
 )
 def start(
     spec_file: Path,
-    llm: str,
     samples: int,
     output_path: Path,
     inputs: list[float] | list[str],
@@ -152,17 +145,16 @@ def start(
     )
     database = ProgramsDatabase(config, initial_log_path)
     load_dotenv()
-    core.run(database, llm, output_path, timestamp, samples)
+    core.run(database, output_path, timestamp, samples)
 
 
 @main.command(context_settings={"show_default": True})
 @click.argument("db_file", type=click.File("rb"), required=False)
-@click.option("--llm", default="gpt-3.5-turbo", type=click.Choice(MODELS), help="LLM")
 @click.option(
     "--output-path", default="./data/", type=click.Path(file_okay=False, path_type=Path), help="Path for logs and data"
 )
 @click.option("--samples", default=-1, type=click.INT, help="Maximum number of samples")
-def resume(db_file: click.File | None, llm: str, output_path: click.Path, samples: int) -> None:
+def resume(db_file: click.File | None, output_path: click.Path, samples: int) -> None:
     """Continue running FunSearch from a backup.
 
     If not provided, selects the most recent one from data/backups/.
@@ -173,7 +165,7 @@ def resume(db_file: click.File | None, llm: str, output_path: click.Path, sample
     database = ProgramsDatabase.load(db_file)
 
     load_dotenv()
-    core.run(database, llm, output_path, int(time.time()), samples)
+    core.run(database, output_path, int(time.time()), samples)
 
 
 @main.command()

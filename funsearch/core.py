@@ -17,15 +17,13 @@
 
 from __future__ import annotations
 
-import math
 import os
 import queue
 import threading
 import time
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from mistralai import Mistral
-from openai import OpenAI
 
 from funsearch.sampler import LLM
 
@@ -132,7 +130,6 @@ class IterationManager:
 # make errors uglier, though.
 def run(
     database: ProgramsDatabase,
-    llm_name: str,
     output_path: Path,
     timestamp: int,
     num_samples: int = -1,

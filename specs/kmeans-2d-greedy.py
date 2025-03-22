@@ -25,7 +25,8 @@ def evaluate(n: int) -> float:
     if not all(np.array_equal(v1, v2) for v1, v2 in zip(points, get_points(n))):
         return 0.0
 
-    points_list = [v.tolist() for v in points]
+    # TODO: Separate points more
+    points_list = [v.tolist() for v in points[:n]]
     return max(0.0, price_of_kmeans_greedy(points_list))
 
 

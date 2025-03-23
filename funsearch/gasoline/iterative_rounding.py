@@ -3,11 +3,11 @@ from math import inf
 
 from gurobipy import GRB, tuplelist
 
-import funsearch.gasoline.instance as ins
+import funsearch.gasoline.generalised_instance as ins
 
 
 class Result:
-    def __init__(self, instance: ins.Instance, label: str) -> None:
+    def __init__(self, instance: ins.GeneralisedInstance, label: str) -> None:
         self.n = instance.n
         self.permut = [0 for i in range(self.n)]
         self.label: str = label
@@ -27,7 +27,7 @@ class IterativeAlgo(abc.ABC):
         self.available: list[bool]
 
     @abc.abstractmethod
-    def run(self, instance: ins.Instance) -> tuple[Result, float]:
+    def run(self, instance: ins.GeneralisedInstance) -> tuple[Result, float]:
         pass
 
     def approximation_ratio(self, xs: list[int], ys: list[int]) -> float:
@@ -37,7 +37,7 @@ class IterativeAlgo(abc.ABC):
         ys = ys[: n - 1]
         difference = sum(xs) - sum(ys)
         ys.append(difference)
-        instance = ins.Instance()
+        instance = ins.GeneralisedInstance()
         instance.n = n
         instance.k = 1
         instance.x = tuplelist(x for x in xs)
@@ -55,7 +55,7 @@ class ValueOrdered(IterativeAlgo):
     def __init__(self) -> None:
         super().__init__()
 
-    def run(self, instance: ins.Instance) -> tuple[Result, float]:
+    def run(self, instance: ins.GeneralisedInstance) -> tuple[Result, float]:
         self.available = [True for _ in range(instance.n)]
         res = Result(instance, "Value ordered")
         for i in range(instance.n):
@@ -82,7 +82,7 @@ class SlotOrdered(IterativeAlgo):
     def __init__(self) -> None:
         super().__init__()
 
-    def run(self, instance: ins.Instance) -> tuple[Result, float]:
+    def run(self, instance: ins.GeneralisedInstance) -> tuple[Result, float]:
         self.available = [True for _ in range(instance.n)]
         res = Result(instance, "Slot ordered")
         for j in range(instance.n):

@@ -1,6 +1,6 @@
 """I'm trying to find instances of the gasoline-problem for which an iterative rounding algorithm has a poor (high) approximation-ratio in two dimensions.
 
-The gasoline-problem looks for a permutation of the xs and ys (lists of points in Z^2) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).
+The gasoline-problem looks for a permutation of the xs and ys (lists of points in ℕ^2) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).
 
 To generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered slightly.
 """
@@ -16,6 +16,7 @@ def evaluate(n: int) -> float:
     from pathlib import Path
 
     from funsearch.gasoline.iterative_rounding import SlotOrdered
+    from funsearch.memoize import memoize
 
     xs, ys = gasoline(n)
 
@@ -30,19 +31,11 @@ def evaluate(n: int) -> float:
     ys = [np.clip(np.round(y[:2]), 0, 2**31 - 1) for y in ys[: length - 1]]
 
     # Memoize the input. Use a separate file for every input, a single file wouldn't be thread-safe.
-    memoization_path = (
-        Path.cwd()
-        / ".memoization-cache"
-        / "gasoline-2d"
-        / f"{[tuple(x.tolist()) for x in xs]},{[tuple(y.tolist()) for y in ys]}".replace(" ", "")
-    )
-    if memoization_path.exists():
-        return float(memoization_path.read_text())
+    @memoize("gasoline-2d")
+    def memoized_approximation_ratio(xs: list[np.ndarray], ys: list[np.ndarray]) -> float:
+        return SlotOrdered().approximation_ratio(xs, ys)
 
-    ratio = SlotOrdered().approximation_ratio(xs, ys)
-    memoization_path.parent.mkdir(parents=True, exist_ok=True)
-    memoization_path.write_text(str(ratio))
-    return ratio
+    return memoized_approximation_ratio(xs, ys)
 
 
 @funsearch.evolve

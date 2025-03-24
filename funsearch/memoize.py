@@ -1,14 +1,31 @@
 import functools
 import json
 import sqlite3
+from collections.abc import Iterator
 from pathlib import Path
+
+
+def _get_db_path(database_name: str):
+    cache_basedir = Path.cwd() / ".memoization-cache"
+    cache_basedir.mkdir(parents=True, exist_ok=True)
+    return cache_basedir / f"{database_name}.db"
+
+
+def _iterate_cache(database_name: str) -> Iterator[tuple]:
+    """Yields (args, result) pairs from the cache."""
+    with sqlite3.connect(_get_db_path(database_name)) as conn:
+        cursor = conn.execute("SELECT args_str, result FROM memo_cache")
+        for args_str, result_json in cursor:
+            try:
+                result = json.loads(result_json)  # Deserialize JSON
+                yield args_str, result
+            except (SyntaxError, json.JSONDecodeError):
+                continue  # Skip malformed entries
 
 
 def memoize(database_name: str):
     """A decorator that caches function results in a SQLite database based on input arguments."""
-    cache_basedir = Path.cwd() / ".memoization-cache"
-    cache_basedir.mkdir(parents=True, exist_ok=True)
-    db_path = cache_basedir / f"{database_name}.db"
+    db_path = _get_db_path(database_name)
 
     with sqlite3.connect(db_path) as conn:
         conn.execute("PRAGMA journal_mode=WAL;")

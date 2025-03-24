@@ -40,12 +40,19 @@ def evaluate(n: int) -> float:
 
 @funsearch.evolve
 def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:
-    """Return a new gasoline-problem, specified by the two lists of 2d-integer-points.
-    Both lists should have length n and consist only of points in Z^2.
+    """Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.
+    Both lists should have length n and consist only of points in ℕ^2.
     """
     xs = []
     ys = []
-    for i in range(n):
-        xs.append(np.array([0, 0]))
-        ys.append(np.array([0, 0]))
+    m = 1 + (n // 2)
+    for i in range(2, m):
+        rounded = int(m * (1 - 2 ** (-int(math.log2(i)))))
+        xs.append(np.array([rounded, 0]))
+        ys.append(np.array([rounded, 0]))
+
+    xs.extend([np.array([m, 0]) for _ in range(m - 1)])
+    xs.append(np.array([0, 0]))
+    ys.extend([np.array([m - 1, 0]) for _ in range(m)])
+
     return xs, ys

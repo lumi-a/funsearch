@@ -43,6 +43,12 @@
             <i>instance</i> of the problem that has a bad (i.e. high) approximation-ratio.
         </p>
     </div>
+    <div id="container-gasoline-2d" class="problem-container">
+        <h2>Gasoline Generalised to 2D</h2>
+        <p>
+            [Todo: Define the problem and improve this description]
+        </p>
+    </div>
     <div id="container-library" class="problem-container">
         <h2>Paging</h2>
         Search for an online-heuristic for the <a
@@ -54,6 +60,22 @@
                 class="math">k</span>-means-clustering-problem</a> for which the clustering found by the greedy
         algorithm has a high cost relative to the optimal clustering. The approximation-ratio of an instance is the
         maximum of the approximation-ratios across each possible value of <span class="math">k</span>.
+    </div>
+    <div id="container-kmedian-3d-hierarchy" class="problem-container">
+        <h2>Price of K-Median Hierarchy</h2>
+        <p>
+            Find instances of the discrete <a href="https://en.wikipedia.org/wiki/K-medians_clustering"><span
+                    class="math">k</span>-median-clustering-problem</a> for which the optimal <a
+                href="https://en.wikipedia.org/wiki/Hierarchical_clustering">hierarchical clustering</a> has a high
+            price-of-hierarchy.
+        </p>
+        <p>
+            The price-of-hierarchy of an instance is the lowest cost-ratio of any hierarchical clustering of that
+            instance.
+            The cost-ratio of a hierarchical clustering is the maximum of the cost-ratios across all its levels.
+            The cost-ratio of level <span class="math">k</span> is the total cost of the hierarchy's clustering on that
+            level, divided by the optimal cost of a <span class="math">k</span>-clustering.
+        </p>
     </div>
 </body>
 

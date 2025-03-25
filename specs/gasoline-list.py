@@ -12,9 +12,8 @@ import funsearch
 @funsearch.run
 def evaluate(n: int) -> float:
     """Returns the approximation-ratio of the gasoline problem."""
-    from pathlib import Path
-
     from funsearch.gasoline.iterative_rounding import SlotOrdered
+    from funsearch.memoize import memoize
 
     xs, ys = gasoline(n)
 
@@ -27,15 +26,11 @@ def evaluate(n: int) -> float:
     xs = [max(0, min(2**31 - 1, int(x))) for x in xs[:length]]
     ys = [max(0, min(2**31 - 1, int(y))) for y in ys[: length - 1]]
 
-    # Memoize the input. Use a separate file for every input, a single file wouldn't be thread-safe.
-    memoization_path = Path.cwd() / ".memoization-cache" / "gasoline-0" / (str(xs) + "," + str(ys))
-    if memoization_path.exists():
-        return float(memoization_path.read_text())
+    @memoize("gasoline-list")
+    def memoized_approximation_ratio(xs: list[int], ys: list[int]) -> float:
+        return SlotOrdered().approximation_ratio(xs, ys)
 
-    ratio = SlotOrdered().approximation_ratio(xs, ys)
-    memoization_path.parent.mkdir(parents=True, exist_ok=True)
-    memoization_path.write_text(str(ratio))
-    return ratio
+    return memoized_approximation_ratio(xs, ys)
 
 
 @funsearch.evolve

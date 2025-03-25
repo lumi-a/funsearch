@@ -13,8 +13,6 @@ import funsearch
 @funsearch.run
 def evaluate(n: int) -> float:
     """Returns the approximation-ratio of the gasoline problem."""
-    from pathlib import Path
-
     from funsearch.gasoline.iterative_rounding import SlotOrdered
     from funsearch.memoize import memoize
 
@@ -30,7 +28,6 @@ def evaluate(n: int) -> float:
     xs = [np.clip(np.round(x[:2]), 0, 2**31 - 1) for x in xs[:length]]
     ys = [np.clip(np.round(y[:2]), 0, 2**31 - 1) for y in ys[: length - 1]]
 
-    # Memoize the input. Use a separate file for every input, a single file wouldn't be thread-safe.
     @memoize("gasoline-2d")
     def memoized_approximation_ratio(xs: list[np.ndarray], ys: list[np.ndarray]) -> float:
         return SlotOrdered().approximation_ratio(xs, ys)

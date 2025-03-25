@@ -1,0 +1,831 @@
+{
+  "config":{
+    "inputs":[
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "specification":"\"\"\"I'm trying to find 2D-instances of the k-means clustering problem for which the clustering found by the\ncomplete-linkage-algorithm has a high cost relative to the optimal clustering.\n\nSo far, I have tried the following functions to generate such instances. Please write a similar one that doesn't use randomness and has the same signature, but improves on the objective by slightly changing some lines. Please only respond with code, no explanations.\n\"\"\"\n\nimport numpy as np\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the ratio of the found instance.\n\n    The ratio is the maximum of the ratios for each k in {1,...,n}, where the ratio for a fixed k\n    is the ratio between the cost of the complete-linkage-clustering and the cost of the optimal clustering for\n    k clusters.\n    \"\"\"\n    from clustering_rs import price_of_kmeans_greedy\n\n    points = get_points(n)\n\n    # Assert determinancy\n    if not all(np.array_equal(v1, v2) for v1, v2 in zip(points, get_points(n))):\n        return 0.0\n\n    points_list = [v.tolist() for v in points]\n    # TODO: Separate points more\n    return max(0.0, price_of_kmeans_greedy(points_list))\n\n\n@funsearch.evolve\ndef get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n",
+    "problem_name":"kmeans-2d-greedy",
+    "message":"Start with trivial solution, scored by max of approximation-ratios.\n\nThis doesn't limit the number of returned points yet.\n\nopen-mistral-nemo, temperature 1.5",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1742479142,
+  "highestRunIndex":1013,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3428571428571427,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = i * 2 - 1\n        y = 0\n        points.append(np.array([x, y]))\n        points.append(np.array([x, 1]))\n    return points\n\n"
+        ],
+        [
+          3,
+          1.4000000000000001,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = i * 2.0\n        y = 0\n        points.append(np.array([x, y]))\n        x = i * -2.0\n        y = 0\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          6,
+          1.4651162790697674,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 4.0\n        y = 0\n        points.append(np.array([x, y]))\n        x = i * -4.0\n        y = 0\n        points.append(np.array([x, y]))\n        x = i * 4.0\n        y = 1\n        points.append(np.array([x, y]))\n        x = i * -4.0\n        y = 1\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          8,
+          1.535707574925751,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = i * 2.0\n        y = np.sin(i * np.pi / 5.0)\n        points.append(np.array([x, y]))\n        x = i * -2.0\n        y = -np.sin(i * np.pi / 5.0)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          9,
+          1.7729468599033815,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = i * 2.0 - 1.0\n        y = 0.1 * i\n        points.append(np.array([x, y]))\n        y = -0.1 * i\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          11,
+          2.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = i * 2.0\n        y = 0\n        points.append(np.array([x, y]))\n        x = i * -2.0 + 1.0\n        y = 0\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":876,
+      "failureCount":5
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.377517868745939,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i * 2\n        y = i % 2\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.445578231292517,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 2):\n        x = i // 2\n        y = 1 if i % 2 == 0 else -1\n        points.append(np.array([x, y]))\n    for i in range(1, n, 2):\n        x = i // 2 + 1\n        y = -1 if i % 2 == 0 else 1\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          19,
+          1.4999999999999998,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % (n // 2)\n        y = i // (n // 2)\n        if i < n // 2:\n            y = -y\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          25,
+          1.5417391304347825,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % (n // 2)\n        y = i // (n // 2)\n        if y % 2 == 0:\n            y = y - 1\n        else:\n            y = -y\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          67,
+          1.5549985879694999,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i * 2 + 1\n        y = (n - 1 - i) // (n // 2) * (i % 2 == 0) - (n - 1 - i) // (n // 2) * (i % 2 == 1)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          83,
+          1.6666666666666656,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 2)\n        y = (i % (n // 2)) * 0.05\n        if i < n // 2:\n            y = -y - 0.025\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          137,
+          1.6666666666666665,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v0` and `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 2) + (i % (n // 2)) * 0.01\n        y = (i % (n // 2)) * 0.05 - 0.01 * (i // (n // 2))\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          212,
+          1.857142857142857,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = (i % (n // 2)) / (n // 2 - 1) if i % 2 == 0 else 1 - (i % (n // 2)) / (n // 2 - 1)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          215,
+          1.9493628863695105,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + 0.5 - np.abs(i % (n // 4) - n // 8) * 0.5\n        y = (i % 4) * 0.25 - 1 + np.sin(i / n * np.pi) * 0.25\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          238,
+          1.9576152747167654,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + 0.5 - np.abs(i % (n // 4) - n // 8) * 0.4\n        y = (i % 4) * 0.25 - 1 + np.sin(i / n * np.pi) * 0.35\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          249,
+          1.9603928103355195,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + 0.5 - np.abs(i % (n // 4) - n // 8) * 0.4\n        y = (i % 4) * 0.25 - 1 + np.sin(i / n * np.pi) * 0.2\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          260,
+          1.9716132658797079,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1` with less randomness and more linearity.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + 0.5 - np.abs(i % (n // 4) - n // 8) * 0.5\n        y = (i % 2) * 0.5 - 1 + i // (n // 2) * 0.25\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          294,
+          1.974717074710311,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 - np.abs(i % (n // 4) - n // 8) * 0.55\n        y = (i % 2) * 0.4 - 1 + i // (n // 2) * 0.25\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          322,
+          1.9758854762625964,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + 0.5 - np.abs(i % (n // 4) - n // 8) * 0.2\n        y = (i % 4) * 0.25 - 1 + np.sin(i / n * np.pi) * 0.05\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          330,
+          1.9763550916197832,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 - np.abs(i % (n // 4) - n // 8) * 0.4\n        y = (i % 2) * 0.5 - 1 + i // (n // 2) * 0.25\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          345,
+          1.9781083880826662,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + (i % (n // 8) - n // 16) * 0.7\n        y = (i % 4) * 0.25 - 1 + np.sin(i / n * np.pi) * 0.25 * ((i // (n // 4)) % 2)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          402,
+          1.9783445402884379,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + 0.5 - np.abs(i % (n // 4) - n // 8) * 0.35\n        y = (i % 2) * 0.5 - 1 + i // (n // 2) * 0.25\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          404,
+          1.979122723458302,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + 0.5 - np.abs(i % (n // 4) - n // 8) * 0.3\n        y = (i % 2) * 0.5 - 1 + i // (n // 2) * 0.15\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          437,
+          1.9791256310987344,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 - np.abs(i % (n // 4) - n // 8) * 0.35\n        y = (i % 2) * 0.5 - 1 + i // (n // 2) * 0.3\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          491,
+          1.9849002849002848,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 + (i % (n // 8) - n // 16) * 0.5\n        y = (i % 2) * 0.5 - 1 + i // (n // 2) * 0.25\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          620,
+          1.993275398303331,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // (n // 4) * 4 - np.abs(i % (n // 4) - n // 8) * 0.15 + 0.05 * np.cos(n / 15)\n        y = (i % 2) * 0.3 - 1 + i // (n // 2) * 0.15 + 0.025 * np.sin(n / 10)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":929,
+      "failureCount":0
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.6666666666666663,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 2):\n        x = i / n\n        y = 0\n        points.append(np.array([x, y]))\n    for i in range(1, n, 2):\n        x = i / n\n        y = 1\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          54,
+          1.7350980241471012,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.5 - 0.5 * np.cos(2 * np.pi * x)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          113,
+          1.796048438495857,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2 - 1\n        y = 0.25 if i < n // 4 else (0.5 if i < n * 2 // 4 else 0.75 if i < n * 3 // 4 else 1)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          121,
+          1.7999999999999965,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 3 - 1.5\n        y = 0.5 if i < n // 3 else 1 if i < 2 * n // 3 else 1.5\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          134,
+          1.802010827532869,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2 - 1\n        y = 0.25 if i < n // 4 else (0.5 if i < n * 2 // 4 else 0.75 if i < n * 3 // 4 else 1)\n        points.append(np.array([x, y * 1.1]))  # Slightly shift y-coordinates upwards\n    return points\n\n"
+        ],
+        [
+          158,
+          1.8146753923669423,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2 - 1\n        y = 0.25 if i < n // 4 else (0.5 if i < n * 2 // 4 else 0.75 if i < n * 3 // 4 else 1)\n        points.append(np.array([x, y * 1.2]))  # Further shift y-coordinates upwards\n    return points\n\n"
+        ],
+        [
+          184,
+          1.8161322455182176,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2 - 1\n        y = 0.5 - 0.5 * np.cos(2 * np.pi * (x ** 2 + 0.1 * i))  # Introduce a small offset based on i\n        points.append(np.array([x, y * 1.2]))  # Further shift y-coordinates upwards\n    return points\n\n"
+        ],
+        [
+          225,
+          1.820698151950718,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 2):\n        x = i / (n - 1) * 2 - 1\n        y = 0.25 if i < n // 4 else 0.5 if i < n * 2 // 4 else 0.75 if i < n * 3 // 4 else 1\n        points.append(np.array([x, y * 1.05]))  # Further slightly shift y-coordinates upwards\n        points.append(np.array([x, y * 0.95]))  # Further slightly shift mirror point downwards\n    return points\n\n"
+        ],
+        [
+          272,
+          1.8333333333333328,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = 0 if i < n // 4 else 0.5 if i < n * 2 // 4 else 1 if i < n * 3 // 4 else 1.5\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          342,
+          1.857397504456328,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 4 - 2\n        y = 0 if i < n // 4 else 1 if i < n * 2 // 4 else 2 if i < n * 3 // 4 else 3\n        points.append(np.array([x * 1.1, y * 1.1]))\n    return points\n\n"
+        ],
+        [
+          365,
+          1.9962081826049594,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 4):\n        x = i / (n - 1) * 2.4 - 1.2\n        y1, y2, y3, y4 = [x * 1.05, x * 0.95, x * 1.02, x * 0.98]\n        points.extend([np.array([x, y]) for y in [y1, y2, y3, y4]])\n    return points\n\n"
+        ],
+        [
+          396,
+          1.9967699682347173,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 5):\n        x = i / (n - 1) * 2.5 - 1.25\n        y_values = [x * 1.05, x * 0.95, x * 1.02, x * 0.98, x * 1.03]\n        points.extend([np.array([x, y]) for y in y_values])\n    return points\n\n"
+        ],
+        [
+          397,
+          1.9974714845173227,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(0, n, 5):\n        x = i / (n - 1) * 2.8 - 1.4\n        y1, y2, y3, y4, y5 = [x * 1.03, x * 0.97, x * 1.04, x * 0.96, x * 1.01]\n        points.extend([np.array([x, y]) for y in [y1, y2, y3, y4, y5]])\n    return points\n\n"
+        ],
+        [
+          398,
+          1.9984176758385361,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 3):\n        x = i / (n - 1) * 2.2 - 1.1\n        y1, y2, y3 = [x * 1.03, x * 0.97, x * 1.01]\n        points.extend([np.array([x, y]) for y in [y1, y2, y3]])\n    return points\n\n"
+        ],
+        [
+          405,
+          1.9987359747819158,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Another improved version of `get_points_v0`.\"\"\"\n    points = []\n    for i in range(0, n, 4):\n        x = i / (n - 1) * 2.25 - 1.125\n        y_values = [x * 1.03, x * 0.97, x * 1.01, x * 0.99]\n        points.extend([np.array([x, y]) for y in y_values])\n    return points\n\n"
+        ],
+        [
+          423,
+          1.9994121131592482,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 5):\n        x = i / (n - 1) * 2.9 - 1.45\n        y1, y2, y3, y4, y5 = [x * 1.01, x * 0.99, x * 1.02, x * 0.98, x * 1.015]\n        points.extend([np.array([x, y]) for y in [y1, y2, y3, y4, y5]])\n    return points\n\n"
+        ],
+        [
+          442,
+          1.999999999999985,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 4):\n        x = i / (n - 1) * 2.2 - 1.1\n        y_values = [x * 1.03 + i % 4 * 0.01, x * 0.97 - i % 4 * 0.01, x * 1.01, x * 0.99]\n        points.extend([np.array([x, y]) for y in y_values])\n    return points\n\n"
+        ],
+        [
+          556,
+          1.9999999999999867,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 4):\n        x = i / (n - 1) * 2.5 - 1.25\n        y_values = [\n            x * 1.03 + i % 4 * 0.02,\n            x * 0.97 - i % 4 * 0.02,\n            x * 1.01,\n            x * 0.99\n        ]\n        points.extend([np.array([x, y]) for y in y_values])\n    return points\n\n"
+        ],
+        [
+          595,
+          1.9999999999999933,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 3):\n        x = i / (n - 1) * 2.7 - 1.35\n        y_values = [\n            x * 1.06 + i % 3 * 0.05,  # Further increase separation between clusters\n            x * 0.94 - i % 3 * 0.05,  # Further increase separation between clusters\n            x * 1.02,\n            x * 0.98\n        ]\n        points.extend([np.array([x, y]) for y in y_values])\n    return points\n\n"
+        ],
+        [
+          603,
+          2.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 4):\n        x = i / (n - 1) * 3.4 - 1.7\n        y1, y2, y3, y4 = [x * 1.005, x * 0.995, x * 1.015, x * 0.985]\n        points.extend([np.array([x, y]) for y in [y1, y2, y3, y4]])\n    return points\n\n"
+        ]
+      ],
+      "successCount":944,
+      "failureCount":9
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3866666666666667,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = [np.array([i % n, i // n]) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          3,
+          1.6666666666666665,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = -1 + i * 2 / (n // 2)\n        y = 0\n        points.append(np.array([x, y]))\n        points.append(np.array([x, 1]))\n    return points\n\n"
+        ],
+        [
+          60,
+          1.9890109890109888,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 3):\n        x = -1 + i * 3 / (n // 3)\n        points.append(np.array([x, 0.5 - 0.0125 * i * 2]))  # varying y-coordinate\n        points.append(np.array([x + 0.0125, 0.5 + 0.0125 * i * 2]))  # varying y-coordinate and slight x-shift\n        points.append(np.array([x + 0.025, 0.5]))  # constant y-coordinate and increasing x-shift\n    return points\n\n"
+        ],
+        [
+          97,
+          1.9972814845458307,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 3):\n        x = -1 + i * 3 / (n // 3)\n        points.append(np.array([x, 0.5 - 0.01 * i]))  # slight decrease in y-variation\n        points.append(np.array([x + 0.015, 0.5 + 0.01 * i]))  # slight increase in x-shift and y-variation\n        points.append(np.array([x + 0.03, 0.5]))  # constant y-coordinate and increasing x-shift\n    return points\n\n"
+        ],
+        [
+          123,
+          1.9984663556776792,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 3):\n        x = -1 + i * 3 / (n // 3)\n        points.append(np.array([x, 0.5 - 0.008 * i]))  # further decrease in y-variation\n        points.append(np.array([x + 0.01, 0.5 + 0.008 * i]))  # further decrease in x-shift and y-variation\n        points.append(np.array([x + 0.02, 0.5]))  # constant y-coordinate and increasing x-shift\n    return points\n\n"
+        ],
+        [
+          125,
+          1.9988359245521274,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 3):\n        x = -1 + i * 3 / (n // 3)\n        points.append(np.array([x, 0.5 - 0.005 * i]))  # further decrease in y-variation\n        points.append(np.array([x + 0.01, 0.5 + 0.005 * i]))  # further decrease in x-shift and y-variation\n        points.append(np.array([x + 0.025, 0.5]))  # constant y-coordinate and increasing x-shift\n    return points\n\n"
+        ],
+        [
+          162,
+          1.9993264647393294,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = -1 + i * 4 / (n // 4)\n        y = 0.5 - 0.008 * i  # further decrease in y-variation\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 0.01, y + 0.008 * i]))  # further decrease in x-shift and increase in y-variation\n        points.append(np.array([x + 0.025, y]))  # constant y-coordinate and increasing x-shift\n        points.append(np.array([x + 0.025, y + 0.008 * i]))  # constant x-shift and increase in y-variation\n    return points\n\n"
+        ],
+        [
+          166,
+          1.999775050613612,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = -1 + i * 4 / (n // 4)\n        points.append(np.array([x, 0.5 - 0.0025 * i]))  # further decrease in y-variation\n        points.append(np.array([x + 0.005, 0.5 + 0.0025 * i]))  # further decrease in x-shift and y-variation\n        points.append(np.array([x + 0.0125, 0.5]))  # constant y-coordinate and increasing x-shift\n        points.append(np.array([x + 0.0175, 0.5]))  # constant y-coordinate and further increasing x-shift\n    return points\n\n"
+        ],
+        [
+          182,
+          1.9999999999999962,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = -1 + i * 4 / (n // 4)\n        for j in range(4):\n            y = 0.5 - 0.005 * i * 2 + j * 0.05\n            points.append(np.array([x + j * 0.01, y]))\n    return points\n\n"
+        ],
+        [
+          192,
+          1.9999999999999967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = -1 + i * 4 / (n // 4)\n        for j in range(4):\n            y = 0.5 - 0.005 * i * 2 + j * 0.05\n            points.append(np.array([x + j * 0.01, y + 0.002 * j]))  # added y-shift based on j\n    return points\n\n"
+        ],
+        [
+          314,
+          1.999999999999997,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improvement of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = -1 + i * 4 / (n // 4)\n        for j in range(4):\n            y = 0.5 - 0.001 * i + j * 0.05  # Decrease the rate of change in y further\n            points.append(np.array([x + j * 0.015, y]))  # Decrease x-shift slightly\n    return points\n\n"
+        ],
+        [
+          423,
+          1.9999999999999971,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = -1 + i * 4 / (n // 4) + 0.001 * i  # introduced i dependency in x-shift\n        for j in range(4):\n            y = 0.5 - 0.006 * i * 2 + j * 0.05 + 0.0015 * i + 0.001 * j  # adjusted y-shift and coefficients\n            points.append(np.array([x + j * 0.011, y]))\n    return points\n\n"
+        ],
+        [
+          484,
+          1.9999999999999973,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = -1 + i * 4 / (n // 4)\n        for j in range(4):\n            y = 0.5 - 0.006 * i * 2 + j * 0.06 + np.sin(i * 0.15) * 0.015  # increased y-amplitude, increased sine frequency\n            points.append(np.array([x + j * 0.018, y]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":867,
+      "failureCount":18
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3866666666666667,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i * 2\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          15,
+          1.4411764705882353,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = (i % 4) * 2 - 1  # Alternate between -1, 1, -1, 1\n        y = i // 4  # Alternate between 0, 1\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          27,
+          1.607142857142857,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 2  # Alternate between 0 and 1\n        y = i % 3 * (i % 3 - 1)  # Alternate between -1, 0, and 1\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          104,
+          1.6252062706270627,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % 3  # Alternate between 0, 1, and 2\n        y = i // 3 * (i // 3 - 1) * 2  # Alternate between -2, 0, and 2\n        points.append(np.array([y, x]))\n    return points\n\n"
+        ],
+        [
+          165,
+          1.788405797101449,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = (i % 2) * 2 - 1  # Alternate between -1 and 1\n        y = i // 2 * (i // 2 - 1) * 2  # Alternate between -2, 0, and 2\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          179,
+          1.801169590643275,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 4 * 2 - 1  # Increase spacing between x-coordinates\n        y = i // 2 * (i // 2 - 1) * 2  # Alternate between -2, 0, and 2\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          229,
+          1.8047882136279925,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improvement over `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 4 * 3 - 2  # Increase spacing between x-coordinates\n        y = i // 2 * (i // 2 - 1) * 4  # Further increase spacing between y-coordinates\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          261,
+          1.805774278215223,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 4 * 4 - 2\n        y = i // 2 * (i // 2 - 1) * 6\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          282,
+          1.806599525096209,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 4 * 5 - 2.5  # Increase spacing and shift x-coordinates\n        y = i // 2 * (i // 2 - 1) * 8.5  # Increase spacing and shift y-coordinates\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          328,
+          1.807850029291154,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 4 * 4 - 3  # Further increase spacing between x-coordinates and shift center\n        y = i // 2 * (i // 2 - 1) * 9  # Further increase spacing between y-coordinates\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          361,
+          1.8084844165293181,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 4 * 3.5 - 3  # Increase spacing between x-coordinates\n        y = i // 2 * (i // 2 - 1) * 10  # Further increase spacing between y-coordinates\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          363,
+          1.8085808580858085,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 4 * 4 - 2  # Increase spacing between x-coordinates\n        y = i // 2 * (i // 2 - 1) * 12  # Increase spacing between y-coordinates further\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          430,
+          1.813123116160445,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 3 * 12 - 6  # Further increase spacing\n        y = i // 2 * (i // 2 - 1) * 12 + (i % 3) * 4 - 3  # Further increase spacing, shift y-coordinates and add more noise\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          481,
+          1.8164639461995102,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i // 3 * 15 - 7.5  # Further increase spacing\n        y = i // 2 * (i // 2 - 1) * 15 + (i % 3) * 6 - 4.5  # Further increase spacing, shift y-coordinates and add more noise\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          733,
+          1.999999999999999,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(0, n, 3):\n        x = i // 5 * 7.5 - 5  # Further increase spacing and shift x-coordinates\n        y = i // 3 * (i // 3 - 1) * 15 + 0.1 * i  # Add small random noise to y-coordinates\n        points.append(np.array([x, y]))\n        points.append(np.array([x, y + 0.2]))  # Add a closely spaced point\n        points.append(np.array([x, y + 0.4]))  # Add another closely spaced point\n    return points\n\n"
+        ]
+      ],
+      "successCount":926,
+      "failureCount":3
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % 10 - 5\n        y = i // 10 - 5\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.6666666666666663,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 2):\n        x = i / n\n        y = 0\n        points.append(np.array([x, y]))\n    for i in range(1, n, 2):\n        x = i / n\n        y = 1\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          15,
+          1.6666666666666665,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i * (2.0 / n) - 1.0\n        y = 1 if i % 2 == 0 else -1\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          24,
+          1.6764705882352935,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = [np.array([i / (n // 2), 0]) for i in range(n // 2)]\n    points += [np.array([i / (n // 2), 1]) for i in range(n // 2, n)]\n    return points\n\n"
+        ],
+        [
+          31,
+          1.7350980241471012,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.5 * (1 - np.cos(2 * np.pi * x))\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          111,
+          1.7544393161148264,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = [np.array([i / (n // 2), 0]) for i in range(n)]\n    points = [p + np.array([0, 0.05 * np.sin(i)]) for i, p in enumerate(points)]\n    return points\n\n"
+        ],
+        [
+          218,
+          2.0642423772199887,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13)  # Slightly adjust amplitude and frequency\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          382,
+          2.0705968581659464,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.01 * np.sin(2 * np.pi * x * 7)  # Add another sine wave\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          444,
+          2.0769734266578554,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.6 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.02 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 8.2) + 0.005 * np.sin(2 * np.pi * x * 5.5) + 0.003 * np.sin(2 * np.pi * x * 3.8)  # Add another sine wave with yet another frequency and adjust amplitudes\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          476,
+          2.1224104387421336,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.005 * np.cos(2 * np.pi * x * 7)  # Changed sine to cosine\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          548,
+          2.14056150722306,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.6 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.025 * np.sin(2 * np.pi * x * 13) + 0.015 * np.sin(2 * np.pi * x * 8.5) + 0.0075 * np.sin(2 * np.pi * x * 5) + 0.003 * np.sin(2 * np.pi * x * 25)  # Change frequencies and amplitudes\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          623,
+          2.1485723726962402,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.005 * np.cos(2 * np.pi * x * 7) + 0.005 * np.sin(2 * np.pi * x * 11) + 0.0025 * np.cos(2 * np.pi * x * 17)  # Added another cosine wave\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          642,
+          2.1493392532404285,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.005 * np.cos(2 * np.pi * x * 7) + 0.005 * np.sin(2 * np.pi * x * 11) + 0.0025 * np.cos(2 * np.pi * x * 17) + 0.001 * np.sin(2 * np.pi * x * 19)  # Added another sine wave\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          689,
+          2.1494238344923975,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.005 * np.cos(2 * np.pi * x * 7) + 0.005 * np.sin(2 * np.pi * x * 11) + 0.0025 * np.cos(2 * np.pi * x * 17) + 0.001 * np.sin(2 * np.pi * x * 19) + 0.0005 * np.cos(2 * np.pi * x * 29)  # Added another cosine wave\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          706,
+          2.149718227842939,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.005 * np.cos(2 * np.pi * x * 7) + 0.005 * np.sin(2 * np.pi * x * 11) + 0.0025 * np.cos(2 * np.pi * x * 17) + 0.001 * np.sin(2 * np.pi * x * 19) + 0.0005 * np.sin(2 * np.pi * x * 29)  # Changed to sine wave\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          707,
+          2.1553499186895664,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.005 * np.cos(2 * np.pi * x * 7) + 0.005 * np.sin(2 * np.pi * x * 11) + 0.0025 * np.cos(2 * np.pi * x * 17) + 0.001 * np.sin(2 * np.pi * x * 19) + 0.0005 * np.cos(2 * np.pi * x * 23)  # Changed the last cosine wave frequency\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          756,
+          2.1598060970927198,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.005 * np.cos(2 * np.pi * x * 7) + 0.005 * np.sin(2 * np.pi * x * 11) + 0.0025 * np.cos(2 * np.pi * x * 17) - 0.001 * np.sin(2 * np.pi * x * 19) + 0.001 * np.cos(2 * np.pi * x * 23)  # Added another cosine wave with small amplitude\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          796,
+          2.168952178850892,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.007 * np.cos(2 * np.pi * x * 7) + 0.003 * np.sin(2 * np.pi * x * 11) + 0.002 * np.cos(2 * np.pi * x * 17) + 0.001 * np.sin(2 * np.pi * x * 19) + 0.0007 * np.cos(2 * np.pi * x * 29) + 0.0002 * np.sin(2 * np.pi * x * 31)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          891,
+          2.1740356516234542,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0.55 * (1 - np.cos(2 * np.pi * x * 1.03)) + 0.03 * np.sin(2 * np.pi * x * 13) + 0.01 * np.sin(2 * np.pi * x * 5) + 0.0075 * np.cos(2 * np.pi * x * 7) + 0.005 * np.sin(2 * np.pi * x * 11) + 0.0025 * np.cos(2 * np.pi * x * 17) + 0.0015 * np.sin(2 * np.pi * x * 19) - 0.0005 * np.cos(2 * np.pi * x * 23) + 0.0003 * np.sin(2 * np.pi * x * 29) - 0.0002 * np.cos(2 * np.pi * x * 31) + 0.0001 * np.sin(2 * np.pi * x * 37) - 0.00005 * np.cos(2 * np.pi * x * 41) + 0.000025 * np.sin(2 * np.pi * x * 43) - 0.00001 * np.cos(2 * np.pi * x * 47)  # Added another sine and cosine wave with even smaller amplitude and different frequency\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":883,
+      "failureCount":10
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3999999999999986,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1)\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          6,
+          1.4058674537998974,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * np.pi\n        y = np.sin(x)\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          10,
+          1.4746265108370946,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 4 * np.sin(2 * np.pi * i / n) - 2\n        y = 4 * np.cos(2 * np.pi * i / n) - 2\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          17,
+          1.6666666666666652,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    return [np.array([i/n, (i//(n//2) - 1)**2]) for i in range(n)]\n\n"
+        ],
+        [
+          45,
+          1.9696969696969688,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    return [np.array([i/(n-1), (i*(i//2))%n]) for i in range(n)]\n\n"
+        ],
+        [
+          644,
+          1.9999999999999991,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    return [np.array([i/(n-1), (i*(i//2)%n) + (n-1)//2 + 0.5*(i%2) - 0.5]) for i in range(n)]\n\n"
+        ]
+      ],
+      "successCount":839,
+      "failureCount":3
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3866666666666667,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % n\n        y = i // n\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          5,
+          1.4196975026380585,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = i * 1.1\n        y = 0\n        points.append(np.array([x, y]))\n    for i in range(n // 2, n):\n        x = i * 1.1 - (n - 1) * 1.1\n        y = 1\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          6,
+          1.6666666666666656,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n, 2):\n        x = i / (n / 2)\n        y = 0\n        points.append(np.array([x, y]))\n        points.append(np.array([x, 1]))\n    return points\n\n"
+        ],
+        [
+          21,
+          1.9999999999999998,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(0, n//4):\n        x = i / (n // 4)\n        y = 0\n        points.append(np.array([x, y]))\n        points.append(np.array([x, 1]))\n        points.append(np.array([x + 0.5, y]))\n        points.append(np.array([x + 0.5, 1]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":968,
+      "failureCount":5
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3866666666666667,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % n\n        y = i // n\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          3,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % (n // 2)\n        y = i // (n // 2)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          18,
+          1.5925340030866826,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = (i / (n - 1)) * 2 - 1\n        y = np.sin(x * np.pi)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          33,
+          1.6666666666666654,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = (i / (n - 1)) * 4 - 2\n        y = (i // ((n + 1) // 2)) * 2 - 1\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          34,
+          1.7350980241471015,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = (i / (n - 1)) * 2 - 1\n        y = np.cos(x * np.pi)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          83,
+          1.792732596644817,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = (i / (n - 1)) * 3 - 1.5\n        y = np.sin(x * np.pi)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          102,
+          2.000726022549213,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = np.sin((x + 0.5) * np.pi) * 1.25\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          152,
+          2.0007260225492134,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = np.sin((x + 0.5) * np.pi) * 1.25 + 0.5\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          212,
+          2.009430938461061,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = np.sin((x + 0.5) * np.pi) * 1.25 - 0.05 * (i % 2) / (n - 1)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          230,
+          2.018136109382733,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = np.sin((x + 0.5) * np.pi) * 1.25 - 0.05 * np.sin(i * np.pi / (n - 1))\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          304,
+          2.026508598621997,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = np.sin((x + 0.5) * np.pi) * 1.25 - 0.05 * (i // 3) / (n // 3 - 1)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          364,
+          2.0317845914334627,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.4 - 1.2\n        y = np.sin((x + 0.5) * np.pi) * 1.3 - 0.05 * (i % 4) / (n - 1)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          390,
+          2.0370453977031926,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25 + 0.01 * np.sin((i + 1) / (n - 1) * np.pi) - 0.01 * np.cos((i + 2) / (n - 1) * np.pi)\n        y = np.sin((x + 0.5) * np.pi) * 1.25 + 0.05 * (n - i - 1) / (n - 1) - 0.1 * np.cos((i + 3) / (n - 1) * np.pi) + 0.05 * np.sin((i + 12) / (n - 1) * np.pi) - 0.05 * np.cos((i + 18) / (n - 1) * np.pi)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          498,
+          2.0388078454058935,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25 + 0.01 * np.sin(i / (n - 1) * np.pi) - 0.005 * np.cos(i / (n - 1) * np.pi)\n        y = np.sin((x + 0.5) * np.pi) * 1.25 + 0.05 * (n - i - 1) / (n - 1) - 0.05 * np.cos(i / (n - 1) * np.pi) + 0.05 * np.sin((i + 10) / (n - 1) * np.pi)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          513,
+          2.045505325918656,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25 - 0.01 * np.cos(i / (n - 1) * np.pi)\n        y = np.sin((x + 0.5) * np.pi) * 1.25 - 0.05 * i / (n - 1)\n        if i < n // 2:\n            y += 0.05 * np.sin(i / (n - 1) * np.pi)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          557,
+          2.045512012546436,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = np.sin((x + 0.5) * np.pi) * 1.25 + 0.1 * np.sin((i / (n - 1) + 0.5) * np.pi) + 0.05 * np.abs(i - n // 2) / (n - 1) + 0.02 * np.sin(i / (n - 1) * np.pi * 5)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          585,
+          2.0606889808182864,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = np.sin((x + 0.5) * np.pi) * 1.25 + 0.1 * np.sin((i / (n - 1) + 0.5) * np.pi) + 0.05 * np.abs(i - n // 2) / (n - 1) + 0.03 * np.sin(i / (n - 1) * np.pi * 7)\n        if i % 3 == 0:\n            y += 0.02\n        if i % 5 == 0:\n            y -= 0.02\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          694,
+          2.0621855677183034,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25 + 0.015 * np.cos(i / (n - 1) * np.pi * 2.5)\n        y = np.sin((x + 0.5) * np.pi) * 1.25 + 0.5 - 0.07 * i / (n - 1) - 0.03 * np.sin(i / (n - 1) * np.pi * 1.8)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          726,
+          2.082655585901787,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i / (n - 1) * 2.5 - 1.25\n        y = np.sin((x + 0.5) * np.pi) * 1.25 + 0.1 * np.sin((i / (n - 1) + 0.5) * np.pi) + 0.05 * np.abs(i - n // 2) / (n - 1) + 0.03 * np.sin(i / (n - 1) * np.pi * 7)\n        y += 0.01 * np.sin((i / (n - 1) + 0.8) * np.pi)\n        if i % 3 == 0:\n            y += 0.015\n        if i % 5 == 0:\n            y -= 0.015\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":964,
+      "failureCount":1
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = 0\n        y = 0\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % 10 - 5\n        y = i // 10 - 5\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          3,
+          1.3866666666666667,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % n\n        y = i // n\n        points.append(np.array([x, y]))\n\n    return points\n\n"
+        ],
+        [
+          8,
+          1.4202898550724636,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = (i % 10 - 5) * 1.5 if i % 10 > 5 else (i % 10 - 5)\n        y = (i // 10 - 5) * 1.5 if i // 10 > 5 else (i // 10 - 5)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          9,
+          1.4285714285714286,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of get_points_v0 and get_points_v1.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = i\n        y = i\n        points.append(np.array([x, y]))\n        points.append(np.array([n - x - 1, n - y - 1]))\n\n    if n % 2 == 1:\n        points.append(np.array([n // 2, n // 2]))\n\n    return points\n\n"
+        ],
+        [
+          10,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n):\n        x = i % (n // 2)\n        y = i // (n // 2)\n        points.append(np.array([x, y]))\n    return points\n\n"
+        ],
+        [
+          18,
+          1.6666666666666667,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 2):\n        x = i * 2\n        y = i * 2\n        points.append(np.array([x, y]))\n        points.append(np.array([n - x - 2, n - y - 2]))\n    if n % 2 == 1:\n        points.append(np.array([n // 2 - 1, n // 2 - 1]))\n    return points\n\n"
+        ],
+        [
+          24,
+          1.6934371704388738,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 2\n        y = i * 2\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 1, y + 1]))\n        points.append(np.array([n - x - 2, n - y - 2]))\n        points.append(np.array([n - x - 1, n - y - 1]))\n\n    for i in range(n // 4, n // 2):\n        x = (n // 2) * 2 + i * 2\n        y = (n // 2) * 2 + i * 2\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 1, y + 1]))\n        points.append(np.array([n - x - 2, n - y - 2]))\n        points.append(np.array([n - x - 1, n - y - 1]))\n\n    return points\n\n"
+        ],
+        [
+          33,
+          1.7619047619047619,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 4\n        y = i * 4\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 1, y + 1]))\n        points.append(np.array([n - x - 4, n - y - 4]))\n        points.append(np.array([n - x - 3, n - y - 3]))\n\n        points.append(np.array([x + 2, y + 2]))\n        points.append(np.array([n - x - 2, n - y - 2]))\n        points.append(np.array([x + 3, y + 3]))\n        points.append(np.array([n - x - 1, n - y - 1]))\n\n    return points\n\n"
+        ],
+        [
+          60,
+          1.8019801980198016,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 3):\n        x = i * 3\n        y = i * 3\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 1, y + 1]))\n        points.append(np.array([n - x - 3, n - y - 3]))\n\n        points.append(np.array([x + 2, y + 2]))\n        points.append(np.array([n - x - 2, n - y - 2]))\n        points.append(np.array([x + 2, y + 2]))\n\n    return points\n\n"
+        ],
+        [
+          63,
+          1.8571428571428572,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 4\n        y = i * 4\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 1, y + 1]))\n        points.append(np.array([n - x - 4, n - y - 4]))\n        points.append(np.array([n - x - 3, n - y - 3]))\n\n        points.append(np.array([x + 2, y + 2]))\n        points.append(np.array([n - x - 2, n - y - 2]))\n\n    return points\n\n"
+        ],
+        [
+          73,
+          1.9101123595505614,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 3):\n        x = i * 3\n        y = i * 3\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 1, y + 1]))\n        points.append(np.array([n - x - 3, n - y - 3]))\n    return points\n\n"
+        ],
+        [
+          99,
+          1.9411764705882353,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 4\n        y = i * 4\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 1, y + 1]))\n        points.append(np.array([n - x - 4, n - y - 4]))\n        points.append(np.array([n - x - 3, n - y - 3]))\n    return points\n\n"
+        ],
+        [
+          262,
+          1.9846153846153847,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 4\n        y = i * 4\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 0.5, y + 0.5]))\n        points.append(np.array([n - x - 4, n - y - 4]))\n        points.append(np.array([n - x - 3.5, n - y - 3.5]))\n    return points\n\n"
+        ],
+        [
+          285,
+          1.9987515605493136,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 4\n        y = i * 4\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 0.1, y + 0.1]))\n        points.append(np.array([n - x - 3.9, n - y - 3.9]))\n        points.append(np.array([n - x - 3.8, n - y - 3.8]))\n    return points\n\n"
+        ],
+        [
+          704,
+          1.9990633780830476,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 4\n        y = i * 4\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 0.15, y + 0.15]))\n        points.append(np.array([n - x - 3.9, n - y - 3.9]))\n        points.append(np.array([n - x - 3.85, n - y - 3.85]))\n    return points\n\n"
+        ],
+        [
+          707,
+          2.011824324324327,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 2D.\"\"\"\n    points = []\n    for i in range(n // 4):\n        x = i * 4\n        y = i * 4\n        points.append(np.array([x, y]))\n        points.append(np.array([x + 0.3, y + 0.3]))\n        points.append(np.array([x + 0.7, y + 0.7]))\n        points.append(np.array([n - x - 3, n - y - 3]))\n        points.append(np.array([n - x - 3.3, n - y - 3.3]))\n        points.append(np.array([n - x - 3.7, n - y - 3.7]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":1000,
+      "failureCount":13
+    }
+  ]
+}

@@ -10,6 +10,55 @@
     "3-4-cyclefree_1740604239.json"
   ],
   [
+    "gasoline-2d",
+    1742742210,
+    [
+      8,
+      10,
+      12,
+      14,
+      16
+    ],
+    1.6185365529611055,
+    "Start from trivial, score by mean of approximation-ratios.",
+    "gasoline-2d_1742742210.json"
+  ],
+  [
+    "gasoline-2d",
+    1742804163,
+    [
+      14
+    ],
+    1.7142857142857142,
+    "Start with scaffolding similar to Lucas' 1D solution but still using trivial entries.",
+    "gasoline-2d_1742804163.json"
+  ],
+  [
+    "gasoline-2d",
+    1742807607,
+    [
+      10,
+      14,
+      20,
+      30
+    ],
+    1.7554397357028937,
+    "Mean of approximation-ratios, start with scaffolding similar to Lucas' 1D solution but still using trivial entries.",
+    "gasoline-2d_1742807607.json"
+  ],
+  [
+    "gasoline-2d",
+    1742843055,
+    [
+      10,
+      14,
+      20
+    ],
+    1.794805194805195,
+    "Mean of approximation-ratios, start from Lucas' solution embedded into 2d.",
+    "gasoline-2d_1742843055.json"
+  ],
+  [
     "gasoline-list",
     1740234412,
     [
@@ -246,6 +295,71 @@
     12.537988032194415,
     "Start with trivial.",
     "kmeans-2d-greedy_1742304811.json"
+  ],
+  [
+    "kmeans-2d-greedy",
+    1742479142,
+    [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    2.1740356516234542,
+    "Start with trivial solution, scored by max of approximation-ratios.",
+    "kmeans-2d-greedy_1742479142.json"
+  ],
+  [
+    "kmeans-2d-greedy",
+    1742488706,
+    [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    3.0526824202690137,
+    "Start from good solution, scored by max of approximation-ratios.",
+    "kmeans-2d-greedy_1742488706.json"
+  ],
+  [
+    "kmedian-3d-hierarchy",
+    1742657453,
+    [
+      10,
+      12,
+      14,
+      16,
+      18
+    ],
+    1.25,
+    "Start from trivial, scored by max of approximation-ratios.",
+    "kmedian-3d-hierarchy_1742657453.json"
+  ],
+  [
+    "kmedian-3d-hierarchy",
+    1742896183,
+    [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    1.3656716417910446,
+    "Start from good 1D-solution embedded into 3D, scored by max of approximation-ratios.",
+    "kmedian-3d-hierarchy_1742896183.json"
   ],
   [
     "library",

@@ -1,0 +1,655 @@
+{
+  "config":{
+    "inputs":[
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "specification":"\"\"\"I'm trying to find 3D-instances of the k-median clustering problem for which the best-possible hierarchical\n(nested) clustering has a high cost. The cost of a hierarchical clustering is the maximum of its cost across each\nof its levels. The cost of level `k` is the ratio between its cost and the optimal cost of a k-clustering.\nBecause optimal clusterings need not be nested, the cost of the best-possible hierarchical clustering\ncan exceed 1.0.\n\nSo far, I have tried the following functions to generate sets of points for which the best-possible hierarchical\nclustering has a high cost. Please write a similar one that doesn't use randomness and has the same signature,\nbut improves on the objective by slightly changing some lines. Please only respond with code, no explanations.\n\"\"\"\n\nimport numpy as np\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the ratio of the found instance.\"\"\"\n    from clustering_rs import price_of_kmedian_hierarchy\n\n    points = get_points(n)\n\n    # Assert determinancy\n    if not all(np.array_equal(v1, v2) for v1, v2 in zip(points, get_points(n))):\n        return 0.0\n\n    # TODO: Separate points more\n    points_list = [v.tolist() for v in points[:n]]\n    return max(0.0, price_of_kmedian_hierarchy(points_list))\n\n\n@funsearch.evolve\ndef get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n",
+    "problem_name":"kmedian-3d-hierarchy",
+    "message":"Start from good 1D-solution embedded into 3D, scored by max of approximation-ratios.\n\nopen-mistral-nemo, temperature 1.5",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1742896183,
+  "highestRunIndex":1109,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          58,
+          1.3333160498948178,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0, 0]))\n        points.append(np.array([1 - i * 1e-6, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          204,
+          1.3500404203718677,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(n - 2):\n        points.append(np.array([i * 1e-4 + (i % 3) * 1e-4, (i % 2) * 1e-4, (i % 4) * 1e-4]))\n        points.append(np.array([1 - i * 1e-4 - (i % 3) * 1e-4, (i % 2) * 1e-4, (i % 4) * 1e-4]))\n    return points\n\n"
+        ],
+        [
+          416,
+          1.3505744026751525,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, n - 1):\n        points.append(np.array([i * 1e-5, i % 2 * 1e-4, i * 1e-4]))\n        points.append(np.array([1 - i * 1e-5, i % 2 * 1e-4, -i * 1e-4]))\n    return points\n\n"
+        ],
+        [
+          643,
+          1.351199481305381,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, n - 1, 2):\n        points.append(np.array([i * 1e-5, i * 1e-5, 0]))\n        points.append(np.array([1 - i * 1e-5, i * 1e-5, 0]))\n\n    return points\n\n"
+        ],
+        [
+          804,
+          1.3513512943754658,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 3):\n        points.append(np.array([i * 1e-8, i * 1e-8, 0]))\n        points.append(np.array([1 - i * 1e-8, i * 1e-8, 0]))\n        points.append(np.array([i * 1e-8, 1 - i * 1e-8, 0]))\n        points.append(np.array([1 - i * 1e-8, 1 - i * 1e-8, 0]))\n    return points\n\n"
+        ],
+        [
+          829,
+          1.3653534774254095,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range(1, n - 1):\n        points.append(np.array([i * 1e-6 + 1e-7, i * 1e-5 + 1e-7, (i % 3) * 1e-4 + 1e-7]))\n        points.append(np.array([1 - i * 1e-6 - 1e-7, i * 1e-5 + 1e-7, (i % 3) * 1e-4 + 1e-7]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":1010,
+      "failureCount":3
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.3331975710900474,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 1e-5, 0]))\n        points.append(np.array([1 - i * 1e-5, -1e-5, 0]))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.3333160498948178,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0, 0]))\n        points.append(np.array([1 - i * 1e-6, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          38,
+          1.3333316049433925,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-7, 0, 0]))\n        points.append(np.array([1 - i * 1e-7, 0, 0]))\n    return points\n\n"
+        ],
+        [
+          42,
+          1.3333331604938783,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-8, 0, 0]))\n        points.append(np.array([1 - i * 1e-8, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          48,
+          1.3333333135802479,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, n // 2 + 1):\n        points.append(np.array([i * 1e-9, i * 1e-9, 0]))\n        points.append(np.array([1 - i * 1e-9, -i * 1e-9, 0]))\n    return points\n\n"
+        ],
+        [
+          52,
+          1.3333333160493832,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-9, 0, 0]))\n        points.append(np.array([1 - i * 1e-9, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          55,
+          1.3333333234567903,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-9, i * 1e-9, 0]))\n        points.append(np.array([1 - i * 1e-9, -i * 1e-9, 0]))\n        points.append(np.array([i * 1e-9, 0, i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, 0, -i * 1e-9]))\n    return points\n\n"
+        ],
+        [
+          60,
+          1.3333333311111113,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, n // 2 + 1):\n        points.append(np.array([i * 1e-10, i * 1e-10, i * 1e-10]))\n        points.append(np.array([1 - i * 1e-10, -i * 1e-10, -i * 1e-10]))\n    return points\n\n"
+        ],
+        [
+          65,
+          1.3333333325925927,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-10, i * 1e-10, i * 1e-10]))\n        points.append(np.array([1 - i * 1e-10, -i * 1e-10, -i * 1e-10]))\n        points.append(np.array([i * 1e-10, 0, i * 1e-10]))\n        points.append(np.array([1 - i * 1e-10, 0, -i * 1e-10]))\n        points.append(np.array([i * 1e-10, i * 1e-10, -i * 1e-10]))\n        points.append(np.array([1 - i * 1e-10, -i * 1e-10, i * 1e-10]))\n    return points\n\n"
+        ],
+        [
+          66,
+          1.3333333333259259,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-12, i * 1e-12, i * 1e-12]))\n        points.append(np.array([1 - i * 1e-12, i * 1e-12, i * 1e-12]))\n        points.append(np.array([i * 1e-12, 1 - i * 1e-12, i * 1e-12]))\n        points.append(np.array([i * 1e-12, i * 1e-12, 1 - i * 1e-12]))\n        points.append(np.array([1 - i * 1e-12, 1 - i * 1e-12, i * 1e-12]))\n        points.append(np.array([i * 1e-12, 1 - i * 1e-12, 1 - i * 1e-12]))\n    return points\n\n"
+        ],
+        [
+          91,
+          1.333333333333311,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(n // 2 - 1):\n        points.append(np.array([(i + 1) * 1e-15, (i + 1) * 1e-15, (i + 1) * 1e-15]))\n        points.append(np.array([1 - (i + 1) * 1e-15, -(i + 1) * 1e-15, -(i + 1) * 1e-15]))\n    return points\n\n"
+        ],
+        [
+          100,
+          1.3333333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 6):\n        points.append(np.array([i * 1e-14, i * 1e-14, i * 1e-14]))\n        points.append(np.array([1 - i * 1e-14, i * 1e-14, i * 1e-14]))\n        points.append(np.array([i * 1e-14, 1 - i * 1e-14, i * 1e-14]))\n        points.append(np.array([i * 1e-14, i * 1e-14, 1 - i * 1e-14]))\n        points.append(np.array([1 - i * 1e-14, 1 - i * 1e-14, i * 1e-14]))\n        points.append(np.array([i * 1e-14, 1 - i * 1e-14, 1 - i * 1e-14]))\n        points.append(np.array([i * 1e-14, i * 1e-14, i * 1e-14]))\n        points.append(np.array([1 - i * 1e-14, i * 1e-14, i * 1e-14]))\n    return points\n\n"
+        ],
+        [
+          124,
+          1.3333333333333368,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, n - 2):\n        points.append(np.array([i * 1e-15, i * 1e-15, i * 1e-15]))\n        points.append(np.array([1 - i * 1e-15, i * 1e-15, i * 1e-15]))\n        points.append(np.array([i * 1e-15, 1 - i * 1e-15, i * 1e-15]))\n        points.append(np.array([i * 1e-15, i * 1e-15, 1 - i * 1e-15]))\n        points.append(np.array([1 - i * 1e-15, 1 - i * 1e-15, i * 1e-15]))\n        points.append(np.array([i * 1e-15, 1 - i * 1e-15, 1 - i * 1e-15]))\n        points.append(np.array([i * 1e-15, i * 1e-15, i * 1e-15]))\n        points.append(np.array([1 - i * 1e-15, i * 1e-15, i * 1e-15]))\n        points.append(np.array([i * 1e-15, 1 - i * 1e-15, i * 1e-15]))\n        points.append(np.array([i * 1e-15, i * 1e-15, 1 - i * 1e-15]))\n    return points\n\n"
+        ],
+        [
+          188,
+          1.33333333337049,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, n // 2 + 1):\n        x, y, z = i * 1e-15, i * 1e-13, i * 1e-11\n        points.extend([\n            np.array([x, y, z]),\n            np.array([1 - x, -y, -z]),\n            np.array([x, y, 1 - z]),\n            np.array([1 - x, -y, 1 - z]),\n            np.array([x, 1 - y, z]),\n            np.array([1 - x, y, 1 - z]),\n            np.array([x, y, z]),\n            np.array([1 - x, -y, -z]),\n            np.array([x, 1 - y, z]),\n            np.array([1 - x, y, 1 - z]),\n        ])\n    return points\n\n"
+        ],
+        [
+          259,
+          1.3333333704901233,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, n // 2 + 1):\n        x, y, z = i * 1e-12, i * 1e-10, i * 1e-8\n        points.extend([\n            np.array([x, y, z]),\n            np.array([1 - x, -y, -z]),\n            np.array([x, y, 1 - z]),\n            np.array([1 - x, -y, 1 - z]),\n            np.array([x, 1 - y, z]),\n            np.array([1 - x, y, 1 - z]),\n            np.array([x, y, z]),\n            np.array([1 - x, -y, -z]),\n            np.array([x, 1 - y, z]),\n            np.array([1 - x, y, 1 - z]),\n        ])\n    return points\n\n"
+        ]
+      ],
+      "successCount":1100,
+      "failureCount":9
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.3332963004110654,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 3):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n        points.append(np.array([0, i * 1e-5, 0]))\n\n    return points\n\n"
+        ],
+        [
+          5,
+          1.3333160498948178,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0, 0]))\n        points.append(np.array([1 - i * 1e-6, 0, 0]))\n    return points\n\n"
+        ],
+        [
+          17,
+          1.333323457082753,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-6, i * 1e-6, 0]))\n        points.append(np.array([1 - i * 1e-6, i * 1e-6, 0]))\n        points.append(np.array([i * 1e-6, 1 - i * 1e-6, 0]))\n        points.append(np.array([1 - i * 1e-6, 1 - i * 1e-6, 0]))\n\n    return points\n\n"
+        ],
+        [
+          18,
+          1.3333283951348864,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-6, 0, 0]))\n        points.append(np.array([1 - i * 1e-6, 0, 0]))\n        points.append(np.array([0, i * 1e-6, 0]))\n        points.append(np.array([0, 0, i * 1e-6]))\n\n    return points\n\n"
+        ],
+        [
+          20,
+          1.333329629670781,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 3):\n        points.append(np.array([i * 1e-6, 0, 0]))\n        points.append(np.array([1 - i * 1e-6, 0, 0]))\n        points.append(np.array([0, i * 1e-6, 0]))\n\n    return points\n\n"
+        ],
+        [
+          25,
+          1.3333311111259263,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 6):\n        points.append(np.array([i * 1e-7, i * 1e-7, i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, i * 1e-7, i * 1e-7]))\n        points.append(np.array([i * 1e-7, 1 - i * 1e-7, i * 1e-7]))\n        points.append(np.array([i * 1e-7, i * 1e-7, 1 - i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, 1 - i * 1e-7, i * 1e-7]))\n        points.append(np.array([i * 1e-7, 1 - i * 1e-7, 1 - i * 1e-7]))\n\n    return points\n\n"
+        ],
+        [
+          30,
+          1.3333328395069044,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-7, 0, 0]))\n        points.append(np.array([1 - i * 1e-7, 0, 0]))\n        points.append(np.array([0, i * 1e-7, 0]))\n        points.append(np.array([0, 0, i * 1e-7]))\n\n    return points\n\n"
+        ],
+        [
+          44,
+          1.3333333111111125,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 6):\n        points.append(np.array([i * 1e-9, i * 1e-9, i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, -i * 1e-9, -i * 1e-9]))\n        points.append(np.array([-i * 1e-9, 1 - i * 1e-9, -i * 1e-9]))\n        points.append(np.array([-i * 1e-9, -i * 1e-9, 1 - i * 1e-9]))\n        points.append(np.array([i * 1e-9, -i * 1e-9, 1 - i * 1e-9]))\n        points.append(np.array([-i * 1e-9, i * 1e-9, 1 - i * 1e-9]))\n\n    return points\n\n"
+        ],
+        [
+          58,
+          1.3333333185185194,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-9, i * 1e-9, i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, i * 1e-9, -i * 1e-9]))\n        points.append(np.array([i * 1e-9, 1 - i * 1e-9, i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, 1 - i * 1e-9, -i * 1e-9]))\n\n    return points\n\n"
+        ],
+        [
+          59,
+          1.333333328395062,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 8):\n        points.append(np.array([i * 1e-9, i * 1e-9, 0]))\n        points.append(np.array([1 - i * 1e-9, i * 1e-9, 0]))\n        points.append(np.array([i * 1e-9, 1 - i * 1e-9, 0]))\n        points.append(np.array([1 - i * 1e-9, 1 - i * 1e-9, 0]))\n        points.append(np.array([i * 1e-9, i * 1e-9, 1e-9]))\n        points.append(np.array([1 - i * 1e-9, i * 1e-9, 1e-9]))\n        points.append(np.array([i * 1e-9, 1 - i * 1e-9, 1e-9]))\n        points.append(np.array([1 - i * 1e-9, 1 - i * 1e-9, 1e-9]))\n    return points\n\n"
+        ],
+        [
+          60,
+          1.3333333308641977,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 6):\n        points.append(np.array([i * 1e-9, i * 1e-9, 0]))\n        points.append(np.array([1 - i * 1e-9, i * 1e-9, 0]))\n        points.append(np.array([i * 1e-9, 1 - i * 1e-9, 0]))\n        points.append(np.array([1 - i * 1e-9, 1 - i * 1e-9, 0]))\n        points.append(np.array([i * 1e-9, i * 1e-9, 1e-9]))\n        points.append(np.array([1 - i * 1e-9, i * 1e-9, 1e-9]))\n    return points\n\n"
+        ],
+        [
+          70,
+          1.3333333318518517,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-10, i * 1e-10, i * 1e-10]))\n        points.append(np.array([1 - i * 1e-10, i * 1e-10, i * 1e-10]))\n        points.append(np.array([i * 1e-10, 1 - i * 1e-10, i * 1e-10]))\n        points.append(np.array([1 - i * 1e-10, 1 - i * 1e-10, i * 1e-10]))\n\n    return points\n\n"
+        ],
+        [
+          98,
+          1.3333333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 10):\n        points.append(np.array([i * 1e-9, i * 1e-9, i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, i * 1e-9, i * 1e-9]))\n        points.append(np.array([i * 1e-9, 1 - i * 1e-9, i * 1e-9]))\n        points.append(np.array([i * 1e-9, i * 1e-9, 1 - i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, 1 - i * 1e-9, i * 1e-9]))\n        points.append(np.array([i * 1e-9, 1 - i * 1e-9, 1 - i * 1e-9]))\n        points.append(np.array([i * 1e-9, i * 1e-9, i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, i * 1e-9, i * 1e-9]))\n        points.append(np.array([i * 1e-9, 1 - i * 1e-9, i * 1e-9]))\n        points.append(np.array([i * 1e-9, i * 1e-9, 1 - i * 1e-9]))\n\n    return points\n\n"
+        ],
+        [
+          234,
+          1.3333333333370367,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 6):\n        points.append(np.array([i * 1e-9, i * 1e-9, i * 1e-8 + 1e-12]))\n        points.append(np.array([1 - i * 1e-9, i * 1e-9, i * 1e-8 + 1e-12]))\n        points.append(np.array([i * 1e-9, 1 - i * 1e-9, i * 1e-8 + 1e-12]))\n        points.append(np.array([1 - i * 1e-9, 1 - i * 1e-9, i * 1e-8 + 1e-12]))\n        points.append(np.array([i * 1e-9, 0, i * 1e-8 + 1e-12]))\n        points.append(np.array([1 - i * 1e-9, 0, i * 1e-8 + 1e-12]))\n    return points\n\n"
+        ],
+        [
+          238,
+          1.351350368884388,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-7, i * 1e-7, i * 1e-7]))\n        points.append(np.array([i * 1e-7, i * 1e-7, 1 - i * 1e-7]))\n        points.append(np.array([i * 1e-7, 1 - i * 1e-7, i * 1e-7]))\n        points.append(np.array([i * 1e-7, 1 - i * 1e-7, 1 - i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, i * 1e-7, i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, i * 1e-7, 1 - i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, 1 - i * 1e-7, i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, 1 - i * 1e-7, 1 - i * 1e-7]))\n    return points\n\n"
+        ],
+        [
+          1001,
+          1.3513513513385524,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 3):\n        points.append(np.array([i * 1e-12, i * 1e-12, i * 1e-12]))\n        points.append(np.array([1 - i * 1e-12, i * 1e-12, i * 1e-12]))\n        points.append(np.array([i * 1e-12, 1 - i * 1e-12, i * 1e-12]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":986,
+      "failureCount":19
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          3,
+          1.3333160498948178,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0, 0]))\n        points.append(np.array([1 - i * 1e-6, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          10,
+          1.3333313580363968,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-7, 0, i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, 0, -i * 1e-7]))\n\n    return points\n\n"
+        ],
+        [
+          21,
+          1.3333333135802479,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-9, 0, i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, 0, -i * 1e-9]))\n    return points\n\n"
+        ],
+        [
+          35,
+          1.343915343915344,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-3, 0, i * 1e-3]))\n        points.append(np.array([1 - i * 1e-3, 0, -i * 1e-3]))\n\n    return points\n\n"
+        ],
+        [
+          109,
+          1.3513513513513513,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-20, i * 1e-20 * 0.866, i * 1e-20]))\n        points.append(np.array([1 - i * 1e-20, -i * 1e-20 * 0.866, -i * 1e-20]))\n    return points\n\n"
+        ],
+        [
+          387,
+          1.3656716417910033,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-15, i * 1e-15 * np.sqrt(3) * 0.9, i * 1e-15 * np.sqrt(6) * 0.9]))\n        points.append(np.array([1 - i * 1e-15, -i * 1e-15 * np.sqrt(3) * 0.9, -i * 1e-15 * np.sqrt(6) * 0.9]))\n    return points\n\n"
+        ],
+        [
+          410,
+          1.3656716417910038,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-15, i * 1e-15 * np.sqrt(3) * 0.866, i * 1e-15 * np.sqrt(6) * 0.866]))\n        points.append(np.array([1 - i * 1e-15, -i * 1e-15 * np.sqrt(3) * 0.866, -i * 1e-15 * np.sqrt(6) * 0.866]))\n    return points\n\n"
+        ],
+        [
+          411,
+          1.365671641791006,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-15, i * 1e-15 * np.sqrt(3) * 0.8, i * 1e-15 * np.sqrt(6) * 0.8]))\n        points.append(np.array([1 - i * 1e-15, -i * 1e-15 * np.sqrt(3) * 0.8, -i * 1e-15 * np.sqrt(6) * 0.8]))\n    return points\n\n"
+        ],
+        [
+          437,
+          1.3656716417910104,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Even better version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-15, i * 1e-15 * np.sqrt(2) * 0.866, i * 1e-15 * np.sqrt(3) * 0.866]))\n        points.append(np.array([1 - i * 1e-15, -i * 1e-15 * np.sqrt(2) * 0.866, -i * 1e-15 * np.sqrt(3) * 0.866]))\n    return points\n\n"
+        ],
+        [
+          438,
+          1.365671641791013,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        r = i * 1e-15\n        points.append(np.array([r, r * 0.866, r * np.sqrt(3) * 0.866]))\n        points.append(np.array([1 - r, -r * 0.866, -r * np.sqrt(3) * 0.866]))\n    return points\n\n"
+        ],
+        [
+          439,
+          1.3656716417910406,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-16, i * 1e-16 * np.sqrt(3) * 0.866, i * 1e-16 * np.sqrt(6) * 0.866]))\n        points.append(np.array([1 - i * 1e-16, -i * 1e-16 * np.sqrt(3) * 0.866, -i * 1e-16 * np.sqrt(6) * 0.866]))\n    return points + [np.array([0.5, 0, 0])] * ((n - len(points)) // 2)\n\n"
+        ],
+        [
+          640,
+          1.3656716417910442,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-17, i * 1e-17 * np.sqrt(3) * 0.866, i * 1e-17 * np.sqrt(6) * 0.866]))\n        points.append(np.array([1 - i * 1e-17, -i * 1e-17 * np.sqrt(3) * 0.866, -i * 1e-17 * np.sqrt(6) * 0.866]))\n    return points + [np.array([0.5, 0, 0])] * ((n - len(points)) // 2)\n\n"
+        ],
+        [
+          737,
+          1.3656716417910444,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-17, i * 1e-17 * np.sqrt(3) * 0.866, (i * 1e-17) ** 2 * np.sqrt(6) * 0.866]))\n        points.append(np.array([1 - i * 1e-17, -i * 1e-17 * np.sqrt(3) * 0.866, -(i * 1e-17) ** 2 * np.sqrt(6) * 0.866]))\n    return points + [np.array([0.5, 0, 0])] * ((n - len(points)) // 2)\n\n"
+        ],
+        [
+          739,
+          1.3656716417910446,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-18, i * 1e-18 * np.sqrt(3) * 0.866, i * 1e-18 * np.sqrt(6) * 0.866]))\n        points.append(np.array([1 - i * 1e-18, -i * 1e-18 * np.sqrt(3) * 0.866, -i * 1e-18 * np.sqrt(6) * 0.866]))\n    return points + [np.array([0.5, 0, 0])] * ((n - len(points)) // 2)\n\n"
+        ]
+      ],
+      "successCount":1017,
+      "failureCount":4
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          15,
+          1.3332345971563984,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 3):\n        points.append(np.array([i * 1e-5, i * 1e-5, 0]))\n        points.append(np.array([1 - i * 1e-5, 1 - i * 1e-5, 0]))\n        points.append(np.array([i * 1e-5, 1 - i * 1e-5, 0]))\n        points.append(np.array([1 - i * 1e-5, i * 1e-5, 0]))\n\n    return points\n\n"
+        ],
+        [
+          63,
+          1.333274084607181,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-6, i * 1e-5 * (i % 2), i * 1e-6 * (i % 2)]))\n        points.append(np.array([1 - i * 1e-6, -i * 1e-5 * (i % 2), -i * 1e-6 * (i % 2)]))\n        points.append(np.array([i * 1e-6, 1 - i * 1e-5 * (i % 2), i * 1e-6 * (i % 2)]))\n        points.append(np.array([1 - i * 1e-6, i * 1e-5 * (i % 2), -i * 1e-6 * (i % 2)]))\n\n    return points\n\n"
+        ],
+        [
+          105,
+          1.3333207411884613,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-7, i * 1e-6 * (i % 2), i * 1e-7 * (i % 2)]))\n        points.append(np.array([1 - i * 1e-7, -i * 1e-6 * (i % 2), -i * 1e-7 * (i % 2)]))\n    return points\n\n"
+        ],
+        [
+          147,
+          1.3333333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(2, n):\n        points.append(np.array([i * 1e-7, i * 1e-6, i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, -i * 1e-6, -i * 1e-7]))\n    return points\n\n"
+        ],
+        [
+          192,
+          1.3335767769540037,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(2, n - 1):\n        points.append(np.array([i * 1e-6, i * 1e-5, i * 1e-4]))  # Increase separation and size variation\n        points.append(np.array([1 - i * 1e-6, -i * 1e-5, -i * 1e-4]))  # Increase separation and size variation\n    if n % 2 == 1:\n        points.append(np.array([0.5, 0, 0]))\n    return points\n\n"
+        ],
+        [
+          315,
+          1.3357109706900856,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(2, n - 1):\n        points.append(np.array([i * 1e-6, i * 1e-5, i * 1e-3]))  # Increase size variation and separation in z-axis\n        points.append(np.array([1 - i * 1e-6, -i * 1e-5, -i * 1e-3]))  # Increase size variation and separation in z-axis\n    if n % 2 == 1:\n        points.append(np.array([0.5, 0, 0]))\n    return points\n\n"
+        ],
+        [
+          1003,
+          1.3358839819268324,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, (n - 2) // 2):\n        points.append(np.array([i * 1e-5, i * 1e-4, i * 1e-3]))  # Decrease y offset and increase z offset\n        points.append(np.array([1 - i * 1e-5, -i * 1e-4, -(i * 1e-3)]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":1069,
+      "failureCount":8
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          5,
+          1.3332963004110654,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 3):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n        points.append(np.array([0, i * 1e-5, 0]))\n\n    return points\n\n"
+        ],
+        [
+          47,
+          1.33332469158207,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 3):\n        points.append(np.array([i * 1e-6, 0, i * 1e-6]))\n        points.append(np.array([1 - i * 1e-6, 0, -i * 1e-6]))\n        points.append(np.array([i * 1e-6, i * 1e-6, i * 1e-6]))\n    return points\n\n"
+        ],
+        [
+          98,
+          1.3336610135667004,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(2, n):\n        points.append(np.array([i * 1e-5, i * 1e-6, i * 1e-4 + i * 1e-6 * (i + 1)]))\n        points.append(np.array([i * 1e-5, 1 - i * 1e-6, i * 1e-4 + i * 1e-6 * (i + 1)]))\n        points.append(np.array([1 - i * 1e-5, i * 1e-6, -(i * 1e-4 + i * 1e-6 * (i + 1))]))\n    return points\n\n"
+        ],
+        [
+          129,
+          1.3336782777418459,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(2, n):\n        points.append(np.array([i * 1e-5, i * 1e-6, i * 1e-4 + i * 1e-6 * (i + 1)]))\n        points.append(np.array([i * 1e-5, 1 - i * 1e-6, i * 1e-4]))\n        points.append(np.array([1 - i * 1e-5, i * 1e-6, -(i * 1e-4 + i * 1e-6 * (i + 1))]))\n    return points\n\n"
+        ],
+        [
+          146,
+          1.333973766857565,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(2, n):\n        points.append(np.array([i * 1e-5, i * 1e-5, i * 1e-4 + i * 1e-5 * i]))\n        points.append(np.array([1 - i * 1e-5, i * 1e-5, i * 1e-4 - i * 1e-5 * i]))\n        points.append(np.array([i * 1e-5, 1 - i * 1e-5, -(i * 1e-4 + i * 1e-5 * i)]))\n    return points\n\n"
+        ],
+        [
+          227,
+          1.3345702997096764,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(2, n):\n        points.append(np.array([i * 1e-5, i * 1e-6, i * 1e-4 * (i + 1)]))  # Increase z-coordinate separation\n        points.append(np.array([i * 1e-5, 1 - i * 1e-6, -i * 1e-4 * (i + 1)]))  # Increase z-coordinate separation\n        points.append(np.array([i * 1e-5, i * 1e-6, i * 1e-3]))  # Add new point with smaller z-coordinate\n        points.append(np.array([1 - i * 1e-5, i * 1e-6, -i * 1e-3]))  # Add new point with smaller z-coordinate\n    return points\n\n"
+        ],
+        [
+          446,
+          1.3365269461077842,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(2, n):\n        points.append(np.array([i * 1e-4, i * 1e-5, i * 1e-3]))\n        points.append(np.array([1 - i * 1e-4, i * 1e-5, i * 1e-3]))\n        points.append(np.array([i * 1e-4, 1 - i * 1e-5, -i * 1e-3]))\n        points.append(np.array([1 - i * 1e-4, 1 - i * 1e-5, -i * 1e-3]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":911,
+      "failureCount":2
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.3333160498948178,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0, 0]))\n        points.append(np.array([1 - i * 1e-6, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          14,
+          1.3333316049433925,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-7, 0, 0]))\n        points.append(np.array([1 - i * 1e-7, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          22,
+          1.3333331604938783,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-8, 0, 0]))\n        points.append(np.array([1 - i * 1e-8, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          25,
+          1.3333333160493839,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-9, np.sin(i * np.pi), 0]))\n        points.append(np.array([1 - i * 1e-9, -np.sin(i * np.pi), 0]))\n\n    return points\n\n"
+        ],
+        [
+          71,
+          1.3333333209876543,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-9, np.sin(i * np.pi / 2), 0]))\n        points.append(np.array([1 - i * 1e-9, -np.sin(i * np.pi / 2), 0]))\n\n    return points\n\n"
+        ],
+        [
+          74,
+          1.3333333316049174,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-10, np.sin(i * np.pi * 10), 0]))\n        points.append(np.array([1 - i * 1e-10, -np.sin(i * np.pi * 10), 0]))\n\n    return points\n\n"
+        ],
+        [
+          87,
+          1.3333333333135802,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-12, 0, i * 1e-12]))\n        points.append(np.array([1 - i * 1e-12, 0, -i * 1e-12]))\n\n    return points\n\n"
+        ],
+        [
+          101,
+          1.3333333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-18, i * 1e-18, 0]))\n        points.append(np.array([1 - i * 1e-18, -i * 1e-18, 0]))\n\n    return points\n\n"
+        ],
+        [
+          114,
+          1.3513513502440961,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-10, np.sqrt(3) * 1e-10 * i, 0]))\n        points.append(np.array([1 - i * 1e-10, -np.sqrt(3) * 1e-10 * i, 0]))\n\n    return points\n\n"
+        ],
+        [
+          310,
+          1.3513513512753659,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, (n - 1) // 2 + 1):\n        points.append(np.array([i * 1e-11, np.sin(i * np.pi * 13), i * 1e-11]))\n        points.append(np.array([1 - i * 1e-11, -np.sin(i * np.pi * 13), -i * 1e-11]))\n    return points\n\n"
+        ],
+        [
+          835,
+          1.3513513513513484,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-16, 2 * 1e-16 * i, i * 1e-16]))\n        points.append(np.array([1 - i * 1e-16, -2 * 1e-16 * i, -i * 1e-16]))\n\n    return points\n\n"
+        ]
+      ],
+      "successCount":900,
+      "failureCount":6
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          28,
+          1.333307409711729,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, i * 1e-6, i * 1e-6]))\n        points.append(np.array([1 - i * 1e-6, -i * 1e-6, -i * 1e-6]))\n    return points\n\n"
+        ],
+        [
+          31,
+          1.333318519176925,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, i * 1e-6, i * 1e-6]))\n        points.append(np.array([1 - i * 1e-6, -i * 1e-6, -i * 1e-6]))\n        points.append(np.array([i * 1e-6, -i * 1e-6, i * 1e-6]))\n        points.append(np.array([1 - i * 1e-6, i * 1e-6, -i * 1e-6]))\n    return points\n\n"
+        ],
+        [
+          32,
+          1.3333296297942308,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4, n // 2):\n        points.append(np.array([i * 1e-6, i * 1e-6, i * 1e-6]))\n        points.append(np.array([1 - i * 1e-6, -i * 1e-6, -i * 1e-6]))\n    return points\n\n"
+        ],
+        [
+          38,
+          1.333331111130864,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, (n - 2) // 2 + 1):\n        points.append(np.array([i * 1e-7, i * 1e-7, i * 1e-7]))\n        points.append(np.array([1 - i * 1e-7, -i * 1e-7, -i * 1e-7]))\n    return points\n\n"
+        ],
+        [
+          45,
+          1.3333333259259263,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, (n - 3) // 2 + 1):\n        points.append(np.array([i * 1e-9, i * 1e-9, i * 1e-9]))\n        points.append(np.array([1 - i * 1e-9, -i * 1e-9, -i * 1e-9]))\n    return points\n\n"
+        ],
+        [
+          77,
+          1.333333330740741,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-10, i * 1e-10, i * 1e-10]))\n        points.append(np.array([1 - i * 1e-10, -i * 1e-10, -i * 1e-10]))\n    points.append(np.array([0.5, 0, 1e-10]))\n    return points\n\n"
+        ],
+        [
+          85,
+          1.3333333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 6):\n        points.extend([\n            np.array([i * 1e-7, i * 1e-7, i * 1e-7]),\n            np.array([1 - i * 1e-7, -i * 1e-7, -i * 1e-7]),\n            np.array([i * 1e-7, -i * 1e-7, i * 1e-7]),\n            np.array([1 - i * 1e-7, i * 1e-7, -i * 1e-7]),\n            np.array([i * 1e-7, i * 1e-7, -i * 1e-7]),\n            np.array([1 - i * 1e-7, -i * 1e-7, i * 1e-7]),\n        ])\n    return points\n\n"
+        ],
+        [
+          158,
+          1.333333333382716,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 5, n // 3):\n        points.append(np.array([i * 1e-7, i * 1e-7, i * 1e-7 * 1.0001]))  # Further decrease z-coordinate\n        points.append(np.array([1 - i * 1e-7, -i * 1e-7, -(i * 1e-7 * 1.0001)]))\n    return points\n\n"
+        ],
+        [
+          212,
+          1.3333357036678855,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, (n - 2) // 3 + 1):\n        points.append(np.array([i * 1e-8, i * 1e-8, i * 1e-6]))\n        points.append(np.array([1 - i * 1e-8, -i * 1e-8, -i * 1e-6]))\n    return points\n\n"
+        ],
+        [
+          308,
+          1.3513512468955757,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range(1, n // 4 + 1):\n        points.append(np.array([i * 1e-8, i * 1e-8, i * 1e-8]))\n        points.append(np.array([1 - i * 1e-8, -i * 1e-8, -i * 1e-8]))\n        points.append(np.array([i * 1e-8, -i * 1e-8, i * 1e-8]))\n        points.append(np.array([1 - i * 1e-8, i * 1e-8, -i * 1e-8]))\n    return points\n\n"
+        ],
+        [
+          417,
+          1.3513513227589504,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Slightly improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.37, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-8, i * 1e-8, i * 1e-8 * 1.011]))  # Further increase z-coordinate\n        points.append(np.array([1 - i * 1e-8, -i * 1e-8, -i * 1e-8 * 1.011]))\n        points.append(np.array([i * 1e-8, -i * 1e-8, i * 1e-8 * 1.011]))\n        points.append(np.array([1 - i * 1e-8, i * 1e-8, -i * 1e-8 * 1.011]))\n        points.append(np.array([i * 1e-8, i * 1e-8, -i * 1e-8 * 1.011]))\n        points.append(np.array([1 - i * 1e-8, -i * 1e-8, i * 1e-8 * 1.011]))\n    return points\n\n"
+        ],
+        [
+          422,
+          1.3518518518518516,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.365, 0, 0]),\n        np.array([0.635, 0, 0]),\n    ]\n    for i in range((n - 2) // 6):\n        points.append(np.array([i * 1e-14, i * 1e-14, i * 1e-14 * 1.000001]))  # Further decrease the increment and use 1.000001\n        points.append(np.array([1 - i * 1e-14, -i * 1e-14, -(i * 1e-14 * 1.000001)]))\n        points.extend([\n            np.array([i * 1e-14, -i * 1e-14, i * 1e-14 * 1.000001]),\n            np.array([1 - i * 1e-14, i * 1e-14, -(i * 1e-14 * 1.000001)]),\n            np.array([i * 1e-14, i * 1e-14, -(i * 1e-14 * 1.000001)]),\n            np.array([1 - i * 1e-14, -i * 1e-14, i * 1e-14 * 1.000001]),\n            np.array([i * 1e-14, i * 1e-14, i * 1e-14 * 1.000001]),\n        ])\n    return points\n\n"
+        ],
+        [
+          825,
+          1.3656716417910446,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range((n - 2) // 6):\n        points.append(np.array([i * 1e-15, i * 1e-15, i * 1e-15 * 1.00000001]))  # Further improve precision\n        points.append(np.array([1 - i * 1e-15, -i * 1e-15, -(i * 1e-15 * 1.00000001)]))\n        points.extend([\n            np.array([i * 1e-15, -i * 1e-15, i * 1e-15 * 1.00000001]),\n            np.array([1 - i * 1e-15, i * 1e-15, -(i * 1e-15 * 1.00000001)]),\n            np.array([i * 1e-15, i * 1e-15, -(i * 1e-15 * 1.00000001)]),\n            np.array([1 - i * 1e-15, -i * 1e-15, i * 1e-15 * 1.00000001]),\n            np.array([i * 1e-15, i * 1e-15, i * 1e-15 * 1.00000001]),\n        ])\n    return points\n\n"
+        ]
+      ],
+      "successCount":993,
+      "failureCount":4
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          19,
+          1.3333160498948178,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0, 0]))\n        points.append(np.array([1 - i * 1e-6, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          34,
+          1.3333316049433925,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-7, 0, 0]))\n        points.append(np.array([1 - i * 1e-7, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          57,
+          1.3333333316049383,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-10, 0, 0]))\n        points.append(np.array([1 - i * 1e-10, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          86,
+          1.3333333333160489,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-12, 0, 0]))\n        points.append(np.array([1 - i * 1e-12, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          153,
+          1.3370196438624038,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0.001, 0]))\n        points.append(np.array([1 - i * 1e-6, -0.001, 0]))\n    return points\n\n"
+        ],
+        [
+          168,
+          1.34072323782999,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0.001, 0.001]))\n        points.append(np.array([1 - i * 1e-6, -0.001, -0.001]))\n\n    return points\n\n"
+        ],
+        [
+          348,
+          1.344426831797576,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-6, 0.001, 0.002]))\n        points.append(np.array([1 - i * 1e-6, -0.001, -0.002]))\n\n    return points\n\n"
+        ],
+        [
+          425,
+          1.3466664817778762,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-7, 0.01, 0]))\n        points.append(np.array([1 - i * 1e-7, -0.01, 0]))\n    return points\n\n"
+        ],
+        [
+          586,
+          1.351851831001373,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.365, 0, 0]),\n        np.array([0.635, 0, 0]),\n    ]\n    for i in range(1, n // 2 + 1):\n        points.append(np.array([i * 1e-9, i * 1e-9, 0]))\n        points.append(np.array([1 - i * 1e-9, -i * 1e-9, 0]))\n    return points\n\n"
+        ],
+        [
+          674,
+          1.365671639262642,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.366, 0, 0]),\n        np.array([0.634, 0, 0]),\n    ]\n    for i in range(1, n // 2 + 1):\n        points.append(np.array([i * 1e-10, i * 1e-10, i * 1e-10]))\n        points.append(np.array([1 - i * 1e-10, -i * 1e-10, -i * 1e-10]))\n    return points + [np.array([0.5, i * 1e-4, i * 1e-4]) for i in range(1, n // 2 + 1)]\n\n"
+        ]
+      ],
+      "successCount":1004,
+      "failureCount":5
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.3331605450236967,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, 0, 0]))\n        points.append(np.array([1 - i * 1e-5, 0, 0]))\n\n    return points\n\n"
+        ],
+        [
+          5,
+          1.3332345971563984,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([i * 1e-5, i * 1e-5, 0]))\n        points.append(np.array([1 - i * 1e-5, 1 - i * 1e-5, 0]))\n        points.append(np.array([i * 1e-5, 1 - i * 1e-5, 0]))\n        points.append(np.array([1 - i * 1e-5, i * 1e-5, 0]))\n\n    return points\n\n"
+        ],
+        [
+          31,
+          1.3333222224691303,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 2):\n        points.append(np.array([(i + 1) * 1e-6, 0, 0]))\n        points.append(np.array([1 - (i + 1) * 1e-6, 0, 0]))\n        points.append(np.array([0, (i + 1) * 1e-6, 0]))\n        points.append(np.array([0, 1 - (i + 1) * 1e-6, 0]))\n        points.append(np.array([0, 0, (i + 1) * 1e-6]))\n        points.append(np.array([0, 0, 1 - (i + 1) * 1e-6]))\n    return points\n\n"
+        ],
+        [
+          60,
+          1.333332222224691,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 3):\n        points.append(np.array([(i + 1) * 1e-7, 0, 0]))\n        points.append(np.array([1 - (i + 1) * 1e-7, 0, 0]))\n        points.append(np.array([0, (i + 1) * 1e-7, 0]))\n        points.append(np.array([0, 1 - (i + 1) * 1e-7, 0]))\n        points.append(np.array([0, 0, (i + 1) * 1e-7]))\n        points.append(np.array([0, 0, 1 - (i + 1) * 1e-7]))\n    return points\n\n"
+        ],
+        [
+          67,
+          1.3333333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 8):\n        points.extend([\n            np.array([i * 1e-5, i * 1e-5, i * 1e-5]),\n            np.array([i * 1e-5, i * 1e-5, 1 - i * 1e-5]),\n            np.array([i * 1e-5, 1 - i * 1e-5, i * 1e-5]),\n            np.array([i * 1e-5, 1 - i * 1e-5, 1 - i * 1e-5]),\n            np.array([1 - i * 1e-5, i * 1e-5, i * 1e-5]),\n            np.array([1 - i * 1e-5, i * 1e-5, 1 - i * 1e-5]),\n            np.array([1 - i * 1e-5, 1 - i * 1e-5, i * 1e-5]),\n            np.array([1 - i * 1e-5, 1 - i * 1e-5, 1 - i * 1e-5]),\n            np.array([i * 1e-5, i * 1e-5, 0]),\n            np.array([i * 1e-5, 1 - i * 1e-5, 0]),\n            np.array([1 - i * 1e-5, i * 1e-5, 0]),\n            np.array([1 - i * 1e-5, 1 - i * 1e-5, 0]),\n        ])\n    return points\n\n"
+        ],
+        [
+          236,
+          1.3466652906710699,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 3D.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([0.36, 0, 0]),\n        np.array([0.63, 0, 0]),\n    ]\n    for i in range((n - 2) // 4):\n        points.append(np.array([i * 1e-7, i * 1e-7, i * 1e-7 * 4 + 0.01]))\n        points.append(np.array([1 - i * 1e-7, i * 1e-7, i * 1e-7 * 4 + 0.01]))\n        points.append(np.array([i * 1e-7, 1 - i * 1e-7, i * 1e-7 * 4 + 0.01]))\n        points.append(np.array([1 - i * 1e-7, 1 - i * 1e-7, i * 1e-7 * 4 + 0.01]))\n    return points\n\n"
+        ]
+      ],
+      "successCount":954,
+      "failureCount":7
+    }
+  ]
+}

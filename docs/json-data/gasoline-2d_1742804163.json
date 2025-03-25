@@ -1,0 +1,234 @@
+{
+  "config":{
+    "inputs":[
+      14
+    ],
+    "specification":"\"\"\"I'm trying to find instances of the gasoline-problem for which an iterative rounding algorithm has a poor (high) approximation-ratio in two dimensions.\n\nThe gasoline-problem looks for a permutation of the xs and ys (lists of points in Z^2) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nTo generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered slightly.\n\"\"\"\n\nimport math\nimport numpy as np\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n    from pathlib import Path\n\n    from funsearch.gasoline.iterative_rounding import SlotOrdered\n\n    xs, ys = gasoline(n)\n\n    # Assert determinancy\n    xs1, ys1 = gasoline(n)\n    if not (len(xs) == len(xs1) and len(ys) == len(ys1) and np.array_equal(xs, xs1) and np.array_equal(ys, ys1)):\n        return 0.0\n\n    length = min(len(xs), len(ys) + 1, n)  # ys will be one element shorter than xs\n    # Clamp inputs to avoid overflows in gurobi\n    xs = [np.clip(np.round(x[:2]), 0, 2**31 - 1) for x in xs[:length]]\n    ys = [np.clip(np.round(y[:2]), 0, 2**31 - 1) for y in ys[: length - 1]]\n\n    # Memoize the input. Use a separate file for every input, a single file wouldn't be thread-safe.\n    memoization_path = (\n        Path.cwd()\n        / \".memoization-cache\"\n        / \"gasoline-2d\"\n        / f\"{[tuple(x.tolist()) for x in xs]},{[tuple(y.tolist()) for y in ys]}\".replace(\" \", \"\")\n    )\n    if memoization_path.exists():\n        return float(memoization_path.read_text())\n\n    ratio = SlotOrdered().approximation_ratio(xs, ys)\n    memoization_path.parent.mkdir(parents=True, exist_ok=True)\n    memoization_path.write_text(str(ratio))\n    return ratio\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n",
+    "problem_name":"gasoline-2d",
+    "message":"Start with scaffolding similar to Lucas' 1D solution but still using trivial entries.\n\nIn 1D, Lucas' solution gets a score of 1.75 for input-size 14, but it's uncertain whether funsearch would recover Lucas' solution in 1D if we start with similarly bare scaffolding.\n\nopen-mistral-nemo, temperature 1.5\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1742804163,
+  "highestRunIndex":1153,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          435,
+          1.5,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Modified version of `gasoline_v1`.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = i // 3 - (i % 3)  # Changed rounding function\n        xs.append(np.array([2, (i % 3) - 1]))  # Changed x-coordinate perturbation\n        ys.append(np.array([rounded, 2]))  # Changed y-coordinate perturbation\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([1, 0]) for _ in range(m)])  # No change in y-coordinate perturbation for even indices\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":1042,
+      "failureCount":3
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          516,
+          1.4444444444444444,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 2 ** (int(math.log2(i)) + 1)\n        xs.append(np.array([rounded, i]))  # Changed this line\n        ys.append(np.array([i, 0]))  # Changed this line\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([1, 0]) for _ in range(m)])  # No change\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":857,
+      "failureCount":24
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          39,
+          1.4285714285714286,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i * 2)))  # Change: multiply i by 2\n        xs.append(np.array([i, 0]))\n        ys.append(np.array([i * rounded, i * (1 - rounded)]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          172,
+          1.5,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    xs = []\n    ys = []\n    m = n // 2 + 2\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i * 2)))\n        xs.append(np.array([i, 0]))\n        ys.append(np.array([i * rounded, i * (1 - rounded)]))\n\n    # Change: Add a different small perturbation to both coordinates of the third point\n    xs[2][1] += 0.05\n    ys[2][0] += 0.05\n\n    # Change: Double the number of zero arrays\n    xs.extend([np.array([0, 0]) for _ in range(2 * m)])\n    ys.extend([np.array([0, 0]) for _ in range(2 * m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          179,
+          1.625,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator.\"\"\"\n    xs = []\n    ys = []\n    m = n // 2 + 2\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i * 2)))\n        xs.append(np.array([i, 0]))\n        ys.append(np.array([i * rounded, i * (1 - rounded)]))\n\n    # Change: Reverse the perturbation for the third point\n    xs[2][1] -= 0.05\n    ys[2][0] -= 0.05\n\n    # Change: Triple the number of zero arrays\n    xs.extend([np.array([0, 0]) for _ in range(3 * m)])\n    ys.extend([np.array([0, 0]) for _ in range(3 * m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          370,
+          1.6666666666666667,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs = []\n    ys = []\n    m = n // 2 + 2\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i * 2)))\n        xs.append(np.array([i, 0]))\n        ys.append(np.array([i * rounded, i * (1 - rounded)]))\n\n    # Change: Increase the perturbation for the second point instead\n    xs[1][1] -= 0.15\n    ys[1][0] -= 0.15\n\n    # Change: Add a constant offset to the x and y coordinates\n    xs = [x + np.array([1, 1]) for x in xs]\n    ys = [y + np.array([1, 1]) for y in ys]\n\n    # Change: Quadruple the number of zero arrays with a slight offset\n    xs.extend([np.array([0.5, 0.5]) for _ in range(4 * m)])\n    ys.extend([np.array([0.5, 0.5]) for _ in range(4 * m)])\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":697,
+      "failureCount":228
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          838,
+          1.1428571428571428,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generation function with different rounding and coordinates.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - (np.sin(i * np.pi / 4) ** 2)  # Change: use sin(i * pi / 4) for rounding\n        xs.append(np.array([i, i + 2]))  # Change: set both coordinates to i and i+2 for xs\n        ys.append(np.array([rounded, (i + 1) % 5]))  # Change: use (i + 1) modulo 5 for y-coordinate\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([4, (i % 5) * 1]) for i in range(m)])  # Change: alternates y-coordinate between 1 and 4, with a cycle of 5\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":900,
+      "failureCount":1
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          520,
+          1.2857142857142858,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - np.log10(i) + 0.3  # Changed constant to 0.3\n        if i % 3 == 0:\n            xs.append(np.array([i, i]))  # Same as v0\n        elif i % 3 == 1:\n            xs.append(np.array([i, i + 1]))  # Changed second coordinate to i + 1\n        else:\n            xs.append(np.array([i + 1, i]))  # Changed both coordinates\n        ys.append(np.array([i, i + rounded]))  # Same as v0\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          529,
+          1.5714285714285714,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - np.log10(i) + 0.2  # Changed constant to 0.2\n        if i % 3 == 0:\n            xs.append(np.array([i, i + 2]))  # Changed second coordinate to i + 2\n        elif i % 3 == 1:\n            xs.append(np.array([i, i + 1]))  # Changed second coordinate to i + 1\n        else:\n            xs.append(np.array([i + 2, i - 2]))  # Changed both coordinates and added 2\n        ys.append(np.array([i, i + rounded]))  # Same as v0\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          539,
+          1.625,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - np.log10(i) + 0.1  # Changed constant to 0.1\n        if i % 3 == 0:\n            xs.append(np.array([i, i + 1]))  # Changed order of coordinates and changed second to i + 1\n        elif i % 3 == 1:\n            xs.append(np.array([i + 1, i - 1]))  # Changed both coordinates, added 1 and subtracted 1\n        else:\n            xs.append(np.array([i + 2, i - 1]))  # Changed both coordinates, added 2 and subtracted 1\n        ys.append(np.array([i, i + rounded]))  # Same as v0 and v1\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          864,
+          1.7142857142857142,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - np.log10(i) + 0.4  # Changed constant to 0.4\n        if i % 3 == 0:\n            if i % 2 == 0:  # Change for even indices\n                xs.append(np.array([i + 1, i - 1]))  # Changed both coordinates, added 1 and subtracted 1\n            else:\n                xs.append(np.array([i + 2, i + 1]))  # Changed both coordinates, added 2 and 1\n        elif i % 3 == 1:\n            xs.append(np.array([i, i + 2]))  # No change\n        else:\n            xs.append(np.array([i + 1, i]))  # Changed both coordinates, added 1\n\n        ys.append(np.array([i, i + rounded - 0.3]))  # Changed constant to -0.3\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":1085,
+      "failureCount":4
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":985,
+      "failureCount":4
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          148,
+          1.3333333333333333,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` with different changes.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)) - 3)  # Changed the exponent from -2 to -3\n        xs.append(np.array([i * 3, rounded * 2]))  # Changed the x-coordinate multiplier from 2 to 3, and y-coordinate multiplier from 1 to 2\n        ys.append(np.array([i * 3, 0]))  # Increased the y-coordinate multiplier from 1 to 3, kept the x-coordinate as is\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([1, 1]) for _ in range(m)])  # Changed the y-coordinate from 0 to 1\n\n    return xs, ys\n\n"
+        ],
+        [
+          213,
+          1.4857142857142858,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0` with different changes.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)) - 6)  # Changed the exponent from -5 to -6\n        xs.append(np.array([i * 5, rounded * 3]))  # Changed the x-coordinate multiplier from 4 to 5 and y-coordinate multiplier from 2 to 3\n        ys.append(np.array([i * 4, rounded * 4]))  # Swapped and changed the multipliers of x and y\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 2]) for _ in range(m)])  # Changed the y-coordinate from 0 to 2\n\n    return xs, ys\n\n"
+        ],
+        [
+          480,
+          1.5178571428571428,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2` with different changes.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)) - 7)  # Changed the exponent from -6 to -7\n        xs.append(np.array([i * 8, rounded * 2.5]))  # Changed the x-coordinate multiplier from 7 to 8 and y-coordinate multiplier from 2 to 2.5\n        ys.append(np.array([i * 6.5, (1 - rounded) * 3.5]))  # Changed the x-coordinate multiplier from 6 to 6.5 and y-coordinate to (1 - rounded) * 3.5\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([3, 2]) for _ in range(m)])  # Changed both coordinates to 3 and 2\n\n    return xs, ys\n\n"
+        ],
+        [
+          562,
+          1.5263157894736843,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of `gasoline_v0`, `gasoline_v1`, and `gasoline_v2` with different changes.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)) - 7)  # Changed the exponent from -8 to -7\n        xs.append(np.array([i * 8.2, rounded * 2.4]))  # Changed the x-coordinate multiplier from 8.5 to 8.2 and y-coordinate multiplier from 2.3 to 2.4\n        ys.append(np.array([i * 6.7, (1 - rounded) * 3.8]))  # Changed the x-coordinate multiplier from 6.8 to 6.7 and y-coordinate to (1 - rounded) * 3.8\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([3.8, 2.8]) for _ in range(m)])  # Changed both coordinates to 3.8 and 2.8\n\n    return xs, ys\n\n"
+        ],
+        [
+          715,
+          1.5272727272727273,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version with different changes.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)) - 6)  # Changed the exponent from -7 to -6\n        xs.append(np.array([i * 7.9, rounded * 2.2]))  # Changed the x-coordinate multiplier from 7.9 to 7.7 and y-coordinate multiplier from 2.2 to 2.1\n        ys.append(np.array([i * 6.5, (1 - rounded) * 3.5]))  # Changed the x-coordinate multiplier from 6.6 to 6.5 and y-coordinate to (1 - rounded) * 3.5\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([4.2, 2.6]) for _ in range(m)])  # Changed both coordinates to 4.2 and 2.6\n\n    return xs, ys\n\n"
+        ],
+        [
+          721,
+          1.5344827586206897,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version with different changes.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)) - 9)  # Changed the exponent from -8 to -9\n        xs.append(np.array([i * 8.3, rounded * 2.4]))  # Changed the x-coordinate multiplier from 8.1 to 8.3 and y-coordinate multiplier from 2.2 to 2.4\n        ys.append(np.array([i * 6.8, (1 - rounded) * 3.8]))  # Changed the x-coordinate multiplier from 6.6 to 6.8 and y-coordinate to (1 - rounded) * 3.8\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([5.2, 2.8]) for _ in range(m)])  # Changed both coordinates to 5.2 and 2.8\n\n    return xs, ys\n\n"
+        ],
+        [
+          731,
+          1.56,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version with different changes.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)) - 7)  # Changed the exponent from -8 to -7\n        xs.append(np.array([i * 7.1, rounded * 2.6]))  # Changed the x-coordinate multiplier from 7.6 to 7.1 and y-coordinate multiplier from 2.6 to 2.6\n        ys.append(np.array([i * 6.1, (1 - rounded) * 3.1]))  # Changed the x-coordinate multiplier from 6.3 to 6.1 and y-coordinate to (1 - rounded) * 3.1\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([4.6, 3.1]) for _ in range(m)])  # Changed both coordinates to 4.6 and 3.1\n\n    return xs, ys\n\n"
+        ],
+        [
+          796,
+          1.5686274509803921,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version with different changes.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)) - 9)  # Changed the exponent from -8 to -9\n        xs.append(np.array([i * 7.3, rounded * 2.4]))  # Changed the x-coordinate multiplier from 7.6 to 7.3 and y-coordinate multiplier from 2.2 to 2.4\n        ys.append(np.array([i * 6.4, (1 - rounded) * 3.5]))  # Changed the x-coordinate multiplier from 6.3 to 6.4 and y-coordinate to (1 - rounded) * 3.5\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([4.8, 3.3]) for _ in range(m)])  # Changed both coordinates to 4.8 and 3.3\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":990,
+      "failureCount":7
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          59,
+          1.5,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 2 ** (int(math.log2(i)) - 1)  # Changed this line\n        xs.append(np.array([rounded, rounded]))  # Changed this line\n        ys.append(np.array([rounded * (i % 2), 0]))  # Changed this line\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([1, 1]) for _ in range(m)])  # Changed this line\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":1149,
+      "failureCount":4
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":1004,
+      "failureCount":5
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 1 - 2 ** (-int(math.log2(i)))\n        xs.append(np.array([1, 0]))\n        ys.append(np.array([0, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 0]) for _ in range(m)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          695,
+          1.5,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-integer-points.\n    Both lists should have length n and consist only of points in Z^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem generator with different rounding and pattern.\"\"\"\n    xs = []\n    ys = []\n    m = 1 + (n // 2)\n    for i in range(2, m):\n        rounded = 2 ** (int(math.log2(i)) - 1)  # Changed the log2 exponent and direction\n        if i % 3 == 0:\n            xs.append(np.array([1, 0]))  # Changed pattern for xs when i is a multiple of 3\n            ys.append(np.array([rounded, 0]))  # Changed rounding for ys when i is a multiple of 3\n        elif i % 2 == 0:\n            xs.append(np.array([rounded, 0]))  # Changed rounding for xs when i is even\n            ys.append(np.array([0, 1]))\n        else:\n            xs.append(np.array([0, rounded]))  # Changed rounding for xs when i is odd\n            ys.append(np.array([1, 0]))\n\n    xs.extend([np.array([0, 0]) for _ in range(m)])\n    ys.extend([np.array([0, 1]) for _ in range(m)])  # Same pattern for ys\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":1009,
+      "failureCount":12
+    }
+  ]
+}

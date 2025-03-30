@@ -17,7 +17,7 @@ import funsearch
 @funsearch.run
 def evaluate(n: int) -> float:
     """Returns the ratio of the found instance."""
-    from clustering_rs import price_of_weighted_kmedian_hierarchy
+    from exact_clustering import weighted_discrete_kmedian_price_of_hierarchy
 
     weighted_points = get_weighted_points(n)
 
@@ -34,7 +34,7 @@ def evaluate(n: int) -> float:
         merged_weighted_points[point] = merged_weighted_points.get(point, 0.0) + weight
     # Sorting by largest weight first helps with performance
     points = sorted(((weight, list(v)) for v, weight in merged_weighted_points.items()), reverse=True)
-    return max(0.0, price_of_weighted_kmedian_hierarchy(points))
+    return max(0.0, weighted_discrete_kmedian_price_of_hierarchy(points))
 
 
 @funsearch.evolve

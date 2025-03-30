@@ -17,7 +17,7 @@ def evaluate(n: int) -> float:
     is the ratio between the cost of the complete-linkage-clustering and the cost of the optimal clustering for
     k clusters.
     """
-    from clustering_rs import price_of_weighted_kmeans_greedy
+    from exact_clustering import weighted_continuous_kmeans_price_of_greedy
 
     weighted_points = get_weighted_points(n)
 
@@ -34,7 +34,7 @@ def evaluate(n: int) -> float:
         merged_weighted_points[point] = merged_weighted_points.get(point, 0.0) + weight
     # Sorting by largest weight first helps with performance
     points = sorted(((weight, list(v)) for v, weight in merged_weighted_points.items()), reverse=True)
-    return max(0.0, price_of_weighted_kmeans_greedy(points))
+    return max(0.0, weighted_continuous_kmeans_price_of_greedy(points))
 
 
 @funsearch.evolve

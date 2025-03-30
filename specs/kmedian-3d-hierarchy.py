@@ -17,7 +17,7 @@ import funsearch
 @funsearch.run
 def evaluate(n: int) -> float:
     """Returns the ratio of the found instance."""
-    from clustering_rs import price_of_kmedian_hierarchy
+    from exact_clustering import unweighted_discrete_kmedian_price_of_hierarchy
 
     points = get_points(n)
 
@@ -27,7 +27,7 @@ def evaluate(n: int) -> float:
 
     # TODO: Separate points more
     points_list = [v.tolist() for v in points[:n]]
-    return max(0.0, price_of_kmedian_hierarchy(points_list))
+    return max(0.0, unweighted_discrete_kmedian_price_of_hierarchy(points_list))
 
 
 @funsearch.evolve

@@ -6,6 +6,10 @@
     box-sizing: inherit;
 }
 
+h2 {
+    margin-top: 1em;
+}
+
 body {
     box-sizing: border-box;
     margin-bottom: 100vh;

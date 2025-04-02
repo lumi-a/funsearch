@@ -61,6 +61,16 @@
         algorithm has a high cost relative to the optimal clustering. The approximation-ratio of an instance is the
         maximum of the approximation-ratios across each possible value of <span class="math">k</span>.
     </div>
+    <div id="container-weighted-kmeans-2d-greedy" class="problem-container">
+        <h3>Weighted K-Means</h3>
+        In this generalisation, each point has a non-negative weight. The distance from a center <span
+            class="math">c</span> to a point <span class="math">p</span> is the usual distance (the square of the
+        euclidean distance) between <span class="math">c</span> and <span class="math">p</span>, but multiplied by the
+        weight
+        of <span class="math">p</span>. When using integer (or, by extension, rational) weights, this shouldn't lose
+        generality, because a point with weight <span class="math">z</span> can be replaced with <span
+            class="math">z</span> identical points of weight <span class="math">1</span>.
+    </div>
     <div id="container-kmedian-3d-hierarchy" class="problem-container">
         <h2>Price of K-Median Hierarchy</h2>
         <p>
@@ -77,6 +87,13 @@
             level, divided by the optimal cost of a <span class="math">k</span>-clustering.
         </p>
     </div>
+    <div id="container-kmedian-8d-hierarchy" class="problem-container"></div>
+    <div id="container-weighted-kmedian-3d-hierarchy" class="problem-container">
+        <h3>Weighted K-Median</h3>
+        In this generalisation, each point has a non-negative weight. See the <a
+            href="#container-weighted-kmeans-2d-greedy">weighted K-Means</a> section for details.
+    </div>
+    <div id="container-weighted-kmedian-8d-hierarchy" class="problem-container"></div>
 </body>
 
 </html>

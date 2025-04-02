@@ -11,52 +11,41 @@
   ],
   [
     "gasoline-2d",
-    1742742210,
-    [
-      8,
-      10,
-      12,
-      14,
-      16
-    ],
-    1.6185365529611055,
-    "Start from trivial, score by mean of approximation-ratios.",
-    "gasoline-2d_1742742210.json"
-  ],
-  [
-    "gasoline-2d",
-    1742804163,
-    [
-      14
-    ],
-    1.7142857142857142,
-    "Start with scaffolding similar to Lucas' 1D solution but still using trivial entries.",
-    "gasoline-2d_1742804163.json"
-  ],
-  [
-    "gasoline-2d",
-    1742807607,
-    [
-      10,
-      14,
-      20,
-      30
-    ],
-    1.7554397357028937,
-    "Mean of approximation-ratios, start with scaffolding similar to Lucas' 1D solution but still using trivial entries.",
-    "gasoline-2d_1742807607.json"
-  ],
-  [
-    "gasoline-2d",
-    1742843055,
+    1743498946,
     [
       10,
       14,
       20
     ],
-    1.794805194805195,
-    "Mean of approximation-ratios, start from Lucas' solution embedded into 2d.",
-    "gasoline-2d_1742843055.json"
+    1.463095238095238,
+    "Start from trivial, mean of approximation-ratios.",
+    "gasoline-2d_1743498946.json"
+  ],
+  [
+    "gasoline-2d",
+    1743513307,
+    [
+      6,
+      10,
+      14,
+      20
+    ],
+    1.827465834818776,
+    "Start from Lucas' solution embedded into 2D, mean of approximation-ratios.",
+    "gasoline-2d_1743513307.json"
+  ],
+  [
+    "gasoline-2d",
+    1743584434,
+    [
+      6,
+      10,
+      14,
+      20
+    ],
+    1.6302884615384616,
+    "Start from structure similar to Lucas' solution, mean of approximation-ratios.",
+    "gasoline-2d_1743584434.json"
   ],
   [
     "gasoline-list",
@@ -362,6 +351,22 @@
     "kmedian-3d-hierarchy_1742896183.json"
   ],
   [
+    "kmedian-8d-hierarchy",
+    1743599967,
+    [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    1.746261216350947,
+    "Start from trivial, score by max of approximation-ratios.",
+    "kmedian-8d-hierarchy_1743599967.json"
+  ],
+  [
     "library",
     1740424536,
     [
@@ -370,5 +375,57 @@
     -27155.0,
     "Simulated paging-problem.",
     "library_1740424536.json"
+  ],
+  [
+    "weighted-kmeans-2d-greedy",
+    1743247188,
+    [
+      8,
+      10,
+      12,
+      14,
+      16
+    ],
+    3.336782795969752,
+    "Start from trivial, score by max of approximation-ratios.",
+    "weighted-kmeans-2d-greedy_1743247188.json"
+  ],
+  [
+    "weighted-kmeans-2d-greedy",
+    1743253193,
+    [
+      16
+    ],
+    6.590935536335631,
+    "Start from lower-bound solution from paper.",
+    "weighted-kmeans-2d-greedy_1743253193.json"
+  ],
+  [
+    "weighted-kmedian-3d-hierarchy",
+    1743253777,
+    [
+      8,
+      10,
+      12,
+      14,
+      16
+    ],
+    1.4642983724488603,
+    "Start from trivial, score by max of approximation-ratios.",
+    "weighted-kmedian-3d-hierarchy_1743253777.json"
+  ],
+  [
+    "weighted-kmedian-8d-hierarchy",
+    1743615880,
+    [
+      8,
+      10,
+      12,
+      14,
+      16
+    ],
+    1.718306652458797,
+    "Start from trivial, score by max of approximation-ratios.",
+    "weighted-kmedian-8d-hierarchy_1743615880.json"
   ]
 ]

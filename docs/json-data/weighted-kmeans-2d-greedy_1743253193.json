@@ -1,0 +1,674 @@
+{
+  "config":{
+    "inputs":[
+      16
+    ],
+    "specification":"\"\"\"I'm trying to find 2D-instances of the weighted k-means clustering problem for which the clustering found by the\ncomplete-linkage-algorithm has a high cost relative to the optimal clustering.\n\nSo far, I have tried the following functions to generate such instances. Please write a similar one that doesn't use randomness and has the same signature, but improves on the objective by slightly changing some lines. Please only respond with code, no explanations.\n\"\"\"\n\nimport numpy as np\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(_n: int) -> float:\n    \"\"\"Returns the ratio of the found instance.\n\n    The ratio is the maximum of the ratios for each k in {1,...,n}, where the ratio for a fixed k\n    is the ratio between the cost of the complete-linkage-clustering and the cost of the optimal clustering for\n    k clusters.\n    \"\"\"\n    from clustering_rs import price_of_weighted_kmeans_greedy\n\n    weighted_points = get_weighted_points()\n\n    # Assert determinancy\n    if not all(\n        w1 == w2 and np.array_equal(v1, v2) for (w1, v1), (w2, v2) in zip(weighted_points, get_weighted_points())\n    ):\n        return 0.0\n\n    # Merging identical points avoids floating-point-rounding-issues and improves performance\n    merged_weighted_points: dict[np.ndarray, float] = {}\n    for weight, v in weighted_points[:16]:\n        point = tuple(v[:2])\n        merged_weighted_points[point] = merged_weighted_points.get(point, 0.0) + weight\n    # Sorting by largest weight first helps with performance\n    points = sorted(((weight, list(v)) for v, weight in merged_weighted_points.items()), reverse=True)\n    return max(0.0, price_of_weighted_kmeans_greedy(points))\n\n\n@funsearch.evolve\ndef get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n",
+    "problem_name":"weighted-kmeans-2d-greedy",
+    "message":"Start from lower-bound solution from paper.\n\nThe instance involved in proving a lower bound for 2d-weighted-kmeans' greedy-approximation-ratio has a score of 6.328. However, using systematic randomised-hillclimbing starting from the paper's instance, I was able to achieve a score of 7.14 instead.\n\nopen-mistral-nemo, temperature 1.5",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1743253193,
+  "highestRunIndex":1097,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          2,
+          6.328427100725373,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-9), sqrt2 - 1 - 1e-9] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          3,
+          6.328427122344108,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          5,
+          6.328427124725084,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * (1 + 1e-12)])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          7,
+          6.328427125013589,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * (1 + 1e-10)])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ]
+      ],
+      "successCount":1015,
+      "failureCount":6
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          11,
+          6.328427100725373,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-9), sqrt2 - 1 - 1e-9] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          13,
+          6.328427122344108,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          21,
+          6.328427124722169,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          29,
+          6.328427124745949,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 - 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          33,
+          6.328427124746187,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          393,
+          6.328427124746189,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0` and `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ] + [(1e-18, np.array([0, 0] * 1001))] * 3\n\n    return points\n\n"
+        ]
+      ],
+      "successCount":987,
+      "failureCount":38
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          6.328427100725373,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-9), sqrt2 - 1 - 1e-9] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          5,
+          6.328427122344108,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          23,
+          6.328427124722169,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          39,
+          6.328427124743788,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-13), sqrt2 - 1 - 1e-13] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          62,
+          6.328427124746163,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1.0, 1.0] for y in [-1.0 / sqrt2, (1.0 / sqrt2) - 1e-15]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 - 1e-15] for y in [-1.0 / sqrt2, (1.0 / sqrt2) - 1e-15]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          121,
+          6.3284271247461845,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * (1 - 1e-16)])) for x in [-1.0, 1.0] for y in [-(1.0 / sqrt2), (1.0 / sqrt2) - 1e-16]] + [\n        (1.0, np.array([x, y * (1 - 1e-16)])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-(1.0 / sqrt2), (1.0 / sqrt2) - 1e-16]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          145,
+          6.328427124746187,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          266,
+          6.328427124746188,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    return [(1e16, np.array([x, y]) * (1 - 1e-16)) for x in [-1.0, 1.0] for y in [-(1.0 / sqrt2), (1.0 / sqrt2) - 1e-16]] + \\\n           [(1.0, np.array([x, y]) * (1 - 1e-16)) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-(1.0 / sqrt2), (1.0 / sqrt2) - 1e-16]]\n\n"
+        ],
+        [
+          285,
+          6.328427124746189,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y + 1e-16])) for x in [-1.0, 1.0] for y in [-(1 / sqrt2) - 1e-16, (1 / sqrt2) - 1e-16]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-(1 / sqrt2), (1 / sqrt2) - 1e-16]\n    ]\n    return points\n\n"
+        ],
+        [
+          369,
+          6.328427124746192,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * (1 + 1e-14)])) for x in [-1.0, 1.0] for y in [-(1.0 / sqrt2), (1.0 / sqrt2) - 1e-15]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 - 1e-15] for y in [-(1.0 / sqrt2), (1.0 / sqrt2) - 1e-15]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          932,
+          6.3284271247462405,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * (1 + 1e-13)])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 - 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ]
+      ],
+      "successCount":1073,
+      "failureCount":24
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          7,
+          6.328426884538048,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-16, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          8,
+          6.328426966964448,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1 - 1e-8, 1 + 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1), sqrt2 - 1] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          9,
+          6.328427100725373,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-9), sqrt2 - 1 - 1e-9] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          12,
+          6.356788477911796,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * 1.01])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          29,
+          6.356788694938996,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * 1.01])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]]\n    points += [(1e-16, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-9), sqrt2 - 1 - 1e-9] for y in [-1 / sqrt2, 1 / sqrt2]]\n    return points\n\n"
+        ],
+        [
+          33,
+          6.356788718470373,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * 1.01])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 + 1e-10] for y in [-1 / sqrt2, 1 / sqrt2] if y != 0\n    ]\n\n    return points\n\n"
+        ],
+        [
+          34,
+          6.356788719053123,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * 1.01])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 + 1e-15] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          39,
+          6.3595385341192445,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y * 1.011])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 + 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          42,
+          6.3622725573610115,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * 1.012])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 + 1e-15] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          46,
+          6.370379654444073,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * 1.015])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 + 1e-15] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          98,
+          6.370379654444079,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Yet another improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e21, np.array([x, y * 1.015])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-17), sqrt2 - 1 + 1e-17] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          132,
+          6.391298372746476,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * 1.023])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-20), sqrt2 - 1 + 1e-20] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          145,
+          6.3963680360186075,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e21, np.array([x, y * 1.025])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-21), sqrt2 - 1 + 1e-21] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          146,
+          6.420748802376411,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e21, np.array([x, y * 1.035])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-21), sqrt2 - 1 + 1e-21] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          147,
+          6.430047060760865,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e25, np.array([x, y * 1.039])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-25), sqrt2 - 1 + 1e-25] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          148,
+          6.454269171374778,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e21, np.array([x, y * 1.05])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-21), sqrt2 - 1 + 1e-21] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          190,
+          6.454269171374779,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e25, np.array([x, y * 1.05])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-25, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-25), sqrt2 - 1 + 1e-25] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          202,
+          6.4563727199132765,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e25, np.array([x, y * 1.051])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-25, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-25), sqrt2 - 1 + 1e-25] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          219,
+          6.539137335252305,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e23, np.array([x, y * 1.1])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-23), sqrt2 - 1 + 1e-23] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          289,
+          6.544384217145209,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e30, np.array([x, y * 1.10421])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-30, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-30), sqrt2 - 1 + 1e-30] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          293,
+          6.582536251951059,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e25, np.array([x, y * 1.15])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-25), sqrt2 - 1 + 1e-25] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          313,
+          6.586320729803529,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e26, np.array([x, y * 1.16])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-18, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-26), sqrt2 - 1 + 1e-26] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          344,
+          6.589121679911456,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e32, np.array([x, y * 1.18])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-24, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-32), sqrt2 - 1 + 1e-32] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          672,
+          6.589121679911458,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e30, np.array([x, y * 1.18])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-20, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-30), sqrt2 - 1 + 1e-30] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          791,
+          6.590313121786564,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e34, np.array([x, y * 1.155])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-33, np.array([x, y * 1.001])) for x in [-(sqrt2 - 1 - 1e-32), sqrt2 - 1 + 1e-32] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          821,
+          6.590359000033421,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e39, np.array([x, y * 1.205])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-35, np.array([x, y * 1.001])) for x in [-(sqrt2 - 1 - 1e-35), sqrt2 - 1 + 1e-35] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          890,
+          6.590935536335631,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e30, np.array([x, y * 1.15])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e-35, np.array([x, y * 1.0015])) for x in [-(sqrt2 - 1 - 1e-35), sqrt2 - 1 + 1e-35] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":994,
+      "failureCount":15
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          3,
+          6.328427122344108,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          5,
+          6.328427124722169,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          9,
+          6.328427124745949,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 - 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          10,
+          6.328427124745951,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 - 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          29,
+          6.328427124746163,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e17, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 - 1e-15] for y in [-1 / sqrt2 + 1e-15, 1 / sqrt2 - 1e-15]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          30,
+          6.328427124746187,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2 + 1e-16, 1 / sqrt2 - 1e-16]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          152,
+          6.328718468457307,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0` and `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e17, np.array([x, y * 1.0001])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-16, np.array([x, y * (1 - 1e-16)])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          229,
+          6.328718468457311,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e17, np.array([x, y * 1.0001])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-17, np.array([x, y * (1 - 1e-17)])) for x in [-(sqrt2 - 1 - 1e-17), sqrt2 - 1 - 1e-17] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          242,
+          6.328747594286947,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e17, np.array([x, y * 1.00011])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-17, np.array([x, y * (1 - 1e-171)])) for x in [-(sqrt2 - 1 - 1e-17), sqrt2 - 1 - 1e-17] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          249,
+          6.3290096568612215,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y * 1.0002])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-18, np.array([x, y * (1 - 1e-18)])) for x in [-(sqrt2 - 1 - 1e-18), sqrt2 - 1 - 1e-18] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          533,
+          6.329880711662145,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e19, np.array([x, y * 1.0005])) for x in [-1.0000001, 1.0000001] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-17, np.array([x, y * (1 - 1e-17)])) for x in [-(sqrt2 - 1 - 1e-17), sqrt2 - 1 - 1e-17] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          697,
+          6.331331991179168,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * 1.001])) for x in [-1.0000001, 1.0000001] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-18, np.array([x, y * (1 - 1e-18)])) for x in [-(sqrt2 - 1 - 1e-17), sqrt2 - 1 - 1e-17] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          698,
+          6.331333554198189,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * 1.001])) for x in [-1.000000001, 1.000000001] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-18, np.array([x, y * (1 - 1e-18)])) for x in [-(sqrt2 - 1 - 1e-18), sqrt2 - 1 - 1e-18] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          787,
+          6.331333569986265,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * 1.001])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-25, np.array([x, y * (1 - 1e-25)])) for x in [-(sqrt2 - 1 - 1e-25), sqrt2 - 1 - 1e-25] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          789,
+          6.334221302158761,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e21, np.array([x, y * 1.002])) for x in [-1.0000002, 1.0000002] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-19, np.array([x, y * (1 - 1e-19)])) for x in [-(sqrt2 - 1 - 1e-18), sqrt2 - 1 - 1e-18] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          797,
+          6.337095032645031,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e22, np.array([x, y * 1.003])) for x in [-1.0000003, 1.0000003] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 2e-20, np.array([x, y * (1 - 2e-20)])) for x in [-(sqrt2 - 1 - 2e-21), sqrt2 - 1 - 2e-21] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          853,
+          6.342801984007523,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e22, np.array([x, y * 1.005])) for x in [-1.0000001, 1.0000001] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-18, np.array([x, y * (1 - 1e-18)])) for x in [-(sqrt2 - 1 - 1e-17), sqrt2 - 1 - 1e-17] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          920,
+          6.3512291204315146,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e25, np.array([x, y * 1.008])) for x in [-1.0000008, 1.0000008] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0 - 1e-24, np.array([x, y * (1 - 1e-24)])) for x in [-(sqrt2 - 1 - 1e-25), sqrt2 - 1 - 1e-25] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":950,
+      "failureCount":15
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          10,
+          6.328427122344108,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          12,
+          6.328427124722169,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          14,
+          6.328427124722172,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          16,
+          6.328427124746164,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 - 1e-15] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          23,
+          6.328427124746187,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          110,
+          6.331333569986257,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * 1.001])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-15])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          247,
+          6.331333569986262,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * 1.001])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-16])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          275,
+          6.33133357027201,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e25, np.array([x, y * 1.0010000001])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-12])) for x in [-(sqrt2 - 1 - 1e-18), sqrt2 - 1 - 1e-18] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          294,
+          6.332780961619321,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e17, np.array([x, y * 1.0015])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-16])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          296,
+          6.334224461732394,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y * 1.0020])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-16])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          405,
+          6.3370997749148446,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e32, np.array([x, y * 1.003])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-16])) for x in [-(sqrt2 - 1 - 1e-19), sqrt2 - 1 - 1e-19] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          422,
+          6.339959484736862,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y * 1.0040])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-17])) for x in [-(sqrt2 - 1 - 1e-17), sqrt2 - 1 - 1e-17] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          423,
+          6.342803566675367,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y * 1.0050])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-17])) for x in [-(sqrt2 - 1 - 1e-17), sqrt2 - 1 - 1e-17] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          605,
+          6.356788508545326,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e100, np.array([x, y * 1.01])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 5e-8])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          606,
+          6.356788719029912,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e100, np.array([x, y * 1.01])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 5e-12])) for x in [-(sqrt2 - 1 - 1e-13), sqrt2 - 1 - 1e-13] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          608,
+          6.356788719032081,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e100, np.array([x, y * 1.01])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 5e-12])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 - 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          723,
+          6.356788719053128,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * 1.01])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 1e-16])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          829,
+          6.383573619342544,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e21, np.array([x, y * 1.02])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y + 2e-16])) for x in [-(sqrt2 - 1 - 2e-16), sqrt2 - 1 - 2e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":963,
+      "failureCount":14
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          6.328427122344108,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          9,
+          6.328427122344109,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e17, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]\n    ] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          15,
+          6.328427124505984,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e17, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]\n    ] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-11), sqrt2 - 1 - 1e-11] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          16,
+          6.328427124722172,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e17, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]\n    ] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          42,
+          6.328427124745951,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e19, np.array([x, y])) for x in [-1.4, 1.4] for y in [-1 / sqrt2, 1 / sqrt2]\n    ] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 - 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          211,
+          6.328427124746147,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y + 1e-16])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e17, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]\n    ] + [\n        (1.0, np.array([x, y + 1e-15])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 - 1e-15] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          414,
+          6.328427124746187,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y + 1e-20])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e15, np.array([x, y - 1e-20])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]\n    ] + [\n        (1.0, np.array([x, y + 1e-22])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          554,
+          6.329882289735213,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e20, np.array([x, y * 1.0005])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1e19, np.array([x, y * 1.001])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]\n    ] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-11), sqrt2 - 1 - 1e-11] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ]
+      ],
+      "successCount":1000,
+      "failureCount":20
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          6.328427100725373,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-9), sqrt2 - 1 - 1e-9] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          12,
+          6.328427122344108,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          16,
+          6.328427124722169,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          24,
+          6.328427124745949,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 - 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          69,
+          6.328427124746164,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-15), sqrt2 - 1 - 1e-15] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          118,
+          6.328427124746187,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          472,
+          6.32883886126459,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2 - 0.0001, 1 / sqrt2 + 0.0001]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          535,
+          6.331292091953731,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e17, np.array([x, y * 1.001])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2 + 0.00001, 1 / sqrt2 - 0.00001]\n    ]\n    return sorted(points, key=lambda x: x[1][0])\n\n"
+        ],
+        [
+          797,
+          6.332504712035201,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e17, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2 - 0.001, 1 / sqrt2 + 0.001]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-6), sqrt2 - 1 - 1e-6] for y in [-1 / sqrt2 + 0.000001, 1 / sqrt2 - 0.000001]\n    ]\n    return points\n\n"
+        ],
+        [
+          877,
+          6.336584176468992,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2 - 0.002, 1 / sqrt2 + 0.002]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-7), sqrt2 - 1 - 1e-7] for y in [-1 / sqrt2 + 0.000005, 1 / sqrt2 - 0.000005]\n    ]\n    return points\n\n"
+        ],
+        [
+          878,
+          6.336604733017379,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e18, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2 - 0.002, 1 / sqrt2 + 0.002]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-7), sqrt2 - 1 - 1e-7] for y in [-1 / sqrt2 + 0.0000001, 1 / sqrt2 - 0.0000001]\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":952,
+      "failureCount":13
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          5,
+          6.328427122344108,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          9,
+          6.328427124722169,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-12), sqrt2 - 1 - 1e-12] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          17,
+          6.328427124745949,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-14), sqrt2 - 1 - 1e-14] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ],
+        [
+          19,
+          6.328427124746187,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1004,
+      "failureCount":8
+    },
+    {
+      "improvements":[
+        [
+          0,
+          6.328426884538045,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-8), sqrt2 - 1 - 1e-8] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          9,
+          6.3284271220526875,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y * (1 - 1e-10)])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-10), sqrt2 - 1 - 1e-10] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ],
+        [
+          16,
+          6.328427124746187,
+          "def get_weighted_points() -> list[tuple[float, np.ndarray]]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 2D. The first\n    element of each tuple is the weight of the point, the second the 2D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    sqrt2 = np.sqrt(2)\n    points = [(1e16, np.array([x, y])) for x in [-1, 1] for y in [-1 / sqrt2, 1 / sqrt2]] + [\n        (1.0, np.array([x, y])) for x in [-(sqrt2 - 1 - 1e-16), sqrt2 - 1 - 1e-16] for y in [-1 / sqrt2, 1 / sqrt2]\n    ]\n\n    return points\n\n"
+        ]
+      ],
+      "successCount":1006,
+      "failureCount":7
+    }
+  ]
+}

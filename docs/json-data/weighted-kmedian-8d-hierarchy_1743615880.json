@@ -1,0 +1,598 @@
+{
+  "config":{
+    "inputs":[
+      8,
+      10,
+      12,
+      14,
+      16
+    ],
+    "specification":"\"\"\"I'm trying to find instances of the weighted k-median clustering problem in 8-dimensional space for which\nthe best-possible hierarchical (nested) clustering has a high cost.\nThe cost of a hierarchical clustering is the maximum of its cost across each\nof its levels. The cost of level `k` is the ratio between its cost and the optimal cost of a k-clustering.\nBecause optimal clusterings need not be nested, the cost of the best-possible hierarchical clustering\ncan exceed 1.0.\n\nSo far, I have tried the following functions to generate sets of weighted points for which the best-possible\nhierarchical clustering has a high cost. Please write a similar one that doesn't use randomness and has the same\nsignature, but improves on the objective by slightly changing some lines. Please only respond with code, no\nexplanations.\n\"\"\"\n\nimport numpy as np\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the ratio of the found instance.\"\"\"\n    from exact_clustering import weighted_discrete_kmedian_price_of_hierarchy\n\n    weighted_points = get_weighted_points(n)\n\n    # Assert determinancy\n    if not all(\n        w1 == w2 and np.array_equal(v1, v2) for (w1, v1), (w2, v2) in zip(weighted_points, get_weighted_points(n))\n    ):\n        return 0.0\n\n    # Merging identical points avoids floating-point-rounding-issues and improves performance\n    merged_weighted_points: dict[np.ndarray, float] = {}\n    for weight, v in weighted_points[:n]:\n        point = tuple(v[:8])\n        merged_weighted_points[point] = merged_weighted_points.get(point, 0.0) + weight\n    # Sorting by largest weight first helps with performance\n    points = sorted(((weight, list(v)) for v, weight in merged_weighted_points.items()), reverse=True)\n    return max(0.0, weighted_discrete_kmedian_price_of_hierarchy(points))\n\n\n@funsearch.evolve\ndef get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n",
+    "problem_name":"weighted-kmedian-8d-hierarchy",
+    "message":"Start from trivial, score by max of approximation-ratios.\n\nVia randomised-hillclimbing, the best score I could find for the weighted kmedian-price-of-hierarchy was 1.618 (uncannily close to the golden ratio), but funsearch exceeded that.\n\nThis weighted-8d-kmedian-price-of-hierarchy run achieved 1.718, whereas the unweighted-8d-kmedian-price-of-hierarchy run achieved 1.746. This could be an anomaly due to funsearch's random nature; the unweighted run did only have one island of score 1.746, whereas the others never exceeded 1.5. In this weighted run, a total of two islands achieved a score exceeding 1.5 (the winning island 5 achieved 1.718, and island 6 achieved 1.615).\n\nopen-mistral-nemo, temperature 1.5\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1743615880,
+  "highestRunIndex":1185,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          1,
+          1.25,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                i % 2,  # alternate between 0 and 1 for the first dimension\n                i % 3,  # alternate between 0, 1, and 2 for the second dimension\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          23,
+          1.2857142857142858,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i % 3 == 0 else 2.0  # Alternate between weights 1 and 2\n        point = np.array(\n            [\n                i % 2,  # alternate between 0 and 1 for the first dimension\n                i % 3,  # alternate between 0, 1, and 2 for the second dimension\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          111,
+          1.3333333333333333,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 + (i // 5) * 0.5  # Increase weight every 5th point\n        point = np.array(\n            [\n                i % 2,\n                (i // 3) % 2,\n                (i // 7) % 2,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          303,
+          1.5,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 + (i // 16) % 8  # Increase weight for every 16th group of 8 points\n        point = np.array(\n            [\n                i % 3,\n                (i // 4) % 3,\n                (i // 5) % 2,\n                (i // 6) % 3,\n                (i // 7) % 2,\n                (i // 8) % 2,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":941,
+      "failureCount":8
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          4,
+          1.050420168067227,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                i % 2,\n                i % 3,\n                i % 4,\n                i % 5,\n                i % 6,\n                i % 7,\n                i % 8,\n                i % 9,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          7,
+          1.07909604519774,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i % 2 == 0 else 2.0\n        point = np.array([\n            i % 2,\n            i % 3,\n            i % 4,\n            i % 5,\n            i % 6,\n            i % 7,\n            i % 8,\n            i % 9\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          11,
+          1.1428571428571428,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = i % 3 + 1\n        point = np.array([i % 8, i % 8, i % 8, i % 8, i % 8, i % 8, i % 8, i % 8])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          46,
+          1.1764705882352942,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i // 8) + 1\n        point = np.array([i % 8, i % 8, i % 8, i % 8, i % 8, i % 8, i % 8, i % 8])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          71,
+          1.1818181818181819,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i // 4) % 2 + 1\n        point = np.array([(i // 8) % 2, (i // 4) % 2, (i // 2) % 2, i % 2, (i // 8) % 2, (i // 4) % 2, (i // 2) % 2, i % 2])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          136,
+          1.2,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i // 16) % 2 + 2\n        point = np.array([(i // 8) % 2, (i // 4) % 2, (i // 2) % 2, i % 2, (i // 16) % 2, (i // 8) % 2, (i // 4) % 2, (i // 2) % 2])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          147,
+          1.2542372881355932,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.repeat([1, 2, 3], n // 3)\n    weights = np.concatenate((weights, np.ones(n % 3)))\n    points = np.array([[i % 2, i % 4, i % 6, i % 8, i % 16, i % 32, i % 64, i % 128 * n] for i in range(n)])\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          185,
+          1.3076923076923077,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i % 5 + 1) * ((i // 128) % 2 + 1)\n        point = np.array([(i // 16) % 2, (i // 8) % 2, (i // 4) % 2, i % 2, (i // 16) % 2, (i // 8) % 2, (i // 4) % 2, i % 2])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          306,
+          1.3529411764705883,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    return [(i % 3 + 1, np.array([(i // 128) % 2, (i // 64) % 2, (i // 32) % 2, (i // 16) % 2, (i // 8) % 2, (i // 4) % 2, i % 2, (i // 128) % 2])) for i in range(n)]\n\n"
+        ],
+        [
+          882,
+          1.3571428571428572,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i % 11 + 1) * ((i // 512) % 4 + 1)\n        point = np.array([(i // 256) % 2, (i // 128) % 2, (i // 64) % 2, (i // 32) % 2, (i // 16) % 2, (i // 8) % 2, (i // 4) % 2, (i // 2) % 2])\n        if i % 64 == 0:\n            weight *= 5\n        if i % 128 == 0:\n            point[0] = i // 128\n        if i % 256 == 0:\n            weight *= 2\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":916,
+      "failureCount":57
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          3,
+          1.1551724137931034,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(1, n+1):\n        weight = i\n        point = np.array(\n            [\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          57,
+          1.1766561514195584,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = [(i, np.array([i, i, i, i, i, i, i, i])) for i in range(1, n+1)]\n    weighted_points[0] = (n, np.array([n//2, n//2, n//2, n//2, n//2, n//2, n//2, 1]))\n    return weighted_points\n\n"
+        ],
+        [
+          89,
+          1.2798295454545454,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = [(i, np.array([i, i, i, i, i, i, i, i*n])) for i in range(1, n+1)]\n    weighted_points[0] = (n**2, np.array([1, 2, 3, 4, 5, 6, 7, 8]))\n    return weighted_points\n\n"
+        ],
+        [
+          92,
+          1.2889842632331903,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = [(i, np.array([i, i, i, i, i, i, i, i*n])) for i in range(1, n+1)]\n    weighted_points[0] = (n*2, np.array([n//2, n//2, n//2, n//2, n//2, n//2, n//2, n//2]))\n    return weighted_points\n\n"
+        ],
+        [
+          106,
+          1.2904624277456647,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0` and `get_weighted_points_v1`.\"\"\"\n    weighted_points = [(i, np.array([i, i, i, i, i, i, i, i*n])) for i in range(1, n+1)]\n    weighted_points[0] = (n*2, np.array([n//2]*7 + [n//2 + 1]))\n    return weighted_points\n\n"
+        ],
+        [
+          156,
+          1.3333333333333333,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = [(i, np.array([i, i, i, i, i, i, n-i, i**2])) for i in range(1, n//2+1)]\n    weighted_points += [(i, np.array([n-i, n-i, n-i, n-i, n-i, n-i, i, i**2])) for i in range(n//2, n+1)]\n    weighted_points[0] = (n, np.array([n//4, n//4, n//4, n//4, n//4, n//4, n//4, n//2]))\n    weighted_points[-1] = (1, np.array([0]*7 + [n-1]))\n    return weighted_points\n\n"
+        ],
+        [
+          470,
+          1.3681743443009584,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = [(i, np.array([i, i, i, i, i, (n+1-i)**3, (i-1)**4, (i-1)**5])) for i in range(1, n+1)]\n    weighted_points[0] = (n**2, np.array([1, 2, 3, 4, 5, (n-1)**3, 0, 0]))\n    weighted_points[n//2] = (n//2**2, np.array([n//2, n//2, n//2, n//2, n//2, (n//2+1)**3, (n//2-1)**4, (n//2-1)**5]))\n    return weighted_points\n\n"
+        ],
+        [
+          490,
+          1.3785133376707872,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = [(i, np.array([i, i, i, i, i, (n+1-i)**2, (i-1)**3, (i-1)**4])) for i in range(1, n+1)]\n    weighted_points[0] = (n**2, np.array([1, 2, 3, 4, 5, (n-1)**2, 0, 0]))\n    weighted_points[n//2-1] = ((n//2-1)**2, np.array([n//2-1, n//2-1, n//2-1, n//2-1, n//2-1, (n//2)**2, (n//2-2)**3, (n//2-2)**4]))\n    return weighted_points\n\n"
+        ],
+        [
+          731,
+          1.4115456094195538,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v2`.\"\"\"\n    weighted_points = [(i, np.array([i] + [i // 2] * 6 + [((i - 1) ** 2.5)])) for i in range(1, n + 1)]\n    weighted_points[0] = (n, np.array([1] * 8))\n    weighted_points[n // 2] = (n // 2, np.array([n // 2] + [(n // 2 - 1) // 2] * 6 + [((n // 2 - 1) ** 2.5)]))\n    weighted_points[-1] = (n + 1, np.array([n] + [(n - 1) // 2] * 6 + [((n - 1) ** 2.5)]))\n    return weighted_points\n\n"
+        ],
+        [
+          925,
+          1.4311502938706968,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v2`.\"\"\"\n    weighted_points = [(i, np.array([i, i, i, i, i, i, i, (i-1)**3])) for i in range(1, n+1)]\n    weighted_points[0] = (n, np.array([1, 1, 1, 1, 1, 1, 1, 0]))\n    weighted_points[1] = (n, np.array([1, 1, 1, 1, 1, 1, 1, 1]))\n    weighted_points[n//2] = (n//2, np.array([n//2, n//2, n//2, n//2, n//2, n//2, n//2, -(n//2-1)**3]))\n    weighted_points[n-2] = (n-2, np.array([n-2, n-2, n-2, n-2, n-2, n-2, n-2, -(n-3)**3]))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":1012,
+      "failureCount":49
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          1,
+          1.1551724137931034,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = i + 1\n        point = np.array(\n            [\n                i,\n                n - i - 1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          2,
+          1.2000088953190675,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(1, n + 1):\n        weight = i\n        point = np.array(\n            [\n                i,\n                n - i,\n                i * (n - i),\n                i * (n - i) ** 2,\n                i * (n - i) ** 3,\n                i * (n - i) ** 4,\n                i * (n - i) ** 5,\n                i * (n - i) ** 6,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          6,
+          1.2000158682565996,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(1, n + 1):\n        weight = i\n        point = np.array([i, n - i] + [i * (n - i) ** j for j in range(2, 7)])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          14,
+          1.2746447681400421,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    weighted_points = []\n    for i in range(1, n + 1):\n        weight = i * (n + 1 - i)\n        point = np.array(\n            [\n                i,\n                n + 1 - i,\n                i * (n + 1 - i),\n                i * (n + 1 - i) ** 2,\n                i * (n + 1 - i) ** 3,\n                i * (n + 1 - i) ** 4,\n                i * (n + 1 - i) ** 5,\n                i * (n + 1 - i) ** 6,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          26,
+          1.2920353982300885,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = [(i, np.array([i * (n - i + 0.5)] * 8)) for i in range(1, n + 1)]\n    return weighted_points\n\n"
+        ],
+        [
+          124,
+          1.2957657458339509,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(1, n + 1):\n        weight = (i + 1) * (n - i + 2)\n        point = np.array([\n            i,\n            n - i + 1,\n            i * (n - i + 1),\n            i * (n - i + 1) ** 2,\n            i * (n - i + 1) ** 3 + (i + 1) * (n - i + 2),\n            i * (n - i + 1) ** 4,\n            i * (n - i + 1) ** 5,\n            i * (n - i + 1) ** 6\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          283,
+          1.421532163647088,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.arange(1, n + 1, dtype=float)\n    points = np.outer(weights, np.ones(8)) * (n - np.arange(8))\n    points[::2, 0] = points[::2, 0] ** 2\n    points[1::2, 1] = points[1::2, 1] ** 3\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          361,
+          1.4283793980800799,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.linspace(1, n, n, dtype=float)\n    points = np.outer(weights, np.ones(8)) * (n - np.arange(8))\n    points[::2] *= 2  # Double the weight of every second point\n    points[1::2, 1::2] **= 3  # Cube the corresponding coordinates of every alternate point\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          574,
+          1.4283857259836423,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.arange(1, n + 1, dtype=float)\n    points = np.outer(weights, np.ones(8)) * (n - np.arange(8))**np.arange(8)\n    points[::2, 2] *= 2\n    points[1::2, 3] = points[1::2, 3]**3\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          580,
+          1.4283866795990945,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.arange(1, n + 1, dtype=float)\n    points = np.outer(weights, np.ones(8)) * (n - np.arange(8))**(n - np.arange(8))\n    points[::2, 2] *= 2\n    points[1::2, 3] = points[1::2, 3]**3\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          595,
+          1.4283872888707756,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.linspace(1, n, n, dtype=float)\n    points = np.outer(weights, np.ones(8)) * (n - np.arange(8))\n    points[::2, 0] *= 2  # Double the x-coordinate of every second point\n    points[1::2, 1::2] **= 3  # Cube the corresponding coordinates of every alternate point\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          601,
+          1.4333013177062537,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.arange(1, n + 1, dtype=float)\n    points = np.outer(weights, np.ones(8)) * (n - np.arange(8))\n    points[::2, :] = points[::2, :] ** 2\n    points[1::2, :] = points[1::2, :] ** 3\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          827,
+          1.4424515452717044,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.arange(1, n + 1, dtype=float)\n    points = np.outer(weights, np.arange(2, 10)) * (n - np.arange(2, 10))\n    points[::2, 1::2] = points[::2, 1::2] ** 2.1  # Slightly increase the exponent\n    points[1::2, 2::2] = points[1::2, 2::2] ** 3.1  # Slightly increase the exponent\n    points[:, 4:] = np.outer(weights, np.ones(4)) * (n - np.arange(4, 8)) * 1.01  # Slightly increase the multiplier\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          1089,
+          1.4431204052262536,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weights = np.arange(1, n + 1, dtype=float)\n    points = np.outer(weights, np.arange(1, 9)) * (n - np.arange(1, 9))\n    points[::2, 1::2] = points[::2, 1::2] ** 2.11  # Further increase the exponent\n    points[1::2, 2::2] = points[1::2, 2::2] ** 3.11  # Further increase the exponent\n    points[:, 4:] = np.outer(weights, np.ones(4)) * (n - np.arange(4, 8)) * 1.02  # Further increase the multiplier\n    return list(zip(weights, points))\n\n"
+        ]
+      ],
+      "successCount":1088,
+      "failureCount":97
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          2,
+          1.1551724137931034,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = i + 1.0\n        point = np.array(\n            [\n                i,\n                i*2,\n                i*3,\n                i*4,\n                i*5,\n                i*6,\n                i*7,\n                i*8,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          20,
+          1.171875,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = n - i if i % 2 == 0 else i + 1\n        point = np.array([\n            i,\n            n - i,\n            i * 2,\n            n - i * 2,\n            i * 3,\n            n - i * 3,\n            i * 4,\n            n - i * 4,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          23,
+          1.1851332398316972,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n // 2):\n        weight = i + 1\n        point = np.array([\n            i,\n            n - i - 1,\n            i * 2,\n            n - i * 2 - 1,\n            i * 3,\n            n - i * 3 - 1,\n            i * 4,\n            n - i * 4 - 1,\n        ])\n        weighted_points.append((weight, point))\n        weight = n - i\n        point = np.array([\n            i + 0.5,\n            n - i - 0.5,\n            (i + 0.5) * 2,\n            n - (i + 0.5) * 2 - 0.5,\n            (i + 0.5) * 3,\n            n - (i + 0.5) * 3 - 0.5,\n            (i + 0.5) * 4,\n            n - (i + 0.5) * 4 - 0.5,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          29,
+          1.1881553064303585,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = n - i if i % 3 == 0 else i + 1 if i % 2 == 0 else n - i\n        point = np.array([\n            i ** 2,\n            (n - i) ** 2,\n            i * n,\n            (n - i) * n,\n            i ** 3,\n            (n - i) ** 3,\n            i ** 4,\n            (n - i) ** 4,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          32,
+          1.3062678062678064,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n // 2):\n        weight = i * 2 + 1 if i % 2 == 0 else n - i * 2\n        point = np.array([\n            i,\n            n - i,\n            i ** 2,\n            (n - i) ** 2,\n            (i + n - i) ** 2,\n            (i - n + i) ** 2,\n            (i + i) ** 2,\n            (n - i - i) ** 2,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          88,
+          1.3242232384450614,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = n - i if i % 3 == 0 or i % 2 == 0 else i + 1\n        point = np.array([\n            i ** 2.0,\n            (n - i) ** 2.0,\n            i ** 2.5,\n            (n - i) ** 2.5,\n            i ** 3.0,\n            (n - i) ** 3.0,\n            i ** 3.5,\n            (n - i) ** 3.5,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          95,
+          1.333333333333333,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = n - i if i % 2 == 0 else i + 1\n        point = np.array([\n            i / (n - 1),\n            (n - 1 - i) / (n - 1),\n            i / (n - 1) * 2,\n            (n - 1 - i) / (n - 1) * 2,\n            i / (n - 1) * 3,\n            (n - 1 - i) / (n - 1) * 3,\n            i / (n - 1) * 4,\n            (n - 1 - i) / (n - 1) * 4\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          179,
+          1.3999999999999997,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (n - i) ** 2 if i % 2 == 0 else (i + 1) ** 2\n        point = np.array([\n            i / (n - 1),\n            (n - i - 1) / (n - 1),\n            i / (n - 1) ** 2,\n            (n - i - 1) / (n - 1) ** 2,\n            i / (n - 1) ** 3,\n            (n - i - 1) / (n - 1) ** 3,\n            i / (n - 1) ** 4,\n            (n - i - 1) / (n - 1) ** 4\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          219,
+          1.4000000000000001,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (n - i) ** 2 if i % 2 == 0 else (i + 1) ** 2\n        point = np.array([\n            i / (n - 1),\n            (n - i - 1) / (n - 1),\n            i / (n - 1) ** 1.5,\n            (n - i - 1) / (n - 1) ** 1.5,\n            i / (n - 1) ** 2.5,\n            (n - i - 1) / (n - 1) ** 2.5,\n            i / (n - 1) ** 3.5,\n            (n - i - 1) / (n - 1) ** 3.5\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          382,
+          1.4444444444444444,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(0, n, 2):\n        weight = (n - i) ** 3\n        point = np.array([\n            i / (n - 1) ** 0.5,\n            (n - i - 1) / (n - 1) ** 0.5,\n            i / (n - 1) ** 1.5,\n            (n - i - 1) / (n - 1) ** 1.5,\n            i / (n - 1) ** 2.5,\n            (n - i - 1) / (n - 1) ** 2.5,\n            i / (n - 1) ** 3.5,\n            (n - i - 1) / (n - 1) ** 3.5\n        ])\n        weighted_points.append((weight, point))\n    for i in range(1, n, 2):\n        weight = (i + 1) ** 3\n        point = np.array([\n            i / (n - 1) ** 0.5,\n            (n - i - 1) / (n - 1) ** 0.5,\n            i / (n - 1) ** 1.5,\n            (n - i - 1) / (n - 1) ** 1.5,\n            i / (n - 1) ** 2.5,\n            (n - i - 1) / (n - 1) ** 2.5,\n            i / (n - 1) ** 3.5,\n            (n - i - 1) / (n - 1) ** 3.5\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          465,
+          1.4703147331004298,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (n - i) ** 3 if i % 7 == 0 else i ** 3 if i % 5 == 0 else (n - i) ** 2\n        point = np.array([\n            i / n ** 0.5,\n            (n - i) / n ** 0.5,\n            i ** 0.5,\n            (n - i) ** 0.5,\n            i ** 0.3,\n            (n - i) ** 0.3,\n            i ** 0.2,\n            (n - i) ** 0.2,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          823,
+          1.4705882352941173,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (n - i) ** 4 if i % 2 == 0 else (i + 1) ** 4\n        point = np.array([\n            i / (n - 1),\n            1 - i / (n - 1),\n            i / (n - 1) ** 0.5 * 2 - 1,\n            1 - i / (n - 1) ** 0.5 * 2,\n            i / (n - 1) ** 1.5 * 3 - 1.5,\n            1.5 - i / (n - 1) ** 1.5 * 3,\n            i / (n - 1) ** 2 * 4 - 2,\n            2 - i / (n - 1) ** 2 * 4,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":885,
+      "failureCount":48
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          6,
+          1.1551724137931034,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = i + 1\n        point = np.array(\n            [\n                i,\n                n - i - 1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          10,
+          1.1666666666666667,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i % 2 == 0 else 2.0\n        point = np.array(\n            [\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          13,
+          1.2222222222222223,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i % 2 == 0 else 10.0\n        point = np.array([i] * 8)\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          16,
+          1.2857142857142858,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                i % 2,\n                i % 2,\n                i % 2,\n                i % 2,\n                i // 2,\n                i // 2,\n                i // 2,\n                i // 2,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          76,
+          1.3225806451612903,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(0, n, n // 3):\n        weight = 1.0\n        point = np.array([i % 8] * 8)\n        weighted_points.append((weight, point))\n    for i in range(n // 3, 2 * n // 3):\n        weight = 10.0\n        point = np.array([i % 8] * 8)\n        weighted_points.append((weight, point))\n    for i in range(2 * n // 3, n):\n        weight = 100.0\n        point = np.array([i % 8] * 8)\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          102,
+          1.3333333333333333,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i < n // 3 else (10.0 if i < 2 * n // 3 else 100.0)\n        point = np.array([i % 4] * 2 + [i // 4] * 2 + [i % 2] * 2 + [i // 2] * 2)\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          106,
+          1.3626373626373627,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 2 if i < n // 2 else (n - i) ** 2\n        point = np.array([\n            i % 2,\n            (i // 2) % 2,\n            (i // 4) % 2,\n            (i // 8) % 2,\n            0,\n            0,\n            0,\n            0,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          123,
+          1.4222222222222223,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 3 if i < n // 2 else (n - i) ** 3\n        point = np.array([\n            i % 3,\n            (i // 3) % 3,\n            (i // 9) % 3,\n            (i // 27) % 3,\n            0,\n            0,\n            0,\n            0,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          165,
+          1.4248894475888327,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 2.5 if i < n // 2 else (n - i) ** 2.5\n        point = np.array([\n            i % 5,\n            (i // 5) % 5,\n            (i // 25) % 5,\n            (i // 125) % 5,\n            (i // 625) % 5,\n            (i // 3125) % 5,\n            (i // 15625) % 5,\n            (i // 78125) % 5,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          200,
+          1.4444444444444444,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 3 if i < n // 2 else (n - i) ** 3\n        point = np.array([\n            i % 7,\n            (i // 7) % 7,\n            (i // 49) % 7,\n            (i // 343) % 7,\n            (i // 2401) % 7,\n            (i // 16807) % 7,\n            (i // 117649) % 7,\n            (i // 823543) % 7,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          217,
+          1.4512471655328798,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 3 if i < n // 2 else (n - i) ** 3\n        point = np.array([i % 2, (i // 2) % 2, (i // 4) % 2, (i // 8) % 2, (i // 16) % 2, (i // 32) % 2, (i // 64) % 2, (i // 128) % 2])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          222,
+          1.5714285714285714,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 2 if i < n // 3 else (n - i) ** 2 if i < 2 * n // 3 else 1\n        point = np.array([\n            i % 5,\n            (i // 5) % 5,\n            (i // 25) % 5,\n            (i // 125) % 5,\n            (i // 625) % 5,\n            (i // 3125) % 5,\n            (i // 15625) % 5,\n            (i // 78125) % 5,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          253,
+          1.6129032258064515,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 2 if i < n // 3 else (n - i) ** 2 if i < 2 * n // 3 else 1\n        point = np.array([\n            i % 5,\n            (i // 5) % 5,\n            (i // 25) % 5,\n            (i // 125) % 5,\n            (i // 625) % 5,\n            (i // 3125) % 5,\n            (i // 15625) % 5,\n            (i // 78125) % 5,\n        ])\n        if i % 5 == 0:\n            point[0] = 10\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          298,
+          1.6551724137931034,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 2 if i < n // 3 else (n - i) ** 2 if i < 2 * n // 3 else 1\n        point = np.array([\n            i % 5,\n            (i // 5) % 5,\n            (i // 25) % 5,\n            (i // 125) % 5,\n            (i // 625) % 5,\n            (i // 3125) % 5,\n            (i // 15625) % 5,\n            (i // 78125) % 5,\n        ])\n        if i % 5 == 0:\n            point[0] = 10\n            point[1] = 10  # Add another high value dimension\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          346,
+          1.718306652458797,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (i + 1) ** 2.5 if i < n // 3 else (n - i) ** 2.5 if i < 2 * n // 3 else 1\n        point = np.array([\n            i % 5,\n            (i // 5) % 5,\n            (i // 25) % 5,\n            (i // 125) % 5,\n            (i // 625) % 5,\n            (i // 3125) % 5,\n            (i // 15625) % 5,\n            (i // 78125) % 5,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":931,
+      "failureCount":30
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          2,
+          1.170212765957447,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 + 0.1 * i  # Slightly increase weight for each point\n        point = np.array(\n            [\n                i % 2,  # Alternate between 0 and 1 for the first dimension\n                i % 3,  # Alternate between 0, 1, and 2 for the second dimension\n                i % 4,  # Alternate between 0, 1, 2, and 3 for the third dimension\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          55,
+          1.393965857235226,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 + 0.3 * i ** 2.5  # Increase weight more rapidly\n        point = np.array([\n            i % 4,\n            i % 5,\n            i % 6,\n            i % 7,\n            i % 8,\n            i % 9,\n            i % 10,\n            (i * 13) % 64,  # Change the scaling factor to introduce a new pattern\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          648,
+          1.5639689556994336,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (1.0 + 0.5 * i ** 2.8) * (n - i) ** 0.3  # Further optimize weight decrease rate and exponent\n        point = np.array([\n            i % 11,\n            i % 13,\n            i % 17,\n            i % 19,\n            i % 23,\n            i % 29,\n            i % 31,\n            (i * 37) % 256,  # Further optimize modulus values and scaling factor\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          719,
+          1.6148749138830867,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = (1.0 + 0.3 * i ** 2.5) * (n - i) ** 0.25  # Further optimize weight decrease rate and exponent\n        point = np.array([\n            i % 12,\n            i % 14,\n            i % 16,\n            i % 18,\n            i % 22,\n            i % 26,\n            i % 30,\n            (i * 37) % 256,  # Further optimize modulus values and scaling factor\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":918,
+      "failureCount":15
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          1,
+          1.0857142857142856,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in 8-dimensional-space.\"\"\"\n    weighted_points = []\n    for i in range(0, n, 2):\n        weight = 1.0\n        point = np.array(\n            [\n                i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    for i in range(1, n, 2):\n        weight = 1.0\n        point = np.array(\n            [\n                -i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          6,
+          1.1428571428571428,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n // 2):\n        weight = 1.0\n        point = np.array(\n            [\n                i,\n                i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n        point = np.array(\n            [\n                -i,\n                -i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          17,
+          1.2307692307692308,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n // 2):\n        weight = 1.0\n        point = np.array(\n            [\n                i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    for i in range(n // 2, n):\n        weight = 2.0\n        point = np.array(\n            [\n                -i + n,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          68,
+          1.25,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Another improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n // 2):\n        weight = 1.0 if i % 2 == 0 else 2.0\n        point = np.array(\n            [\n                i,\n                i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n        point = np.array(\n            [\n                -i,\n                -i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          94,
+          1.259643432674459,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n // 2):\n        weight = 2.0\n        point = np.array(\n            [\n                i - n // 4,\n                (i - n // 4) ** 2,\n                i % 2,\n                i % 3,\n                (i - n // 4) ** 3,\n                i % 5,\n                (i - n // 4) ** 4,  # Introduce a new feature with higher degree to increase separation\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    for i in range(n // 2, n):\n        weight = 1.0\n        point = np.array(\n            [\n                i - n // 4,\n                (i - n // 4) ** 2,\n                i % 2,\n                i % 3,\n                (i - n // 4) ** 3,\n                i % 5,\n                0,\n                (i - n // 4) ** 5,  # Introduce another new feature with higher degree for the second half\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          217,
+          1.2761460512657534,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 3.0 if i < n // 10 else 2.0 if i < n // 5 else 1.0\n        point = np.array(\n            [\n                i - n // 10,\n                (i - n // 10) ** 2,\n                i % 5,\n                (i - n // 10) ** 3,\n                (i - n // 10) ** 4,\n                np.sin((i * 0.1) ** 2),  # Increase separation by squaring the argument of sin\n                np.cos((i * 0.1) ** 2),\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          413,
+          1.3030640668523676,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n // 4):\n        weight = 1.0\n        point = np.array([i, i, i, i, 0, 0, 0, 0])\n        weighted_points.append((weight, point))\n        point = np.array([-i, -i, -i, -i, 0, 0, 0, 0])\n        weighted_points.append((weight, point))\n    for i in range(n // 4, n // 2):\n        weight = 2.0\n        point = np.array([i, i * i, i * i * i, i * i, i * i * i, i * i, i * i, i ** 2])\n        weighted_points.append((weight, point))\n    for i in range(n // 2, 3 * n // 4):\n        weight = 3.0\n        point = np.array([i, i * i, i * i * i, i * i, i * i * i, i * i, i * i, i ** 2])\n        weighted_points.append((weight, point))\n    for i in range(3 * n // 4, n):\n        weight = 4.0\n        point = np.array([i, i * i, i * i * i, i * i, i * i * i, i * i, i * i, i ** 2])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          523,
+          1.3246914481852041,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 3.0 if i < n // 3 else 1.0 if i < n * 2 // 3 else 2.0\n        point = np.array([i - n // 4, (i - n // 4) ** 2, i % 2, i % 3, i, i ** 2, i ** 3, i ** 4, i ** 5])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          623,
+          1.3247789136505603,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i < 0.25 * n else 2.0 if i < 0.5 * n else 3.0 if i < 0.75 * n else 4.0\n        point = np.array([\n            i - 0.2 * n,  # Further shift the linear term to create more separation\n            (i - 0.2 * n) ** 2,\n            (i - 0.2 * n) ** 3,\n            (i - 0.2 * n) ** 4,\n            i % 7,\n            i % 11,\n            i % 13,\n            i % 17,\n            i % 19,\n            i % 23\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          756,
+          1.3421052631578947,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n // 4):\n        weight = 1.0\n        point = np.array([i, i, i, i, 0, 0, 0, 0])\n        weighted_points.append((weight, point))\n        point = np.array([-i, -i, -i, -i, 0, 0, 0, 0])\n        weighted_points.append((weight, point))\n    for i in range(n // 4, n // 2):\n        weight = 2.0\n        point = np.array([i, i * i, i * i * i, i * i, i * i * i, i, i, (i + 1) ** 2 - 1])\n        weighted_points.append((weight, point))\n    for i in range(n // 2, 3 * n // 4):\n        weight = 3.0\n        point = np.array([i, i * i, i * i * i, i * i, i * i * i, i * i, i, (i + 1) ** 2 - 1])\n        weighted_points.append((weight, point))\n    for i in range(3 * n // 4, n):\n        weight = 4.0\n        point = np.array([i, i * i, i * i * i, i * i, i * i * i, i * i * i, i, (i + 1) ** 2 - 1])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":971,
+      "failureCount":10
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          2,
+          1.1551724137931034,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(1, n+1):\n        weight = i\n        point = np.array(\n            [\n                i,\n                n-i+1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          8,
+          1.171875,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0` and `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(1, n+1):\n        weight = i if i % 2 == 0 else n-i+1\n        point = np.array(\n            [\n                i,\n                n-i+1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          34,
+          1.2777777777777777,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(1, n+1):\n        weight = i if i % 2 == 1 else n-i+1\n        point = np.array(\n            [\n                i,\n                n-i+1,\n                i,\n                n-i+1,\n                i,\n                n-i+1,\n                i * n,\n                i * (n // 2),\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          69,
+          1.3060771339308155,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(1, n+1):\n        weight = (n - i + 1) * 7\n        point = np.array([\n            i / n,\n            1 - i / n,\n            (i * 7) % 8 / 7,\n            ((i + 1) * 11) % 8 / 11,\n            ((i + 2) * 13) % 8 / 13,\n            ((i + 3) * 17) % 8 / 17,\n            ((i + 4) * 19) % 8 / 19,\n            ((i + 5) * 23) % 8 / 23,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          135,
+          1.5,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(1, n+1):\n        weight = (i * (n - i + 1)) % (n + 1) + 1\n        point = np.array([\n            i / n,\n            (n - i + 1) / n,\n            (i % 3) / 3,\n            ((i + 1) % 3) / 3,\n            ((i + 2) % 3) / 3,\n            ((i + 3) % 3) / 3,\n            ((i + 4) % 3) / 3,\n            ((i + 5) % 3) / 3,\n        ])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":996,
+      "failureCount":37
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0\n        point = np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          1,
+          1.1666666666666667,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i % 2 == 0 else 0.5\n        point = np.array(\n            [\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n            ]\n        )\n        weighted_points.append((weight, point))\n\n    return weighted_points\n\n"
+        ],
+        [
+          7,
+          1.1818181818181819,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i < n // 2 else 0.5\n        point = np.array(\n            [\n                i - n // 2,\n                i - n // 2,\n                i - n // 2,\n                i - n // 2,\n                i - n // 2,\n                i - n // 2,\n                i - n // 2,\n                i - n // 2,\n            ]\n        )\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          19,
+          1.2248157248157248,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i < n // 3 else 0.5 if i < 2 * n // 3 else 0.33\n        point = np.array([i - n // 3] * 8)\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          116,
+          1.2666666666666666,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i < n // 4 else 0.5 if i < 3 * n // 4 else 0.25\n        point = np.array([i - n // 4] * 8 if i < n // 2 else [i - n // 2] * 8)\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          133,
+          1.2812499999999998,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = [1.0, 0.5, 0.3][i % 3]\n        point = np.array([i // 3 % 3, (i // 9) % 3, (i // 27) % 3, (i // 81) % 3, (i // 243) % 3, (i // 729) % 3, (i // 2187) % 3, (i // 6561) % 3])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          173,
+          1.2857142857142858,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = [1.0, 0.6, 0.4][i % 3]\n        point = np.array([i // 3 % 7, (i // 21) % 11, (i // 63) % 13, (i // 189) % 17, (i // 567) % 19, (i // 1697) % 23, (i // 50921) % 29, (i // 1531393) % 31])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          249,
+          1.3333333333333321,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i < n // 4 else 0.75 if i < n // 2 else 0.5 if i < 3 * n // 4 else 0.25\n        point = np.array([i / (n - 1)] * 4 + [0.0] * 4)\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          647,
+          1.3438320209973753,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i < n // 5 or i >= 4 * n // 5 else 0.5\n        point = np.array([(i % 13) ** 2, (i % 17) ** 2, (i % 19) ** 2, (i % 23) ** 2, (i % 29) ** 2, (i % 31) ** 2, (i % 37) ** 2, (i % 41) ** 2])\n        if i < n // 3:\n            point[0] += n // 3\n        elif i < 2 * n // 3:\n            point[1] += n // 3\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ],
+        [
+          862,
+          1.3529411764705883,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new weighted clustering-problem, specified by a list of n weighted points in\n    8-dimensional-space. The first element of each tuple is the weight of the point,\n    the second element of the tuple is the 8-dimensional-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    weighted_points = []\n    for i in range(n):\n        weight = 1.0 if i < n // 4 or i >= 3 * n // 4 else 0.4 if i % 3 == 0 else 0.25\n        point = np.array([(i % 7) ** 2 if j < 4 else (n - i // 2 - 1) ** 2 for j in range(8)])\n        weighted_points.append((weight, point))\n    return weighted_points\n\n"
+        ]
+      ],
+      "successCount":954,
+      "failureCount":47
+    }
+  ]
+}

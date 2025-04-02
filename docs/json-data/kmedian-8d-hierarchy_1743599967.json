@@ -1,0 +1,550 @@
+{
+  "config":{
+    "inputs":[
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "specification":"\"\"\"I'm trying to find instances  of the k-median clustering problem in 8-dimensional-space\nfor which the best-possible hierarchical (nested) clustering has a high cost.\nThe cost of a hierarchical clustering is the maximum of its cost across each\nof its levels. The cost of level `k` is the ratio between its cost and the optimal cost of a k-clustering.\nBecause optimal clusterings need not be nested, the cost of the best-possible hierarchical clustering\ncan exceed 1.0.\n\nSo far, I have tried the following functions to generate sets of points for which the best-possible hierarchical\nclustering has a high cost. Please write a similar one that doesn't use randomness and has the same signature,\nbut improves on the objective by slightly changing some lines. Please only respond with code, no explanations.\n\"\"\"\n\nimport numpy as np\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the ratio of the found instance.\"\"\"\n    from exact_clustering import unweighted_discrete_kmedian_price_of_hierarchy\n\n    points = get_points(n)\n\n    # Assert determinancy\n    if not all(np.array_equal(v1, v2) for v1, v2 in zip(points, get_points(n))):\n        return 0.0\n\n    # TODO: Separate points more\n    points_list = [v.tolist()[:8] for v in points[:n]]\n    return max(0.0, unweighted_discrete_kmedian_price_of_hierarchy(points_list))\n\n\n@funsearch.evolve\ndef get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n",
+    "problem_name":"kmedian-8d-hierarchy",
+    "message":"Start from trivial, score by max of approximation-ratios.\n\nVia randomised-hillclimbing, the best score I could find for the weighted kmedian-price-of-hierarchy was 1.618 (uncannily close to the golden ratio), but funsearch exceeded that.\n\nopen-mistral-nemo, temperature 1.5\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1743599967,
+  "highestRunIndex":1441,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.1111111111111112,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          12,
+          1.2222222222222223,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2,\n                (i // 2) % 2,\n                (i // 4) % 2,\n                (i // 8) % 2,\n                (i // 16) % 2,\n                (i // 32) % 2,\n                (i // 64) % 2,\n                (i // 128) % 2,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          13,
+          1.25,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 3,\n                (i // 3) % 3,\n                (i // 9) % 3,\n                (i // 27) % 3,\n                (i // 81) % 3,\n                (i // 243) % 3,\n                (i // 729) % 3,\n                (i // 2187) % 3,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          26,
+          1.2857142857142858,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 5,\n                (i // 5) % 5,\n                (i // 25) % 5,\n                (i // 125) % 5,\n                (i // 625) % 5,\n                (i // 3125) % 5,\n                (i // 15625) % 5,\n                (i // 78125) % 5,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          157,
+          1.3333333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 3,\n            (i // 3) % 3,\n            (i // 9) % 3,\n            (i // 27) % 3,\n            (i // 81) % 3,\n            (i // 243) % 3,\n            (i // 729) % 3,\n            (i // 2187) % 3,\n        ])\n        for i in range(n // 4, -1, -1)\n    ]\n    return points\n\n"
+        ],
+        [
+          200,
+          1.4,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 3,\n            (i // 3) % 2,\n            (i // 9) % 2,\n            (i // 81) % 2,\n            (i // 6561) % 2,\n            (i // 524288) % 2,\n            (i // 4194304) % 2,\n            (i // 33554432) % 2,\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          206,
+          1.4285714285714286,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([\n            i % 3,\n            (i // 3) % 2,\n            (i // 9) % 3,\n            (i // 81) % 3,\n            (i // 6561) % 3,\n            (i // 524288) % 3,\n            (i // 4194304) % 3,\n            (i // 33554432) % 3,\n        ])\n        for i in range(n - 1, -1, -1)\n    ]\n    return points\n\n"
+        ],
+        [
+          216,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 4,\n            (i // 4) % 2,\n            (i // 16) % 2,\n            (i // 256) % 2,\n            (i // 65536) % 2,\n            (i // 4294967296) % 2,\n            (i // 18446744073709551616) % 2,\n            (i // 340282366920938463463374607431768211455) % 2,\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1319,
+      "failureCount":21
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0952380952380953,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2 - 0.5,\n                i % 4 - 0.5,\n                i % 8 - 0.5,\n                i % 16 - 0.5,\n                i % 32 - 0.5,\n                i % 64 - 0.5,\n                i % 128 - 0.5,\n                i % 256 - 0.5,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          4,
+          1.1111111111111112,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n                i,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          6,
+          1.2222222222222223,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2,\n                (i // 2) % 2,\n                (i // 4) % 2,\n                (i // 8) % 2,\n                (i // 16) % 2,\n                (i // 32) % 2,\n                (i // 64) % 2,\n                (i // 128) % 2,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          26,
+          1.25,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 3,\n                (i // 3) % 3,\n                (i // 9) % 3,\n                (i // 27) % 3,\n                (i // 81) % 3,\n                (i // 243) % 3,\n                (i // 729) % 3,\n                (i // 2187) % 3,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          30,
+          1.2857142857142858,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1` with increased separation.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 5,\n                (i // 5) % 5,\n                (i // 25) % 5,\n                (i // 125) % 5,\n                (i // 625) % 5,\n                (i // 3125) % 5,\n                (i // 15625) % 5,\n                (i // 78125) % 5,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          32,
+          1.4,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i // 8,\n                (i // 4) % 2,\n                (i // 2) % 2,\n                i % 2,\n                (i + 1) % 2,\n                (i + 2) % 2,\n                (i + 3) % 2,\n                (i + 4) % 2,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          319,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i // 254,\n            (i // 126) % 2,\n            (i // 62) % 2,\n            (i // 30) % 2,\n            (i // 14) % 2,\n            (i // 6) % 2,\n            (i // 2) % 2,\n            i % 2,\n            (i + 2) % 2,\n            (i + 3) % 2,\n            (i - 1) % 2,\n            (i - 2) % 2,\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1345,
+      "failureCount":12
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.053191489361702,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2 - 0.5,\n                i % 3 - 0.5,\n                i % 5 - 0.5,\n                i % 7 - 0.5,\n                i % 11 - 0.5,\n                i % 13 - 0.5,\n                i % 17 - 0.5,\n                i % 19 - 0.5,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          3,
+          1.2222222222222223,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2,\n                (i // 2) % 2,\n                (i // 4) % 2,\n                (i // 8) % 2,\n                (i // 16) % 2,\n                (i // 32) % 2,\n                (i // 64) % 2,\n                (i // 128) % 2,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          10,
+          1.25,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 3,\n                (i // 3) % 3,\n                (i // 9) % 3,\n                (i // 27) % 3,\n                (i // 81) % 3,\n                (i // 243) % 3,\n                (i // 729) % 3,\n                (i // 2187) % 3,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          22,
+          1.2857142857142858,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = [np.array([(i // (5 ** k)) % 5 for k in range(8)]) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          26,
+          1.3,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Improved version of `get_points_v2`.\"\"\"\n    points = [np.array([((i + k) // (3 ** k)) % 3 for k in range(8)]) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          43,
+          1.375,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [np.array([((i + k + 1) // (3 ** k)) % 3 for k in range(8)]) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          73,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [np.array([((i * (k + 1)) // (7 ** k)) % 3 for k in range(8)]) for i in range(n)]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1327,
+      "failureCount":30
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.053191489361702,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2,\n                i % 3,\n                i % 5,\n                i % 7,\n                i % 11,\n                i % 13,\n                i % 17,\n                i % 19,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          3,
+          1.0952380952380953,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2 - 0.5,\n                i % 4 - 0.5,\n                i % 8 - 0.5,\n                i % 16 - 0.5,\n                i % 32 - 0.5,\n                i % 64 - 0.5,\n                i % 128 - 0.5,\n                i % 256 - 0.5,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          7,
+          1.2222222222222223,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2 - 0.5,\n                i // 2 % 2 - 0.5,\n                i // 4 % 2 - 0.5,\n                i // 8 % 2 - 0.5,\n                i // 16 % 2 - 0.5,\n                i // 32 % 2 - 0.5,\n                i // 64 % 2 - 0.5,\n                i // 128 % 2 - 0.5,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          16,
+          1.25,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 3 - 1,\n                (i // 3) % 3 - 1,\n                (i // 9) % 3 - 1,\n                (i // 27) % 3 - 1,\n                (i // 81) % 3 - 1,\n                (i // 243) % 3 - 1,\n                (i // 729) % 3 - 1,\n                (i // 2187) % 3 - 1,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          18,
+          1.2857142857142858,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 5 - 2,\n                (i // 5) % 5 - 2,\n                (i // 25) % 5 - 2,\n                (i // 125) % 5 - 2,\n                (i // 625) % 5 - 2,\n                (i // 3125) % 5 - 2,\n                (i // 15625) % 5 - 2,\n                (i // 78125) % 5 - 2,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          25,
+          1.4,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 2 - 0.5,\n            (i // 2) % 2 - 0.5,\n            (i // 4) % 2 - 0.5,\n            (i // 8) % 2 - 0.5,\n            (i // 16) % 2 - 0.5,\n            (i // 32) % 2 - 0.5,\n            (i // 64) % 2 - 0.5,\n            (i // 128) % 2 - 0.5,\n        ]) * (i % 2 == 0) for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          91,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 4 - 1.5,\n            (i // 4) % 2 - 0.5,\n            (i // 16) % 2 - 0.5,\n            (i // 64) % 2 - 0.5,\n            (i // 256) % 2 - 0.5,\n            (i // 1024) % 2 - 0.5,\n            (i // 4096) % 2 - 0.5,\n            (i // 16384) % 2 - 0.5,\n        ])\n        for i in range(n * 2 - 1, 0, -2)\n    ]\n    return points\n\n"
+        ],
+        [
+          951,
+          1.6653359946773123,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([\n            i % 11 - 5.5,\n            (i // 11) % 3 - 1,\n            (i // 121) % 2 - 0.5,\n            (i // 14641) % 2 - 0.5,\n            (i // 1948717) % 2 - 0.5,\n            (i // 2746681) % 2 - 0.5,\n            (i // 76293997) % 2 - 0.5,\n            (i // 608037152) % 2 - 0.5,\n        ])\n        for i in range(n * 11 - 1, 0, -11)\n    ]\n    points[-1][:3] += 0.002  # Increase the change in the first three coordinates of the last point\n    return points\n\n"
+        ],
+        [
+          1033,
+          1.746261216350947,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 12 - 6,\n            (i // 12) % 3 - 1.5,\n            (i // 144) % 2 - 0.75,\n            (i // 19683) % 2 - 0.75,\n            (i // 262144) % 2 - 0.75,\n            (i // 35831808) % 2 - 0.75,\n            (i // 4782969) % 2 - 0.75,\n            (i // 637281273) % 2 - 0.75,\n        ])\n        for i in range(n * 12 - 1, 0, -12)\n    ]\n    points[-1][:4] += 0.003  # Increase the change in the first four coordinates of the last point\n    return points\n\n"
+        ]
+      ],
+      "successCount":1322,
+      "failureCount":23
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0952380952380953,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2 - 0.5,\n                i % 4 - 1.5,\n                i % 8 - 3.5,\n                i % 16 - 7.5,\n                i % 32 - 15.5,\n                i % 64 - 31.5,\n                i % 128 - 63.5,\n                i % 256 - 127.5,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          4,
+          1.1111111111111112,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i,\n                i*2,\n                i*3,\n                i*4,\n                i*5,\n                i*6,\n                i*7,\n                i*8,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          9,
+          1.2857142857142858,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i // (n // 2),\n                i % (n // 2),\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          64,
+          1.4,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [np.array([i % (n // 4) / (n // 4), (i // (n // 4)) % (n // 4) / (n // 4)] * 4) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          121,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [np.array([i % (n // 5) / (n // 5), (i // (n // 5)) % (n // 5) / (n // 5), 0] * 2 + [1, 1, 0, 0]) for i in range(n)]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1139,
+      "failureCount":146
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0952380952380953,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2,  # Change the first element to be either 0 or 1\n                i % 4,\n                i % 8,\n                i % 16,\n                i % 32,\n                i % 64,\n                i % 128,\n                i % 256,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.1,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i,\n                n - i - 1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n // 2)\n    ]\n    points += [\n        np.array(\n            [\n                n - i - 1,\n                i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n // 2, n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          5,
+          1.1139240506329113,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2 if i < n//2 else 1,  # Change the first element to be 0 for first half and 1 for second half\n                i % 4,\n                i % 8,\n                i % 16,\n                i % 32,\n                i % 64,\n                i % 128,\n                i % 256,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          13,
+          1.1411764705882352,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 3 if i < n//3 else (i - n//3) % 3,  # Change first element based on third of n\n                i % 5,\n                i % 9,\n                i % 17,\n                i % 33,\n                i % 65,\n                i % 129,\n                i % 257,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          26,
+          1.1428571428571428,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 3 if i < n//3 else 2,  # Change the first element to be either 0, 1 or 2, and 2 for the last third\n                i % 5 if i < n//5 else 4,  # Change the second element to be either 0, 1, 2, 3 or 4, and 4 for the last fifth\n                i % 7 if i < n//7 else 6,  # Change the third element to be either 0, 1, 2, 3, 4, 5 or 6, and 6 for the last seventh\n                i % 11 if i < n//11 else 10,  # Change the fourth element to be either 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 or 10, and 10 for the last eleventh\n                i % 13 if i < n//13 else 12,  # Change the fifth element to be either 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 or 12, and 12 for the last thirteenth\n                i % 17 if i < n//17 else 16,  # Change the sixth element to be either 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 or 16, and 16 for the last seventeenth\n                i % 19 if i < n//19 else 18,  # Change the seventh element to be either 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 or 18, and 18 for the last nineteenth\n                i % 23,  # Change the eighth element to be any value from 0 to 22\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          67,
+          1.144578313253012,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 5 if i < n//5 else (i - (n//5) * 2) % 5,\n            i % 9,\n            i % 17,\n            i % 33,\n            i % 65,\n            i % 131,\n            i % 263,\n            i % 527,\n        ]) for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          81,
+          1.16,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 4 if i < n//4 else 3,\n                i % 6 if i < n//6 else 4,\n                i % 8 if i < n//8 else 5,\n                i % 10 if i < n//10 else 6,\n                i % 12 if i < n//12 else 7,\n                i % 14 if i < n//14 else 0,\n                i % 16 if i < n//16 else 1,\n                i % 18,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          97,
+          1.190217391304348,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 32 if i < n//8 else 16,  # Change the first element to be 0-31 for first eighth, and 16 for remaining\n                i % 16,\n                i % 32,\n                i % 64,\n                i % 128,\n                i % 256,\n                i % 512,\n                i % 1024,\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          101,
+          1.2153773806724666,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2 if i % 4 < 2 else 1,  # First element is 0 for first half, 1 for second half\n                (i % 4) * 7 if i % 8 < 4 else (i - n//8) % 7,  # Alternate between two ranges of 7\n                (i % 11) * 11 if i % 22 < 11 else (i - n//22) % 11,  # Alternate between two ranges of 11\n                (i % 19) * 19 if i % 38 < 19 else (i - n//38) % 19,  # Alternate between two ranges of 19\n                (i % 37) * 37 if i % 74 < 37 else (i - n//74) % 37,  # Alternate between two ranges of 37\n                (i % 67) * 67 if i % 134 < 67 else (i - n//134) % 67,  # Alternate between two ranges of 67\n                (i % 127) * 127 if i % 254 < 127 else (i - n//254) % 127,  # Alternate between two ranges of 127\n                (i % 251) * 251 if i % 502 < 251 else (i - n//502) % 251,  # Alternate between two ranges of 251\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          214,
+          1.25,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n // 4)\n    ]\n    points += [\n        np.array(\n            [\n                n - i - 1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n // 4, n // 2)\n    ]\n    points += [\n        np.array(\n            [\n                i % 2,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n // 2, n // 4 * 3)\n    ]\n    points += [\n        np.array(\n            [\n                n - i - 1,\n                1,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n // 4 * 3, n)\n    ]\n    return points\n\n"
+        ],
+        [
+          346,
+          1.4,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 2,\n            (i // 2) % 2,\n            (i // 4) % 2,\n            (i // 8) % 2,\n            (i // 16) % 2,\n            (i // 32) % 2,\n            (i // 64) % 2,\n            1 - i % 2\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1399,
+      "failureCount":30
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.053191489361702,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2,\n                i % 3,\n                i % 5,\n                i % 7,\n                i % 11,\n                i % 13,\n                i % 17,\n                i % 19,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          3,
+          1.0769230769230769,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2,\n                i % 3,\n                i % 4,\n                i % 5,\n                i % 6,\n                i % 7,\n                i % 8,\n                i % 9,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          5,
+          1.0833333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([\n            i % 2,\n            i % 5,\n            i % 7,\n            i % 11,\n            i % 13,\n            i % 17,\n            i % 19,\n            i % 23,\n        ]) for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          21,
+          1.1428571428571428,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 4,\n            i % 8,\n            i % 16,\n            i % 24,\n            i % 32,\n            i % 40,\n            i % 48,\n            i % 56,\n        ]) for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          65,
+          1.1764705882352942,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 4,\n            i % 16,\n            i % 64,\n            i % 256,\n            i % 1024,\n            i % 4096,\n            i % 16384,\n            i % 65536,\n        ]) for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          70,
+          1.2222222222222223,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v0` and `get_points_v1`.\"\"\"\n    points = [\n        np.array([\n            i % (2**k) // (2**(k-1)) for k in range(1, 9)\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          110,
+          1.4,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % (2**k) // (2**(k-1)) - (1 if i % 2 == 0 else 0) for k in range(1, 9)\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          251,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            (i * 2**k) % n // (n // 2) + k/10 for k in range(8)\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1346,
+      "failureCount":35
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.053191489361702,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2 - 0.5,\n                i % 3 - 0.5,\n                i % 5 - 0.5,\n                i % 7 - 0.5,\n                i % 11 - 0.5,\n                i % 13 - 0.5,\n                i % 17 - 0.5,\n                i % 19 - 0.5,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          5,
+          1.1111111111111112,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [np.array([i, 0, 0, 0, 0, 0, 0, 0]) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          7,
+          1.2222222222222223,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 2,\n                (i // 2) % 2,\n                (i // 4) % 2,\n                (i // 8) % 2,\n                (i // 16) % 2,\n                (i // 32) % 2,\n                (i // 64) % 2,\n                (i // 128) % 2,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          9,
+          1.25,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 2,\n            (i // 2) % 2,\n            (i // 4) % 2,\n            (i // 8) % 2,\n            (i // 16) % 2,\n            (i // 32) % 2,\n            (i // 64) % 2,\n            (i // 128) % 2,\n        ])\n        for i in range(n)\n    ]\n\n    # Shift the first point to create a non-nested structure\n    points[0] += 1\n\n    return points\n\n"
+        ],
+        [
+          18,
+          1.4,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 2,\n            (i // 2) % 2,\n            (i // 4) % 2,\n            (i // 8) % 2,\n            (i // 16) % 2,\n            (i // 32) % 2,\n            (i // 64) % 2,\n            (i // 128) % 2,\n        ])\n        for i in range(n)\n    ]\n\n    # Shift every other point to create a non-nested structure\n    for i in range(1, n, 2):\n        points[i] += 1\n\n    return points\n\n"
+        ],
+        [
+          122,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 4,\n            (i // 4) % 2,\n            (i // 16) % 2,\n            (i // 64) % 2,\n            (i // 256) % 2,\n            (i // 1024) % 2,\n            (i // 4096) % 2,\n            (i // 16384) % 2,\n        ])\n        for i in range(n)\n    ]\n\n    # Introduce a larger gap between every 8th point and its neighbors, and between the first and second points\n    for i in range(0, n, 8):\n        points[i] += 4\n        if i < n - 8:\n            points[i + 8] -= 4\n    points[0] += 2\n    points[1] -= 2\n\n    return points\n\n"
+        ]
+      ],
+      "successCount":1312,
+      "failureCount":129
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.1111111111111112,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i // n,\n                i % n,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          10,
+          1.2857142857142858,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array(\n            [\n                i // (n // 2),\n                i % (n // 2),\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          216,
+          1.2926829268292683,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    return [\n        np.array([\n            i % (n // 8),\n            i % (n // 4),\n            i % (n // 4) * 2,\n            i % (n // 2),\n            i % (n // 2) * 2,\n            i % (n // 2) * 3,\n            i % (n // 2) * 5,\n            i % (n // 2) * 7,\n        ])\n        for i in range(n)\n    ]\n\n"
+        ],
+        [
+          225,
+          1.3031674208144797,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    return [\n        np.array([\n            i % (n // 8) * 2,\n            i % (n // 4) * 3,\n            i % (n // 4) * 5,\n            i % (n // 2) * 7,\n            i % (n // 2) * 11,\n            i % (n // 2) * 13,\n            i % (n // 2) * 17,\n            i % (n // 2) * 19,\n        ])\n        for i in range(n)\n    ]\n\n"
+        ],
+        [
+          297,
+          1.3116883116883118,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1` with modified scaling and more non-zero values.\"\"\"\n    return [\n        np.array([\n            i % (n // 8) * 2 - 1,\n            i % (n // 4) * 2 - 1,\n            i % (n // 4) * 4 - 1,\n            i % (n // 2) * 4 - 1,\n            i % (n // 2) * 8 - 1,\n            i % (n // 2) * 12 - 1,\n            i % (n // 2) * 20 - 1,\n            i % (n // 2) * 28 - 1,\n        ])\n        for i in range(n)\n    ]\n\n"
+        ],
+        [
+          405,
+          1.323076923076923,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v0`.\"\"\"\n    points = [\n        np.array([\n            i % (n // 2) * 3,\n            (i // (n // 2)) * 6,\n            (i % (n // 2)) * 6 + 1,\n            (i % (n // 2)) * 12,\n            (i % (n // 2)) * 24,\n            (i % (n // 2)) * 36,\n            (i % (n // 2)) * 48,\n            (i % (n // 2)) * 60,\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          429,
+          1.326478149100257,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % (n // 3) * 4,\n            (i // (n // 3)) * 8,\n            (i % (n // 3)) * 8 + 2,\n            (i % (n // 3)) * 16,\n            (i % (n // 3)) * 32,\n            (i % (n // 3)) * 64,\n            (i % (n // 3)) * 128,\n            (i % (n // 3)) * 256,\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          613,
+          1.3333333333333333,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    return [\n        np.array([\n            i % (n // 2) * 8,\n            i % (n // 2) * 8 + 4,\n            i % (n // 2) * 16,\n            i % (n // 2) * 16 + 4,\n            i % (n // 2) * 32,\n            i % (n // 2) * 32 + 4,\n            i % (n // 2) * 64,\n            i % (n // 2) * 64 + 4,\n        ])\n        for i in range(n)\n    ]\n\n"
+        ]
+      ],
+      "successCount":1320,
+      "failureCount":33
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n                0,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0198675496688743,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 2,\n            i // 2,\n            (i * 2) % 8,\n            (i * 3) % 8,\n            (i * 5) % 8,\n            (i * 7) % 8,\n            (i * 11) % 8,\n            (i * 13) % 8,\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          3,
+          1.3571428571428572,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 8,\n                (i + 1) % 8,\n                (i + 2) % 8,\n                (i + 3) % 8,\n                (i + 4) % 8,\n                (i + 5) % 8,\n                (i + 6) % 8,\n                (i + 7) % 8,\n            ]\n        )\n        for i in range(n)\n    ]\n\n    return points\n\n"
+        ],
+        [
+          10,
+          1.3666666666666667,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array(\n            [\n                i % 8,\n                (i + 1) % 8,\n                (i + 2) % 8,\n                (i + 3) % 8,\n                (i + 4) % 8,\n                (i + 5) % 8,\n                (i + 6) % 8,\n                (i + 7) % 8 * 2  # Change: multiply the last coordinate by 2\n            ]\n        )\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          22,
+          1.4047619047619047,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * (n // 2 + 1)  # Change: multiply the last coordinate by n//2 + 1\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          23,
+          1.4285714285714286,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * (n + 1)  # Change: multiply the last coordinate by n+1\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          25,
+          1.480952380952381,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * ((n * (n - 1)) // 2 + 1)  # Change: multiply the last coordinate by (n * (n - 1)) // 2 + 1\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          29,
+          1.4904306220095693,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * (n ** 2)  # Change: multiply the last coordinate by n^2\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          35,
+          1.4961904761904763,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * (n // 2 + 1) ** 3  # Change: cube the multiplier\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          37,
+          1.49660441426146,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * ((n // 2 + 1) * 3) ** 2  # Change: square the multiplier\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          38,
+          1.4995132635677781,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * ((n + 1) // 2 + 1) ** 4  # Change: increase the exponent of the multiplier\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          40,
+          1.4999389890485342,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * (n // 2 + 1) ** 5  # Change: raise the multiplier to the 5th power\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          42,
+          1.4999923709838,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * (n // 2 + 1) ** 6  # Change: increase the exponent of the multiplier\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          43,
+          1.4999999535388677,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    \"\"\"Further improved version of `get_points_v1`.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * ((n + 2) // 2 + 1) ** 8  # Change: increase the multiplier and the exponent\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ],
+        [
+          45,
+          1.5,
+          "def get_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n points in 8-dimensional space.\"\"\"\n    points = [\n        np.array([\n            i % 8,\n            (i + 1) % 8,\n            (i + 2) % 8,\n            (i + 3) % 8,\n            (i + 4) % 8,\n            (i + 5) % 8,\n            (i + 6) % 8,\n            (i + 7) % 8 * (n // 2 + 1) ** 20  # Change: raise the multiplier to the 20th power\n        ])\n        for i in range(n)\n    ]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1262,
+      "failureCount":127
+    }
+  ]
+}

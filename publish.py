@@ -36,10 +36,13 @@ def publish() -> None:
     # Save small descriptions of each json-file in index.json
     # Has schema (problemName, timestamp, inputs, maxScore, message, filepath)
     index_json: list[tuple[str, int, list[float] | list[str], float, str, str]] = []
+    old_filenames = {file.name for file in JSON_DIR.glob("*json")}
+    new_filenames = set()
     for (specname, timestamp), file in files.items():
         database = ProgramsDatabase.load(file.open("rb"))
 
         filename = f"{specname}_{timestamp}.json"
+        new_filenames.add(filename)
         with (JSON_DIR / filename).open("w") as f:
             # Trim message to 255 "characters"
             # This is bad practice, something something graphemes, but it will be cut off on the website anyway.
@@ -80,6 +83,12 @@ def publish() -> None:
     # Create the index of all json-files
     with (JSON_DIR / "index.json").open("w") as f:
         json.dump(sorted(index_json), f, separators=(",", ":"), indent=2)
+    new_filenames.add("index.json")
+
+    for filename in old_filenames - new_filenames:
+        print(f"❌ Missing {filename}")
+    for filename in new_filenames - old_filenames:
+        print(f"✅ Added {filename}")
 
 
 if __name__ == "__main__":

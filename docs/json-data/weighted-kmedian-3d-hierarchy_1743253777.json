@@ -1,0 +1,703 @@
+{
+  "config":{
+    "inputs":[
+      8,
+      10,
+      12,
+      14,
+      16
+    ],
+    "specification":"\"\"\"I'm trying to find 3D-instances of the k-median clustering problem for which the best-possible hierarchical\n(nested) clustering has a high cost. The cost of a hierarchical clustering is the maximum of its cost across each\nof its levels. The cost of level `k` is the ratio between its cost and the optimal cost of a k-clustering.\nBecause optimal clusterings need not be nested, the cost of the best-possible hierarchical clustering\ncan exceed 1.0.\n\nSo far, I have tried the following functions to generate sets of points for which the best-possible hierarchical\nclustering has a high cost. Please write a similar one that doesn't use randomness and has the same signature,\nbut improves on the objective by slightly changing some lines. Please only respond with code, no explanations.\n\"\"\"\n\nimport numpy as np\n\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the ratio of the found instance.\"\"\"\n    from clustering_rs import price_of_weighted_kmedian_hierarchy\n\n    weighted_points = get_weighted_points(n)\n\n    # Assert determinancy\n    if not all(\n        w1 == w2 and np.array_equal(v1, v2) for (w1, v1), (w2, v2) in zip(weighted_points, get_weighted_points(n))\n    ):\n        return 0.0\n\n    # Merging identical points avoids floating-point-rounding-issues and improves performance\n    merged_weighted_points: dict[np.ndarray, float] = {}\n    for weight, v in weighted_points[:n]:\n        point = tuple(v[:3])\n        merged_weighted_points[point] = merged_weighted_points.get(point, 0.0) + weight\n    # Sorting by largest weight first helps with performance\n    points = sorted(((weight, list(v)) for v, weight in merged_weighted_points.items()), reverse=True)\n    return max(0.0, price_of_weighted_kmedian_hierarchy(points))\n\n\n@funsearch.evolve\ndef get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n",
+    "problem_name":"weighted-kmedian-3d-hierarchy",
+    "message":"Start from trivial, score by max of approximation-ratios.\n\nVia randomised-hillclimbing, the best score I could find for the weighted kmedian-price-of-hierarchy was 1.618 (uncannily close to the golden ratio), which this run didn't beat.\n\nopen-mistral-nemo, temperature 1.5\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1743253777,
+  "highestRunIndex":1189,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.0869925434962717,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0 / (i + 1)\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = i // 9 - 1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          7,
+          1.0929752066115703,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0 / (n - i)\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = i // 9 - 1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          16,
+          1.1,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(1.0, np.array([i % 3 - 1, (i // 3) % 3 - 1, i // 9 - 1])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          20,
+          1.1156586565865658,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0 / (n - i)\n        x = (i % 3) ** 2 - 1\n        y = ((i // 3) % 3) ** 2 - 1\n        z = (i // 9) ** 2 - 1 if i % 9 < 3 else -1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          54,
+          1.124756335282651,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(2, n+1):  # Start from 2 to avoid zero division\n        weight = i ** 2\n        x = (i % 5) ** 2 - 2.5\n        y = ((i // 5) % 5) ** 2 - 2.5\n        z = (i // 25) ** 2 - 2.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          61,
+          1.2432432432432432,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i ** 3\n        x = (i % 7) ** 2 - 3.5\n        y = ((i // 7) % 7) ** 2 - 3.5\n        z = (i // 49) ** 2 - 3.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          75,
+          1.2555450264323749,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i ** 5\n        x = (i % 9) ** 3 - 7\n        y = ((i // 9) % 9) ** 3 - 7\n        z = (i // 81) ** 3 - 7\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          195,
+          1.284464553931234,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i ** 3.8\n        x = (i % 10) ** 2.5 - 5\n        y = ((i // 10) % 10) ** 2.5 - 5\n        z = (i // 100) ** 2.5 - 5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          196,
+          1.2971863211755765,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i ** 4.5\n        x = (i % 10) ** 3 - 8\n        y = ((i // 10) % 10) ** 3 - 8\n        z = (i // 100) ** 3 - 8\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          299,
+          1.2975219808811562,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i ** 5.5\n        x = (i % 11) ** 4 - 8\n        y = ((i // 11) % 11) ** 4 - 8\n        z = (i // 121) ** 4 - 8\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          377,
+          1.3114345346214986,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i ** 6.5\n        x = (i % 11) ** 4 - 5.5\n        y = ((i // 11) % 11) ** 4 - 5.5\n        z = (i // 121) ** 4 - 5.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          421,
+          1.312213777978131,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i ** 7.3\n        x = (i % 13) ** 5 - 6.5\n        y = ((i // 13) % 13) ** 5 - 6.5\n        z = (i // 169) ** 5 - 6.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          456,
+          1.3648090646409485,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = (i + 1) ** 3.7\n        x = (i % 10) ** 2.6 - 4\n        y = ((i // 10) % 10) ** 2.6 - 4\n        z = (i // (n // 5)) ** 2.6 - 4\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          1175,
+          1.403667072305865,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = (i * 7) ** 3.9\n        x = (i % 11) ** 2.9 - 5\n        y = ((i // 11) % 11) ** 2.9 - 5\n        z = (i // (n // 4)) ** 2.9 - 5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ]
+      ],
+      "successCount":1159,
+      "failureCount":30
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.0714285714285714,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0 if i % 2 == 0 else 0.5\n        x = i % (n // 3) - n // 6\n        y = (i // (n // 3)) % (n // 3) - n // 6\n        z = i // (n * (n // 3)) - n // 6\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          3,
+          1.0769230769230773,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i + 1.0\n        x = i * 0.1\n        y = i * 0.1\n        z = i * 0.1\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          6,
+          1.0833333333333333,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = i * 2.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          11,
+          1.0883190883190883,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i / n + 1.0  # Slightly change the weight calculation\n        x = i % 3 - 1.0  # Use deterministic x-coordinate calculation\n        y = (i // 3) % 3 - 1.0  # Use deterministic y-coordinate calculation\n        z = (i // 9) - 1.0  # Use deterministic z-coordinate calculation\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          26,
+          1.1208126283558468,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i / (n - 1) * 3 + 1\n        x = i / (n - 1) * 3 - 1.5\n        y = np.sin(x * np.pi) * 2\n        z = np.cos(x * np.pi) * 2\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          32,
+          1.1815359345944436,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) / n\n        x = i / (n - 1) * 2 - 1\n        y = np.sin(x * np.pi * 2)\n        z = np.cos(x * np.pi * 2)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          34,
+          1.2216019370439786,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2 / (n - 1) ** 2\n        x = (i - n // 2) / (n - 1) * 3\n        y = np.sin(x * np.pi) * 2\n        z = np.cos(x * np.pi) * 2\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          41,
+          1.2601855982203582,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3 / n ** 3\n        x = (i - n // 2) / (n - 1) * 3\n        y = np.sin(x * np.pi) * np.sqrt(2)\n        z = np.cos(x * np.pi) * np.sqrt(2)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          70,
+          1.2912671300254335,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2 / n ** 2\n        x = i / (n - 1) * 3 - 1.5\n        y = np.sin(x * np.pi) * np.sqrt(3)\n        z = np.cos(x * np.pi) * np.sqrt(3)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          113,
+          1.3045540933049151,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3 / n ** 3 * (n - i)\n        x = (i - n // 2) / (n - 1) * 5\n        y = np.sin(x * np.pi) * 3 * (n - i)\n        z = np.cos(x * np.pi) * 3 * (n - i)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          189,
+          1.3241987637995256,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3 / n ** 3\n        x = (i - n // 2) / (n - 1) * 5\n        y = np.sin(x * np.pi) * 4 * (n - i)\n        z = np.cos(x * np.pi) * 4 * (n - i)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          200,
+          1.3300947384070794,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2 / (n ** 2)\n        x = (i - n // 2) / (n - 1) * 5\n        y = np.sin(x * np.pi) * 3 * (n - i)\n        z = np.cos(x * np.pi) * 3 * (n - i)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          305,
+          1.3372572561304361,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3 * (n - i)\n        x = (i - n // 2 + 0.5) / (n - 1) * 7\n        y = np.sin(x * np.pi) * 5 * (n - i) * (n - i)\n        z = np.cos(x * np.pi) * 5 * (n - i) * (n - i)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          362,
+          1.4007075443075696,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3 / (n ** 3) * (n - i) / (n - 1)\n        x = (i - n // 2) / (n - 1) * 15 - 7.5\n        y = np.sin(x * np.pi / 2) * 6 * (n - i) ** 2\n        z = np.cos(x * np.pi / 2) * 6 * (n - i) ** 2 + i * 0.1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          489,
+          1.4039308568962345,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3 * (n - i)\n        x = (i - n // 2 + 0.3) / (n - 1) * 8\n        y = np.sin(x * np.pi) * 6 * (n - i) ** 2\n        z = np.cos(x * np.pi) * 6 * (n - i) ** 2\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          556,
+          1.4432110525989397,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3.2 / (n ** 3)\n        x = (i - n // 2 + 0.5) / (n - 1) * 10\n        y = np.sin(x * np.pi / 2) * 6 * (n - i) ** 1.5\n        z = np.cos(x * np.pi / 2) * 6 * (n - i) ** 1.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          614,
+          1.4642983724488603,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3 * (n - i)\n        x = (i - n // 2 + 0.2) / (n - 1) * 10\n        y = np.sin(x * np.pi * 2) * 8 * (n - i) ** 2\n        z = np.cos(x * np.pi * 2) * 8 * (n - i) ** 2 + i * 0.15\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ]
+      ],
+      "successCount":962,
+      "failureCount":15
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0545454545454545,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i + 1\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = i // 9 - 1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          2,
+          1.0833333333333333,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(1.0, np.array([i, 0, 0])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          8,
+          1.1,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = i % (n // 3)\n        y = (i // (n // 3)) % (n // 3)\n        z = i // ((n // 3) ** 2)\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          36,
+          1.1080402010050252,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i * 2\n        x = i * (i+1) / 2.0\n        y = (n - i) * ((n - i) + 1) / 2.0\n        z = i * (i-1) / 2.0\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          96,
+          1.1791393115534414,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i + 1\n        x = i * (i+1) / 2.0 * np.cos(2 * np.pi * i / n)\n        y = i / (i+1) * 3.0 * np.sin(2 * np.pi * i / n)\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          275,
+          1.1917894953582542,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i + 1\n        x = i * (i+1) * np.cos(2 * np.pi * i / n) * np.sqrt(i+1)\n        y = i / (i+1) * 4.0 * np.sin(2 * np.pi * i / n) * np.sqrt(i+1)\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          872,
+          1.2230380720470513,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2\n        x = i * np.cos(2 * np.pi * i / n) * (n - i) / n\n        y = i * np.sin(2 * np.pi * i / n) * (n - i) / n\n        z = (n - i) / n\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ]
+      ],
+      "successCount":902,
+      "failureCount":19
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0545454545454545,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i + 1\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = i // 9 - 1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          2,
+          1.0555555555555556,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i % 2 + 1.0  # alternating weights\n        x = i % n\n        y = (i // n) % n\n        z = i // n // n\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          3,
+          1.09375,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i + 1\n        x = i % 3 - 1\n        y = (i // 3) % 2 - 1\n        z = i // 6\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          12,
+          1.1,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = i // 9 - 1\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          17,
+          1.103448275862069,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0 if i < n//2 else 2.0\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = i // 9 - 1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          18,
+          1.1428571428571428,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = i // 9 - 1\n        points.append((weight, np.array([x, y, 0.5 * z])))\n    return points\n\n"
+        ],
+        [
+          102,
+          1.232554809346498,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i**2\n        x = i * np.cos(i)\n        y = i * np.sin(i)\n        z = i * np.tan(i)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          273,
+          1.3149727776302813,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i * i\n        x = i * np.cos(i) * 1.6 - 0.8\n        y = i * np.sin(i) * 1.3 - 0.6\n        z = i * np.tan(i) * 0.9 - 0.45\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          466,
+          1.3414192958657079,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = i ** 2\n        x = i * np.cos(i) * 1.6\n        y = i * np.sin(i) * 1.3\n        z = i * np.tan(i) * 1.2\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ]
+      ],
+      "successCount":1016,
+      "failureCount":25
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0420168067226891,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i + 1  # Change: Start weight from 1, increment by 1\n        x = i % 3 - 1  # Change: X-coordinate based on i, range -1 to 1\n        y = 0  # Change: Y-coordinate always 0\n        z = (i // 3) * 2 - 1  # Change: Z-coordinate based on i, range -1 to 1\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.0545454545454545,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = i + 1\n        x = i % 3\n        y = (i // 3) % 3\n        z = i // 9\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          3,
+          1.0909090909090908,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(1.0, np.array([i % 3, i // 3, i // 9])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          5,
+          1.0929752066115703,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(1, n+1):\n        weight = 1.0 / i\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = (i // 9) % 3 - 1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          10,
+          1.1428571428571428,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([i % 3, i // 3, i % 5 - 2])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          17,
+          1.1764705882352942,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([i % n * 2 / n - 1, i % 7 - 3, i // 11])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          18,
+          1.1935483870967745,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0`.\"\"\"\n    points = [(i + 1, np.array([i % n * 2 / n, i % (n // 2) * 2 / (n // 2) - 1, i % (n // 3) * 2 / (n // 3) - 1])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          23,
+          1.2,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([i % 3, (i // 3) * 2, (i % 5) * 2 - 4])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          33,
+          1.2307692307692308,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([i % 3, (i // 3) * 3, (i % 5) * 3 - 6])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          81,
+          1.2328767123287672,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([i % n * 1 / n, i % (n // 2) * 2 / (n // 2) - 1, i % (n // 3) * 3 / (n // 3) - 1.5])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          135,
+          1.2352941176470589,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([(i % (n // 3)) * 3 / (n // 3), (i % (n // 2)) * 2 / (n // 2), (i % n) * 3 / n] + [0.5] * (n % 3 == 0))) for i in range(n)]\n    return points\n\n"
+        ]
+      ],
+      "successCount":1003,
+      "failureCount":42
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0869925434962717,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0 / (i + 1)\n        x = i % 3 - 1\n        y = (i // 3) % 3 - 1\n        z = i // 9 - 1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          21,
+          1.1176470588235294,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0 if i < n//2 else 0.5\n        x = i % 3 - 1.5\n        y = (i // 3) % 3 - 1.5\n        z = i // 9 - 0.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          67,
+          1.125,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(1.0 if i % 5 == 0 else 0.5, np.array([(i % 3) - 1, ((i // 3) % 5) - 1, (i // 15) - 1])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          120,
+          1.1702127659574468,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2  # Square the weight to emphasize larger points\n        x = i % 3 - 1.5 + (i % 2) / n  # Shift x-coordinate and add a slight variation\n        y = (i // 3) % 3 - 1.5\n        z = i // 9 - 1.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          152,
+          1.2083333333333335,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) / n if i % 2 == 0 else (n - i) / n * 2\n        x = (i % 7) / 7 - 0.5\n        y = (i // 7) % 5 / 5 - 0.5\n        z = i // 35 - 0.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          161,
+          1.2831858407079646,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = ((n - i) / n) ** 2\n        x = (i % 7) / 7 - 0.5\n        y = ((i // 7) % 5) / 5 - 0.5\n        z = i // 35 - 0.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          173,
+          1.290322580645161,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2 / n ** 2\n        x = i / (n * 3) - 0.5\n        y = (i % (n // 3)) / (n // 3) - 0.5\n        z = (i // (n // 3)) / (n // 3) - 0.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          223,
+          1.3220712085504887,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = ((n - i) / n) ** 2.5\n        x = (i % 11) / 11 - 0.5\n        y = ((i // 11) % 7) / 7 - 0.5\n        z = i // 77 - 0.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          321,
+          1.3587891497688454,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 5 / n ** 4\n        x = i / (n * 3) - 1\n        y = (i % (n // 3)) / (n // 3) - 1\n        z = (i // (n // 3)) / (n // 3) - 1\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          385,
+          1.3660377358490565,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = ((n - i) / n) ** 3\n        x = (i % 7) / 7 - 0.5\n        y = ((i // 7) % 5) / 5 - 0.5\n        z = (i // 35) / 3 - 0.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          598,
+          1.3986042377386025,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = ((i + 1) ** 3.2) / (n ** 3.2)\n        x = (i % 7) / 7 - 0.35\n        y = ((i // 7) % 5) / 5 - 0.25\n        z = (i // 35) / 5 - 0.3\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ]
+      ],
+      "successCount":964,
+      "failureCount":29
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.0000000000000002,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(0, n, 2):\n        weight = 1.0\n        x = i / n\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    for i in range(1, n, 2):\n        weight = 1.0\n        x = (i + 1) / n\n        y = 1.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          4,
+          1.1,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = i // (n // 3)\n        y = (i % (n // 3)) // (n // 9)\n        z = i % (n // 9)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          27,
+          1.1052631578947365,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(0, n, n // 3):\n        weight = 1.0 if i % 2 == 0 else 0.5\n        x = i / (n - 1)\n        y = 0.0 if i % 2 == 0 else 1.0\n        z = 0.0 if i % 3 == 0 else 1.0\n        points.append((weight, np.array([x, y, z])))\n        points.append((weight, np.array([x, 1.0 - y, 1.0 - z])))\n    return points\n\n"
+        ],
+        [
+          41,
+          1.1111111111111112,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n // 3):\n        weight = 1.0\n        x = i / (n // 3 - 1)\n        y = 0.0\n        z = 0.0 if i % 3 == 0 else 1.0\n        points.append((weight, np.array([x, y, z])))\n        points.append((weight, np.array([x, 1.0, z])))\n    for i in range(n // 3, n):\n        weight = 0.5\n        x = (i - n // 3) / ((n - n // 3) - 1)\n        y = 1.0\n        z = 0.0 if i % 2 == 0 else 1.0\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          58,
+          1.1875,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(0, n, n // 3):\n        weight = 1.0 if i % 6 < 3 else 0.5\n        x = i / (n - 1)\n        y = 0.0 if i % 6 < 3 else 1.0\n        z = 0.0 if i % 3 == 0 else 1.0\n        points.append((weight, np.array([x, y, z])))\n        points.append((weight, np.array([x, 1.0 - y, 1.0 - z])))\n        points.append((weight, np.array([1.0 - x, y, z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, 1.0 - z])))\n    return points\n\n"
+        ],
+        [
+          132,
+          1.25,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(0, n, n // 3):\n        weight = 1.0 if i % 6 < 3 else 0.5\n        x = (i % 6) / 5\n        y = 0.0 if i % 6 < 3 else 1.0\n        z = 0.0 if i % 3 == 0 else 1.0\n        points.append((weight, np.array([x, y, z])))\n        points.append((weight, np.array([x, 1.0 - y, z])))\n        points.append((weight, np.array([1.0 - x, y, z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, z])))\n    return points\n\n"
+        ],
+        [
+          188,
+          1.2727272727272727,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(0, n, n // 4):\n        weight = 1.0 if i % 4 == 0 else 0.5\n        x = i / (n - 1)\n        y = 0.5 if i % 3 == 0 else 1.0\n        z = 0.5 if i % 2 == 0 else 1.0\n        points.append((weight, np.array([x, y, z])))\n        points.append((weight, np.array([x, 1.0 - y, 1.0 - z])))\n        points.append((weight, np.array([1.0 - x, y, z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, 1.0 - z])))\n    return points\n\n"
+        ],
+        [
+          227,
+          1.3043478260869565,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(0, n, n // 4):\n        weight = 1.0 if i % 4 == 0 else 0.5\n        x = i / (n - 1)\n        y = 0.5 if i % 3 == 0 else 1.0\n        z = 0.5 if i % 2 == 0 else 1.0\n        points.append((weight, np.array([x, y, z])))\n        points.append((weight, np.array([x, y, 1.0 - z])))\n        points.append((weight, np.array([x, 1.0 - y, z])))\n        points.append((weight, np.array([x, 1.0 - y, 1.0 - z])))\n        points.append((weight, np.array([1.0 - x, y, z])))\n        points.append((weight, np.array([1.0 - x, y, 1.0 - z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, 1.0 - z])))\n    return points\n\n"
+        ],
+        [
+          372,
+          1.3499999999999999,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Improved version of `get_weighted_points_v1`.\"\"\"\n    points = []\n    for i in range(0, n, n // 7):\n        weight = 1.0 if i % 7 == 0 else 0.5\n        x = i / (n - 1)\n        y = 0.5 if i % 3 == 0 else 1.0\n        z = 0.5 if i % 2 == 0 else 0.0\n        points.append((weight, np.array([x, y, z])))\n        points.append((weight, np.array([1.0 - x, y, z])))\n        points.append((weight, np.array([x, 1.0 - y, z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, z])))\n        points.append((weight, np.array([x, y, 1.0 - z])))\n        points.append((weight, np.array([1.0 - x, y, 1.0 - z])))\n        points.append((weight, np.array([x, 1.0 - y, 1.0 - z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, 1.0 - z])))\n    return points\n\n"
+        ],
+        [
+          698,
+          1.3571428571428577,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v1`.\"\"\"\n    points = []\n    for i in range(0, n, n // 4):\n        weight = 1.0 if i % 5 < 3 else 0.5\n        x = i / (n - 1)\n        y = 0.5 if i % 3 == 0 else 1.0 - x\n        z = 0.5 if i % 2 == 0 else 1.0\n        for j in range(3):\n            for k in range(2):\n                points.append((weight, np.array([x, y, z * (k == 0) + (1.0 - z) * (k == 1)])))\n                points.append((weight, np.array([1.0 - x, y, z * (k == 0) + (1.0 - z) * (k == 1)])))\n    return points\n\n"
+        ],
+        [
+          829,
+          1.3600000000000003,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(0, n, n // 5):\n        weight = 1.0 if i % 5 == 0 else 0.5\n        x = i / (n - 1)\n        y = x**2 if i % 2 == 1 else 1 - x**2\n        z = 0.5 if i % 3 == 0 else 1.0\n        points.append((weight, np.array([x, y, z])))\n        points.append((weight, np.array([1.0 - x, y, z])))\n        points.append((weight, np.array([x, 1.0 - y, z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, z])))\n        points.append((weight, np.array([x, y, 1.0 - z])))\n        points.append((weight, np.array([1.0 - x, y, 1.0 - z])))\n        points.append((weight, np.array([x, 1.0 - y, 1.0 - z])))\n        points.append((weight, np.array([1.0 - x, 1.0 - y, 1.0 - z])))\n    return points\n\n"
+        ]
+      ],
+      "successCount":940,
+      "failureCount":13
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0723270440251573,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (i + 1) ** 2  # Slightly change the weight function\n        x = i * 2.0 - n + 1.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.0833333333333333,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(1.0, np.array([i, i, i])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          11,
+          1.0892857142857146,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(1.0, np.array([0.0, 0.0, 0.0]))]\n    for i in range(1, n):\n        weight = i * 0.1\n        x = i * 1.0\n        y = 0.0\n        z = weight * 10.0\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          18,
+          1.1175017158544953,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0`.\"\"\"\n    points = [(1.0 + i * 0.1, np.array([i, i**2, i**3])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          49,
+          1.1428571428571428,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (i % 3) + 1  # weight is 1, 2, or 3\n        x = i % n\n        y = (i * 2) % n\n        z = (i * 4) % n\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          202,
+          1.155297076391072,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i * 0.1 + 1.0, np.array([i * 1.1, i * 1.2, i * 1.3 + i * 0.1])) for i in range(n//2)]\n    points += [(n * 0.1 + 1.0, np.array([n - i, (n - i)**2 + 0.1 * (n - i), (n - i)**3])) for i in range(n//2, n)]\n    return points\n\n"
+        ],
+        [
+          249,
+          1.1699569214070078,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Another improved version of `get_weighted_points_v0`.\"\"\"\n    points = [(i * 0.1 + 1.0, np.array([i * 1.1, i * 1.2, i * 1.3 + i * 0.1])) for i in range(n//3)]\n    points += [(n * 0.1 + 1.0, np.array([n - i, (n - i)**2 + 0.1 * (n - i), (n - i)**3])) for i in range(n//3, 2*n//3)]\n    points += [(0.1 + i * 0.1, np.array([i * 1.4, i * 1.5, i * 1.6 + i * 0.1])) for i in range(2*n//3, n)]\n    return points\n\n"
+        ],
+        [
+          387,
+          1.1824935982976883,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i * 0.1 + 1.0, np.array([i * 1.1, i * 1.2, i * 1.3])) for i in range(n//3)]\n    points += [(n * 0.1 + 1.0, np.array([n - i, (n - i)**2, (n - i)**3 + 0.1 * (n - i)])) for i in range(n//3, 2*n//3)]\n    points += [(i * 0.1, np.array([n - i, i * 1.2, i * 1.3])) for i in range(2*n//3, n)]\n    return points\n\n"
+        ],
+        [
+          414,
+          1.2003399433427757,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i * 0.1 + 1.0, np.array([i * 1.1, i * 1.2, i * 1.3 + i * 0.1])) for i in range(n//3)]\n    points += [(n * 0.1 + 1.0, np.array([n - i, (n - i)**2 + 0.1 * (n - i), (n - i)**3])) for i in range(n//3, 2*n//3)]\n    points += [(2*n * 0.1 + 1.0, np.array([2*n - i, (2*n - i)**2 + 0.1 * (2*n - i), (2*n - i)**3])) for i in range(2*n//3, n)]\n    return points\n\n"
+        ],
+        [
+          415,
+          1.2016544846733523,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Further improved version of `get_weighted_points_v0` and `get_weighted_points_v1`.\"\"\"\n    points = [(i * 0.1 + 1.0, np.array([i * 1.1, i * 1.3, i * 1.5 + i * 0.1])) for i in range(n//3)]\n    points += [(n * 0.1 + 1.0, np.array([n - i, (n - i)**2 + 0.1 * (n - i), (n - i)**3])) for i in range(n//3, 2*n//3)]\n    points += [(2*n * 0.1 + 1.0, np.array([2*n - i, (2*n - i)**2 + 0.1 * (2*n - i), (2*n - i)**3])) for i in range(2*n//3, n)]\n    return points\n\n"
+        ],
+        [
+          846,
+          1.2019980282615839,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i * 0.1 + 1.0, np.array([i * 1.1, i * 1.15, (i * 1.2) ** 2])) for i in range(n//3)]\n    points += [(n * 0.1 + 1.0, np.array([n - i, (n - i)**2 + 0.1 * (n - i), (n - i)**3])) for i in range(n//3, 2*n//3)]\n    points += [(2*n * 0.1 + 1.0, np.array([2*n - i, (2*n - i)**2 + 0.1 * (2*n - i), (2*n - i)**3])) for i in range(2*n//3, n)]\n    return points\n\n"
+        ],
+        [
+          964,
+          1.2031307085934482,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i * 15 + 1.0, np.array([i * 3.0, i * 1.2, (i * 0.15 + 0.15 * i) * np.sin(i * 0.15) * (n - i) ** 2.5])) for i in range(n//3)]\n    points += [(n * 15 + 1.0, np.array([n - i * 1.2, (n - i * 1.2)**2.5 + 0.15 * (n - i * 1.2), (n - i * 1.2)**3.5 * np.cos(n * 0.15) * (i + 1) ** 2.5])) for i in range(n//3, 2*n//3)]\n    points += [(i * 15 + 1.0, np.array([i * 3.0, i * 1.2, (i * 0.15 + 0.15 * i) * np.cos(i * 0.15) * (n - i) ** 2.5])) for i in range(2*n//3, n)]\n    return points\n\n"
+        ]
+      ],
+      "successCount":890,
+      "failureCount":75
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          1,
+          1.0555555555555556,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0 if i % 2 == 0 else 2.0\n        x = i % 4 - 1.5\n        y = i // 4 % 4 - 1.5\n        z = i // 16 - 1.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          2,
+          1.150973649295939,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D.\"\"\"\n    weights = np.linspace(1.0, n, n)\n    points = np.zeros((n, 3))\n    points[:, 0] = np.cos(np.linspace(0, 2 * np.pi * n, n))\n    points[:, 1] = np.sin(np.linspace(0, 2 * np.pi * n, n))\n    points[:, 2] = np.linspace(0, 1, n)\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          5,
+          1.166718267680226,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.linspace(1.0, n, n)\n    points = np.zeros((n, 3))\n    points[:, 0] = np.cos(np.linspace(0, 2 * np.pi * n, n))\n    points[:, 1] = np.sin(np.linspace(0, 2 * np.pi * n, n))\n    points[:, 2] = np.linspace(0, 1, n, endpoint=False)\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          103,
+          1.181535934594459,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Further improved version.\"\"\"\n    weights = np.linspace(1, n, n)\n    points = np.zeros((n, 3))\n    points[:, 0] = np.cos(np.linspace(0, 4 * np.pi * n, n))\n    points[:, 1] = np.sin(np.linspace(0, 4 * np.pi * n, n))\n    points[:, 2] = np.linspace(0, 2, n, endpoint=True)\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          109,
+          1.191664189856795,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    angles = np.linspace(0, 2 * np.pi * n, n)\n    weights = np.where(np.cos(angles) > 0, 2, 1)\n    points = np.array([np.cos(angles), np.sin(angles), np.linspace(0, 1, n)]).T\n    points *= weights[:, np.newaxis]\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          110,
+          1.195323207001715,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.linspace(1.0, n, n)\n    angles = np.linspace(0, 6 * np.pi, n)\n    points = np.array([np.cos(angles), np.sin(angles), np.linspace(0, 1, n)]).T\n    points[:, :2] *= weights[:, np.newaxis] ** 2\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          131,
+          1.2291292917825372,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.concatenate([np.linspace(1.0, n//2, n//2), np.linspace(n//2, 1.0, n//2)])\n    angles = np.linspace(0, 4 * np.pi, n)\n    points = np.array([np.cos(angles), np.sin(angles), np.linspace(0, 1, n)]).T\n    points[:, :2] *= weights[:, np.newaxis]\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          210,
+          1.2639036298764876,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.arange(1, n + 1)\n    angles = np.linspace(0, 10 * np.pi, n)\n    radius = np.linspace(0.5, 1.5, n)\n    points = np.array([radius * np.cos(angles), radius * np.sin(angles), np.linspace(0, 1, n)**2.5]).T\n    points *= weights[:, np.newaxis]\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          228,
+          1.27479965631027,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.arange(1, n + 1) ** 1.5\n    angles = np.linspace(0, 6 * np.pi, n)\n    points = np.array([np.cos(angles), np.sin(angles), (np.linspace(0, 1, n) ** 3)]).T\n    points *= weights[:, np.newaxis] ** 0.5\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          306,
+          1.3011263589688495,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.linspace(1, n, n) ** 2\n    angles = np.linspace(0, 2 * np.pi * n ** (1/3), n)\n    points = np.array([np.cos(angles), np.sin(angles), np.linspace(0, 1, n, endpoint=False)]).T\n    points *= weights[:, np.newaxis] ** (1/4)\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          487,
+          1.3167571381874623,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.arange(1, n+1) ** 3\n    angles = np.linspace(0, 2 * np.pi * n ** (1/3), n)\n    z = np.linspace(0, 1, n) ** 2\n    points = np.array([np.cos(angles), np.sin(angles), z * np.sin(angles/2)]).T\n    points *= weights[:, np.newaxis] ** (1/4)\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          573,
+          1.332326382573407,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.arange(1, n+1) ** 2.5\n    angles = np.linspace(0, 2 * np.pi * n ** (1/3), n)\n    z = np.linspace(0, 1, n) ** 2\n    points = np.array([np.cos(angles), np.sin(angles), z * np.sin(angles/3)]).T\n    points *= weights[:, np.newaxis] ** (1/3)\n    points[:, 2] += weights / (n ** 2)\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          703,
+          1.3402435832756563,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.arange(1, n+1) ** 2.8\n    angles = np.linspace(0, 2 * np.pi * n ** (1/3), n)\n    z = np.linspace(0, 1, n) ** 2.5\n    points = np.array([np.cos(angles), np.sin(angles), z * np.sin(angles/2 + np.pi/4)]).T\n    points *= weights[:, np.newaxis] ** (1/3.5)\n    return list(zip(weights, points))\n\n"
+        ],
+        [
+          770,
+          1.3479109638014481,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    weights = np.linspace(1, n, n) ** 2.5\n    angles = np.linspace(0, 2 * np.pi * n ** (1/3), n)\n    z = np.linspace(0, 1, n) ** 2.5\n    points = np.array([np.cos(angles), np.sin(angles), z * np.sin(angles/4)]).T\n    points *= weights[:, np.newaxis] ** (1/3)\n    return list(zip(weights, points * n ** (1/3)))\n\n"
+        ]
+      ],
+      "successCount":903,
+      "failureCount":30
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.0,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = 1.0\n        x = 0.0\n        y = 0.0\n        z = 0.0\n        points.append((weight, np.array([x, y, z])))\n\n    return points\n\n"
+        ],
+        [
+          2,
+          1.0833333333333333,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(1.0, np.array([i, i, i])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          21,
+          1.2,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([n // 2 - i, n // 2 + i, n - 1 - i])) for i in range(n // 2)]\n    points.extend([(i + 1, np.array([n // 2 + i, n // 2 - (i - n // 2), n - 1 - (i - n // 2)])) for i in range(n // 2, n)])\n    return points\n\n"
+        ],
+        [
+          223,
+          1.2307692307692308,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([i % (n // 3), n // 3 - 2 * (i % (n // 3)), n - i])) for i in range(n)]\n    return points\n\n"
+        ],
+        [
+          309,
+          1.25,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = [(i + 1, np.array([i % (n // 2), n // 2 - 2 * (i % (n // 2)), n // 2 - i])) for i in range(n)]\n    points[0] = (1, np.array([0, n // 2, n // 2 - 1]))\n    points[n - 1] = (n, np.array([n - 1, n // 2 - 1, 0]))\n    return points\n\n"
+        ],
+        [
+          685,
+          1.2857142857142856,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2 / n ** 2\n        x = i / (n - 1)\n        y = (i % (n // 2) + 0.5) / (n // 2)\n        z = ((n // 2 - 1 - i % (n // 2)) + 0.5) / (n // 2)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          706,
+          1.3228247162673392,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2.5 / (n ** 2.5)\n        x = i / (n - 1) ** 3\n        y = (i % (n // 2)) / ((n // 2) - 1) ** 3\n        z = (i // (n // 2)) / ((n // 2) - 1) ** 3\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          710,
+          1.3756634506525078,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 3 / (n ** 3)\n        x = i / (n - 1) ** 3.5\n        y = (i % (n // 2)) / ((n // 2) - 1) ** 3.5\n        z = (i // (n // 2)) / ((n // 2) - 1) ** 3.5\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ],
+        [
+          951,
+          1.3970099667774085,
+          "def get_weighted_points(n: int) -> list[np.ndarray]:\n    \"\"\"Return a new clustering-problem, specified by a list of n weighted points in 3D. The first\n    element of each tuple is the weight of the point, the second the 3D-point itself.\"\"\"\n    points = []\n    for i in range(n):\n        weight = (n - i) ** 2 / (n ** 2)\n        x = i / (n - 1)\n        y = i % (n // 2) / (n // 2 - 1)\n        z = (n // 2 - 1 - i % (n // 2)) ** 2 / ((n // 2 - 1) ** 2)\n        points.append((weight, np.array([x, y, z])))\n    return points\n\n"
+        ]
+      ],
+      "successCount":963,
+      "failureCount":30
+    }
+  ]
+}

@@ -3,7 +3,7 @@ from math import inf
 
 from gurobipy import GRB, tuplelist
 
-from funsearch.gasoline.instance import Instance as Instance
+from funsearch.gasoline.generalised_instance import GeneralisedInstance as Instance
 
 
 class Result:
@@ -39,7 +39,7 @@ class IterativeAlgo(abc.ABC):
         ys.append(difference)
         instance = Instance()
         instance.n = n
-        instance.k = 1
+        instance.k = len(xs[0])
         instance.x = tuplelist(x for x in xs)
         instance.y = tuplelist(y for y in ys)
         instance.init_model()

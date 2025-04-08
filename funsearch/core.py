@@ -188,14 +188,15 @@ def run(
 
             with database_lock:
                 # TODO: Add as parameter
-                if current_index % 100 == 0:
+                if current_index % 500 == 0:
                     backup_file = backup_dir / f"{database._config.problem_name}_{timestamp}_{current_index}.pickle"
                     database.backup(backup_file)
 
     def database_printer(stop_event: threading.Event) -> None:
         while True:
-            for _ in range(100):
-                time.sleep(0.1)
+            # Wait 10 seconds
+            for _ in range(20):
+                time.sleep(0.5)
                 if stop_event.is_set():
                     return
             with database_lock:

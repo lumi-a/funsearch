@@ -85,6 +85,7 @@ class SlotOrdered(IterativeAlgo):
     def run(self, instance: Instance) -> tuple[Result, float]:
         self.available = [True for _ in range(instance.n)]
         res = Result(instance, "Slot ordered")
+        previous_opt_value = -inf
         for j in range(instance.n):
             opt_value = inf
             opt_idx = -1
@@ -95,12 +96,17 @@ class SlotOrdered(IterativeAlgo):
                 new_m = m.relax()
                 value = round(new_m.solve(), 1)
                 values.append(value)
+                if value <= previous_opt_value:
+                    opt_value = value
+                    opt_idx = i
+                    break
                 if value < opt_value:
                     opt_value = value
                     opt_idx = i
                 m.delete_constr(fixed_constr)
+            previous_opt_value = opt_value
             m.add_fixed_value_const(opt_idx, j)
-            final_value = m.solve()
             self.available[opt_idx] = False
             res.fix_value(j, opt_idx)
+        final_value = m.solve()
         return res, final_value

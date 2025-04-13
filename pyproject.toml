@@ -8,9 +8,7 @@ packages = ["funsearch", "funsearch.container"]
 [tool.pdm]
 [project]
 name = "funsearch"
-dynamic = [
-  "version",
-]
+dynamic = ["version"]
 description = "FunSearch algorithm: Mathematical discoveries from program search with large language models"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -22,27 +20,22 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "click==8.1",
-    "cloudpickle==3.0.0",
-    "python-dotenv==1.0.0",
-    "gurobipy>=11.0.3",
-    "autopep8>=2.3.1",
-    "numpy>=2.0.2",
-    "mistralai>=1.5.0",
-    "exact-clustering>=0.1.1",
+  "click==8.1",
+  "cloudpickle==3.0.0",
+  "python-dotenv==1.0.0",
+  "gurobipy>=11.0.3",
+  "autopep8>=2.3.1",
+  "numpy>=2.0.2",
+  "mistralai>=1.5.0",
+  "exact-clustering>=0.2.0",
 ]
 
 [project.scripts]
 funsearch = "funsearch.__main__:main"
 
 [dependency-groups]
-lint = [
-  "ruff"
-]
-dev = [
-    "mypy>=1.15.0",
-    "pytest>=8.3.4",
-]
+lint = ["ruff"]
+dev = ["mypy>=1.15.0", "pytest>=8.3.4"]
 
 
 [tool.ruff]
@@ -51,26 +44,26 @@ line-length = 120
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "S311",   # suspicious-non-cryptographic-random-usage
-    "D203",   # incorrect-blank-line-before-class
-    "D213",   # multi-line-summary-second-line
-    "COM812", # missing-trailing-comma, see https://docs.astral.sh/ruff/rules/missing-trailing-comma/
-    "TRY201", # verbose-raise
-    "D401", 
+  "S311",   # suspicious-non-cryptographic-random-usage
+  "D203",   # incorrect-blank-line-before-class
+  "D213",   # multi-line-summary-second-line
+  "COM812", # missing-trailing-comma, see https://docs.astral.sh/ruff/rules/missing-trailing-comma/
+  "TRY201", # verbose-raise
+  "D401",
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "tests/**/*.py" = [
-    "S101", # Allow asserts in tests
-    "D", # Disable all doc in tests
-    "ANN201", # Disable return-type-annotation
-    "PLR2004", # Allow magic values
-    "SLF001", # Allow accessing private members
-    "ANN001", # Allow missing type-annotations in function-arguments
+  "S101",    # Allow asserts in tests
+  "D",       # Disable all doc in tests
+  "ANN201",  # Disable return-type-annotation
+  "PLR2004", # Allow magic values
+  "SLF001",  # Allow accessing private members
+  "ANN001",  # Allow missing type-annotations in function-arguments
 ]
 "specs/**/*.py" = [
-    "EM101",  # Allow raw-string-in-exception, hopefully focusing the LLM on more important things
-    "RET504", # Allow unnecessary-assign, the variable-names might mean something to the LLM
+  "EM101",  # Allow raw-string-in-exception, hopefully focusing the LLM on more important things
+  "RET504", # Allow unnecessary-assign, the variable-names might mean something to the LLM
 ]
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"

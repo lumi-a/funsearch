@@ -21,14 +21,14 @@
 </head>
 
 <body>
-    <div id="container-3-4-cyclefree" class="problem-container">
+    <div id="content">
         <h2>3-4-cyclefree(<span class="math">n</span>)</h2>
         Search for simple graphs on <span class="math">n</span> vertices that contain neither a 3-cycle
         nor a 4-cycle, while maximizing the number of edges. The section "<span class="math">H={C₃, C₄}</span>" of
         <a href="https://users.cecs.anu.edu.au/~bdm/data/extremal.html">Extremal Graphs and Turan numbers</a> lists
         known computational lower bounds.
-    </div>
-    <div id="container-gasoline-list" class="problem-container">
+        <div id="container-3-4-cyclefree" class="problem-container"></div>
+
         <h2>Gasoline</h2>
         <p>
             [Todo: Define the problem and improve this description] This is a combinatorial
@@ -42,36 +42,40 @@
             FunSearch does not search for a function that yields a good solution, but instead tries to find an
             <i>instance</i> of the problem that has a bad (i.e. high) approximation-ratio.
         </p>
-    </div>
-    <div id="container-gasoline-2d" class="problem-container">
+        <div id="container-gasoline-list" class="problem-container"></div>
+
         <h4>Generalised Gasoline</h4>
         <p>
             [Todo: Define the problem and improve this description]
         </p>
-    </div>
-    <div id="container-library" class="problem-container">
+        <div id="container-gasoline-2d" class="problem-container"></div>
+        <div id="container-gasoline-3d" class="problem-container"></div>
+
         <h2>Paging</h2>
         Search for an online-heuristic for the <a
             href="https://en.wikipedia.org/wiki/Page_replacement_algorithm">page-replacement-problem</a>.
-    </div>
-    <div id="container-kmeans-2d-greedy" class="problem-container">
+        <div id="container-library" class="problem-container"></div>
+
+
         <h2>Clustering: Greedy K-Means Approximation-Ratio</h2>
         Find instances of the <a href="https://en.wikipedia.org/wiki/K-means_clustering"><span
                 class="math">k</span>-means-clustering-problem</a> for which the clustering found by the greedy
         algorithm has a high cost relative to the optimal clustering. The approximation-ratio of an instance is the
         maximum of the approximation-ratios across each possible value of <span class="math">k</span>.
-    </div>
-    <div id="container-weighted-kmeans-2d-greedy" class="problem-container">
+        <div id="container-kmeans-2d-greedy" class="problem-container"></div>
+
         <h3>Weighted K-Means</h3>
         In this generalisation, each point has a non-negative weight. The distance from a center <span
-            class="math">c</span> to a point <span class="math">p</span> is the usual distance (the square of the
+            class="math">c</span>
+        to a point <span class="math">p</span> is the usual distance (the square of the
         euclidean distance) between <span class="math">c</span> and <span class="math">p</span>, but multiplied by the
         weight
         of <span class="math">p</span>. When using integer (or, by extension, rational) weights, this shouldn't lose
         generality, because a point with weight <span class="math">z</span> can be replaced with <span
-            class="math">z</span> identical points of weight <span class="math">1</span>.
-    </div>
-    <div id="container-kmedian-3d-hierarchy" class="problem-container">
+            class="math">z</span>
+        identical points of weight <span class="math">1</span>.
+        <div id="container-weighted-kmeans-2d-greedy" class="problem-container"></div>
+
         <h2>Clustering: Price of K-Median Hierarchy</h2>
         <p>
             Find instances of the discrete <a href="https://en.wikipedia.org/wiki/K-medians_clustering"><span
@@ -86,14 +90,16 @@
             The cost-ratio of level <span class="math">k</span> is the total cost of the hierarchy's clustering on that
             level, divided by the optimal cost of a <span class="math">k</span>-clustering.
         </p>
-    </div>
-    <div id="container-kmedian-8d-hierarchy" class="problem-container"></div>
-    <div id="container-weighted-kmedian-3d-hierarchy" class="problem-container">
+        <div id="container-kmedian-3d-hierarchy" class="problem-container"></div>
+        <div id="container-kmedian-8d-hierarchy" class="problem-container"></div>
+
         <h3>Weighted K-Median</h3>
         In this generalisation, each point has a non-negative weight. See the <a
             href="#container-weighted-kmeans-2d-greedy">weighted K-Means</a> section for details.
+        <div id="container-weighted-kmedian-3d-hierarchy" class="problem-container"></div>
+        <div id="container-weighted-kmedian-8d-hierarchy" class="problem-container"></div>
+        <div id="container-weighted-kmedian-multi-d-hierarchy" class="problem-container"></div>
     </div>
-    <div id="container-weighted-kmedian-8d-hierarchy" class="problem-container"></div>
 </body>
 
 </html>

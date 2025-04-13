@@ -15,13 +15,13 @@ body {
     margin-bottom: 90vh;
 }
 
-code {
-    white-space: pre-wrap;
-}
-
-.problem-container {
+body>#content {
     width: 64em;
     max-width: 100%;
+}
+
+code {
+    white-space: pre-wrap;
 }
 
 .problem-container>details {

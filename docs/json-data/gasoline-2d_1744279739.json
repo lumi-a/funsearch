@@ -1,0 +1,285 @@
+{
+  "config":{
+    "inputs":[
+      14,
+      30
+    ],
+    "specification":"\"\"\"I'm trying to find instances of the gasoline-problem for which an iterative rounding algorithm has a poor (high) approximation-ratio in two dimensions.\n\nThe gasoline-problem looks for a permutation of the xs and ys (lists of points in \u2115^2) such that maximum of the differences of prefix-sums is as small as possible, i.e. maximum_(m,n) zs[n]-zs[m] is as as small as possible, where zs[n] = xs[0] - ys[0] + xs[1] - ys[1] + ... + xs[n//2] - (ys[n] if n is odd else 0).\n\nTo generate sets with poor approximation-ratios, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered.\n\"\"\"\n\nimport math\nimport numpy as np\nimport funsearch\n\n\n@funsearch.run\ndef evaluate(n: int) -> float:\n    \"\"\"Returns the approximation-ratio of the gasoline problem.\"\"\"\n    from funsearch.gasoline.iterative_rounding import SlotOrdered\n    from funsearch.memoize import memoize\n\n    xs, ys = gasoline(n)\n\n    # Assert determinancy\n    xs1, ys1 = gasoline(n)\n    if not (len(xs) == len(xs1) and len(ys) == len(ys1) and np.array_equal(xs, xs1) and np.array_equal(ys, ys1)):\n        return 0.0\n\n    length = min(len(xs), len(ys) + 1, n)  # ys will be one element shorter than xs\n    # Clamp inputs to avoid overflows in gurobi\n    xs = [np.clip(np.round(x[:2]), 0, 2**31 - 1) for x in xs[:length]]\n    ys = [np.clip(np.round(y[:2]), 0, 2**31 - 1) for y in ys[: length - 1]]\n\n    @memoize(\"gasoline-2d\")\n    def memoized_approximation_ratio(xs: list[np.ndarray], ys: list[np.ndarray]) -> float:\n        return SlotOrdered().approximation_ratio(xs, ys)\n\n    return memoized_approximation_ratio(xs, ys)\n\n\n@funsearch.evolve\ndef gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n",
+    "problem_name":"gasoline-2d",
+    "message":"Old list-building-method. Start with Lucas' embedded into 2d. Mean of apx-ratios, enforcing that all inputs return a result.\n\nNotable returned instances:\n\n```py\n# Island 9's best program for n=14, score 2.25:\nxs = [(4, 0), (4, 0), (6, 0), (6, 0), (6, 0), (6, 0), (8, 4), (8, 4), (8, 4), (8, 4), (8, 4), (8, 4), (0, 1), (8, 2)]\nys = [(4, 2), (4, 2), (6, 2), (6, 2), (6, 2), (6, 2), (7, 2), (7, 2), (7, 2), (7, 2), (7, 2), (7, 2), (7, 2), (0, 1)]\n\n# Island 9's best program for n=30, score 2.95:\nxs = [(8, 0), (8, 0), (12, 0), (12, 0), (12, 0), (12, 0), (14, 0), (14, 0), (14, 0), (14, 0), (14, 0), (14, 0), (14, 0), (14, 0), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (16, 4), (0, 1), (16, 2)]\nys = [(8, 2), (8, 2), (12, 2), (12, 2), (12, 2), (12, 2), (14, 2), (14, 2), (14, 2), (14, 2), (14, 2), (14, 2), (14, 2), (14, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (15, 2), (0, 1)]\n\n# Island 9's best program for n=62, score 3.4166666666666665:\nxs = [(16, 0), (16, 0), (24, 0), (24, 0), (24, 0), (24, 0), (28, 0), (28, 0), (28, 0), (28, 0), (28, 0), (28, 0), (28, 0), (28, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (30, 0), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (32, 4), (0, 1), (32, 2)]\nys = [(16, 2), (16, 2), (24, 2), (24, 2), (24, 2), (24, 2), (28, 2), (28, 2), (28, 2), (28, 2), (28, 2), (28, 2), (28, 2), (28, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (30, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (31, 2), (0, 1)]\n```\n\nopen-mistral-nemo, temperature 1.5\n",
+    "functions_per_prompt":2,
+    "num_islands":10,
+    "reset_period":100000,
+    "cluster_sampling_temperature_init":0.1,
+    "cluster_sampling_temperature_period":30000
+  },
+  "timestamp":1744279739,
+  "highestRunIndex":925,
+  "islands":[
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          658,
+          1.8371428571428572,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of `gasoline_v0` and `gasoline_v1`.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = math.floor(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, i + 1]) for _ in range(2**i)])  # Changed y-coordinate to i + 1\n\n    xs.extend([np.array([2**k, k + 1]) for _ in range(2**k - 1)])  # Changed y-coordinate to k + 1\n    xs.append(np.array([0, 1]))\n\n    rounded = math.ceil(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k]) for _ in range(2**k - 1)])\n    ys[-1] = np.array([rounded + 1, k])  # Changed last point in ys y-coordinate to k\n    ys.append(np.array([2**k + 1, k - 1]))  # Changed y-coordinate to k - 1\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":665,
+      "failureCount":4
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          255,
+          1.823051948051948,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Further improved version of `gasoline_v1`.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    shift = 2 ** -(k + 1)\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i % 3]) for _ in range(2**i)])  # Altered line: different pattern in x-coordinates\n        ys.extend([np.array([rounded, shift * (i + 1) * (i % 2 + 1)]) for _ in range(2**i)])  # Altered line: different shift pattern in y-coordinates\n\n    xs.extend([np.array([2**k, k % 3]) for _ in range(2**k - 1)])  # Altered line: different pattern in x-coordinates\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, shift * k * (k % 2 + 1) + 1]) for _ in range(2**k - 1)])  # Altered line: different shift pattern in y-coordinates\n    ys.append(np.array([0, shift * k * (k % 2 + 1) + 2 ** 15]))  # Altered line: introduce an even larger value in the last y-coordinate to further increase the approximation-ratio\n\n    return xs, ys\n\n"
+        ],
+        [
+          566,
+          1.873015873015873,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Modified version with different patterns and shifts in x and y coordinates.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    shift = 2 ** -(k + 1)\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, rounded % 4]) for _ in range(2**i)])  # Altered line: different pattern in x-coordinates\n        ys.extend([np.array([rounded, shift * i]) for _ in range(2**i)])  # Altered line: different shift pattern in y-coordinates\n\n    xs.extend([np.array([2**k, k % 4]) for _ in range(2**k - 1)])  # Altered line: different pattern in x-coordinates\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, shift * k + 2 ** (i % 3)]) for _ in range(2**k - 1)])  # Altered line: different shift pattern in y-coordinates\n    ys.append(np.array([0, shift * k + 2 ** 17]))  # Altered line: introduce an even larger value in the last y-coordinate to further increase the approximation-ratio\n\n    return xs, ys\n\n"
+        ],
+        [
+          806,
+          1.9757033248081841,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    shift = 2 ** -(k + 1)\n    factor = 4  # Changed line: start with a different factor\n\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i % 4]) for _ in range(2**i)])  # Altered line: new pattern in x-coordinates with modulo 4\n        ys.extend([np.array([rounded, shift * (i * factor + i)]) for _ in range(2**i)])  # Changed line: introduce i * factor + i to increase approximation-ratio\n\n        # Increase the factor by 4 and add 2 to make the shifts grow faster\n        factor += 4\n\n    xs.extend([np.array([2**k, (k + 1) % 4]) for _ in range(2**k - 1)])  # Altered line: new pattern in x-coordinates with modulo 4\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, shift * (k * factor + k + 1)]) for _ in range(2**k - 1)])  # Changed line: introduce k * factor + k + 1 to increase approximation-ratio\n    ys.append(np.array([0, shift * k * factor + 2 ** 17]))  # Altered line: further increase the approximation-ratio by changing 2 ** 16 to 2 ** 17\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":850,
+      "failureCount":23
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          275,
+          1.88,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))  # Changed this line\n        xs.extend([np.array([rounded, i % 2]) for _ in range(2**i)])  # Changed this line\n        ys.extend([np.array([rounded, 1 - i % 2]) for _ in range(2**i)])  # Changed this line\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 2)])\n    xs.append(np.array([0, 0]))  # Changed this line\n    xs.append(np.array([2**k, 1]))  # Changed this line\n\n    rounded = int(2**k * (1 - 2 ** (-k)))  # Changed this line\n    ys.extend([np.array([rounded, i % 2]) for _ in range(2**k)])  # Changed this line\n\n    return xs, ys\n\n"
+        ],
+        [
+          319,
+          1.95,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered lines.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))  # Changed this line\n        xs.extend([np.array([rounded, i % 3]) for _ in range(2**i)])  # Changed this line\n        ys.extend([np.array([rounded, 1 - i % 3]) for _ in range(2**i)])  # Changed this line\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 2)])\n    xs.append(np.array([0, 0]))  # Changed this line\n    xs.append(np.array([2**k, 2]))  # Changed this line\n\n    rounded = int(2**k * (1 - 2 ** (-k - 1)))  # Changed this line\n    ys.extend([np.array([rounded, i % 3]) for _ in range(2**k + 2)])  # Changed this line\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":792,
+      "failureCount":5
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          233,
+          1.8300653594771241,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of gasoline-problem generator with perturbed xs.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k - 2)])\n    ys.append(np.array([2**k, 1]))  # Altered line: changed the y-coordinate to 1\n\n    # Perturb the x-coordinates of ys\n    perturbation = 1\n    for i in range(2**k - 2):\n        ys[i][0] += perturbation\n        perturbation *= -1\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":853,
+      "failureCount":8
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          390,
+          1.8472222222222223,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n\n    for i in range(1, k):\n        unrounded = 2**k * (1 - 2 ** (-i))\n        xs.extend([np.array([unrounded, i % 2]) for _ in range(2**i)])\n        ys.extend([np.array([unrounded, 0]) if j % 2 == 0 else np.array([math.ceil(unrounded), 1 - i % 2]) for j in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 1]))\n\n    unrounded = 2**k * (1 - 2 ** (-k))\n    ys.extend([np.array([unrounded, i % 2]) for i in range(2**k - 1)])\n    ys.append(np.array([math.ceil(unrounded), 0]))\n\n    return xs, ys\n\n"
+        ],
+        [
+          552,
+          1.9215686274509802,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n\n    for i in range(1, k):\n        unrounded = 2**k * (1 - 2 ** (-i))\n        xs.extend([np.array([round(unrounded), i % 2]) for _ in range(2**i)])\n        ys.extend([np.array([unrounded, 1 - i % 2]) for _ in range(2**i)])  # Same as v0 and v1 for ys\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 1]))\n\n    unrounded = 2**k * (1 - 2 ** (-k))\n    ys.extend([np.array([unrounded + 2 ** (-k), i % 2]) for i in range(2**k - 1)])  # Add a small increment for the last ys points\n    ys.append(np.array([0, 0]))\n\n    # Alter the second-to-last point in xs to have a different y-coordinate, same as v0\n    xs[-2] = np.array([xs[-2][0], 1])\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":907,
+      "failureCount":18
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":875,
+      "failureCount":2
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          190,
+          1.8444055944055944,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another variation of the gasoline-problem generator.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i % 5]) for _ in range(2**i)])  # Altered line: use a different shift pattern in x-coordinate (mod 5 instead of mod 4)\n        ys.extend([np.array([rounded, i/(2**k) + 0.4]) for _ in range(2**i)])  # Altered line: add 0.4 to y-shift\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([1, 1]))  # Altered line: add a different point with y-coordinate 1\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 1 - i/(2**k) + 0.5]) for i in range(1, 2**k)])  # Altered line: add 0.5 to y-shift\n    ys.append(np.array([1, 2]))  # Altered line: add a different point with y-coordinate 2\n\n    return xs, ys\n\n"
+        ],
+        [
+          194,
+          2.1083916083916083,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another variation of the gasoline-problem generator with a different shift pattern and point distribution.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])  # kept the y-coordinate as 'i'\n        ys.extend([np.array([rounded, i//2]) for _ in range(2**i)])  # altered line: different shift pattern in y-coordinate\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k//2]) for _ in range(2**k)])  # altered line: different final y-coordinate shift\n\n    return xs, ys\n\n"
+        ],
+        [
+          425,
+          2.127946127946128,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another variation of the gasoline-problem generator with a different shift pattern and point distribution.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])  # kept the y-coordinate as 'i'\n        ys.extend([np.array([rounded, (i-1)//2]) for _ in range(2**i)])  # altered line: different shift pattern in y-coordinate\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, (k-1)//2]) for _ in range(2**k)])  # altered line: different final y-coordinate shift\n\n    return xs, ys\n\n"
+        ],
+        [
+          567,
+          2.1333333333333333,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another variation of the gasoline-problem generator with a different final y-coordinate shift.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, (i-1)//2]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, (k-1)//2 + 1]) for _ in range(2**k)])  # altered line: shift final y-coordinate up by one\n\n    return xs, ys\n\n"
+        ],
+        [
+          822,
+          2.290909090909091,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another variation of the gasoline-problem generator with a different final y-coordinate shift.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, (i-1)//2]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k//2]) for _ in range(2**k)])  # altered line: different final y-coordinate shift\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":831,
+      "failureCount":6
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          249,
+          2.1083916083916083,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered y-coordinates.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, i//2]) for _ in range(2**i)])  # Altered line: divide i by 2\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k - 2]) for _ in range(2**k - 1)])  # Altered line: subtract 2\n    ys.append(np.array([2**k, 3 * 2**k // 4]))  # New line: further increase y-coordinate\n\n    return xs, ys\n\n"
+        ],
+        [
+          274,
+          2.2,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered y-coordinates.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, i % 2]) for _ in range(2**i)])  # Altered line: use i % 2\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k // 2]) for _ in range(2**k - 1)])  # Altered line: use k // 2\n    ys.append(np.array([2**k, 2**k // 2]))  # Altered line: use 2**k // 2\n\n    return xs, ys\n\n"
+        ],
+        [
+          305,
+          2.208333333333333,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered y-coordinates for the last two points.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, i % 2]) for _ in range(2**i)])  # Altered line: use i % 2\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k // 2]) for _ in range(2**k - 2)])  # Altered line: exclude the last point\n    ys.extend([np.array([2**k, k % 2]), np.array([2**k, k // 2])])  # Altered lines: use k % 2 and k // 2\n\n    return xs, ys\n\n"
+        ],
+        [
+          543,
+          2.229166666666667,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered y-coordinates for the first point and the middle point of the second half.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, i % 2]) for _ in range(2**i)])  # Altered line: use i % 2\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k // 2]) for _ in range(2**k - 2)])  # Altered line: use k // 2\n    ys.extend([np.array([2**k, k // 2 - 1]), np.array([2**k, 2**k // 2])])  # Altered lines: use k // 2 - 1 and 2**k // 2\n\n    return xs, ys\n\n"
+        ],
+        [
+          767,
+          2.2672064777327936,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered y-coordinates for the middle points of the second half.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, i % 2]) for _ in range(2**i)])  # Altered line: use i % 2\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    for j in range(2**k - 2):\n        if j % (2**k // 2) == 0:\n            ys.append(np.array([rounded, k // 2]))  # Altered line: use k // 2 for middle points\n        else:\n            ys.append(np.array([rounded, k // 2 - j % 2]))  # Altered line: use k // 2 - j % 2 for other points\n\n    ys.append(np.array([2**k, k // 2]))  # Altered line: use k // 2 for the last point\n\n    return xs, ys\n\n"
+        ],
+        [
+          779,
+          2.337719298245614,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem generator with altered y-coordinates for the middle points of the first half and the first point of the second half.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        if i % 3 == 0:\n            xs.extend([np.array([rounded, i]) for _ in range(2**i)])  # Altered line: no change in xs\n            ys.extend([np.array([rounded, k // 3]) for _ in range(2**i)])  # Altered line: use k // 3 for middle points\n        else:\n            xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n            ys.extend([np.array([rounded, i % 2]) for _ in range(2**i)])  # No change in ys for other points\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.append(np.array([rounded, k // 3 + 1]))  # Altered line: use k // 3 + 1 for the first point of the second half\n\n    for j in range(2**k - 2):\n        if j % (2**k // 2) == 0:\n            ys.append(np.array([rounded, k // 2]))  # No change for middle points\n        else:\n            ys.append(np.array([rounded, k // 2 - j % 2]))  # No change for other points\n\n    ys.append(np.array([2**k, k // 2]))  # No change for the last point\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":854,
+      "failureCount":7
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          84,
+          1.842741935483871,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem with potentially poor approximation-ratio.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i - 1]) for _ in range(2**i)])  # Change here\n        ys.extend([np.array([rounded, 2 ** (i - k)]) for _ in range(2**i)])  # Change here\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k - 2]) for _ in range(2**k)])  # Change here\n\n    return xs, ys\n\n"
+        ],
+        [
+          185,
+          1.8538461538461537,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Another version of the gasoline-problem with potentially poor approximation-ratio.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])  # No change here\n\n        if i % 2 == 0:\n            ys.extend([np.array([rounded, 2 ** (i - k + 2)]) for _ in range(2**i)])  # Change here\n        else:\n            ys.extend([np.array([rounded, 2 ** (i - k + 1)]) for _ in range(2**i)])  # Change here\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k - 2]) for _ in range(2**k)])  # Change here\n\n    return xs, ys\n\n"
+        ],
+        [
+          186,
+          1.8920454545454546,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem with potentially poor approximation-ratio.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])  # No change here\n\n        if i % 2 == 0:\n            ys.extend([np.array([rounded, 2 ** (i - k + 1 + (i - 1) // 2)]) for _ in range(2**i)])  # Change here\n        else:\n            ys.extend([np.array([rounded, 2 ** (i - k + 2 + (i - 2) // 2)]) for _ in range(2**i)])  # Change here\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k - 2]) for _ in range(2**k)])  # Change here\n\n    return xs, ys\n\n"
+        ],
+        [
+          206,
+          2.0,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem with potentially poor approximation-ratio.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])  # No change here\n\n        if i < k - 1:  # Change here\n            ys.extend([np.array([rounded, 2 ** (i - k + 2)]) for _ in range(2**i)])\n        else:\n            ys.extend([np.array([rounded, 2 ** (i - k + 1)]) for _ in range(2**i)])  # Change here\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k - 2]) for _ in range(2**k - 1)])  # Change here\n    ys.append(np.array([0, 0]))\n\n    return xs, ys\n\n"
+        ],
+        [
+          261,
+          2.290909090909091,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem with potentially poor approximation-ratio.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i)])\n\n        if i % 2 == 0:\n            ys.extend([np.array([rounded, 2 * (i - k + 1)]) for _ in range(2**i)])  # Change here\n        else:\n            ys.extend([np.array([rounded, 2 * (i - k + 1) + 1]) for _ in range(2**i)])  # Change here\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k - 2]) for _ in range(2**k - 1)])  # Change here\n    ys.append(np.array([0, 0]))\n\n    return xs, ys\n\n"
+        ],
+        [
+          360,
+          2.346014492753623,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another version of the gasoline-problem with potentially poor approximation-ratio.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, i]) for _ in range(2**i//2)])  # Change here: divide by 2\n        xs.extend([np.array([rounded, i+1]) for _ in range(2**i//2)])\n\n        if i % 2 == 0:\n            ys.extend([np.array([rounded, 2 * (i - k + 1)]) for _ in range(2**i//2)])  # Change here: divide by 2\n            ys.extend([np.array([rounded, 2 * (i - k + 1) + 1]) for _ in range(2**i//2)])\n        else:\n            ys.extend([np.array([rounded, 2 * (i - k + 1) + 1]) for _ in range(2**i//2)])  # Change here: divide by 2\n            ys.extend([np.array([rounded, 2 * (i - k + 1) + 2]) for _ in range(2**i//2)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, k - 2]) for _ in range(2**k - 1)])  # No change here\n    ys.append(np.array([0, 0]))\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":812,
+      "failureCount":21
+    },
+    {
+      "improvements":[
+        [
+          0,
+          1.8125,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 0]) for _ in range(2**i)])\n\n    xs.extend([np.array([2**k, 0]) for _ in range(2**k - 1)])\n    xs.append(np.array([0, 0]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n\n    return xs, ys\n\n"
+        ],
+        [
+          130,
+          1.875,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Similar to `gasoline_v1` but with some lines altered.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 1]) for _ in range(2**i)])  # Changed from [rounded, 0] to [rounded, 1]\n\n    xs.extend([np.array([2**k, 1]) for _ in range(2**k - 1)])  # Changed from [2**k, 0] to [2**k, 1]\n    xs.append(np.array([0, 1]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 0]) for _ in range(2**k)])\n    ys.append(np.array([0, 1]))  # Changed from [0, 0] to [0, 1]\n\n    return xs, ys\n\n"
+        ],
+        [
+          177,
+          2.1333333333333333,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 1]) for _ in range(2**i)])  # Changed from [rounded, 1] to [rounded, 2]\n\n    xs.extend([np.array([2**k, 2]) for _ in range(2**k - 1)])  # Changed from [2**k, 1] to [2**k, 2]\n    xs.append(np.array([0, 2]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 1]) for _ in range(2**k)])\n    ys.append(np.array([0, 1]))  # Changed from [0, 1] to [0, 1]\n\n    return xs, ys\n\n"
+        ],
+        [
+          204,
+          2.291666666666667,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 2]) for _ in range(2**i)])  # Changed from [rounded, 1] to [rounded, 2]\n\n    xs.extend([np.array([2**k, 4]) for _ in range(2**k - 1)])  # Changed from [2**k, 1] to [2**k, 4]\n    xs.append(np.array([0, 4]))\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 2]) for _ in range(2**k)])\n    ys.append(np.array([0, 2]))  # Changed from [0, 1] to [0, 2]\n\n    return xs, ys\n\n"
+        ],
+        [
+          211,
+          2.533333333333333,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 2]) for _ in range(2**i)])  # No change\n\n    xs.extend([np.array([2**k, 4]) for _ in range(2**k - 1)])  # No change\n    xs.append(np.array([0, 0]))  # Changed from [0, 4] to [0, 0]\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 2]) for _ in range(2**k)])\n    ys.append(np.array([0, 1]))  # Changed from [0, 2] to [0, 1]\n\n    return xs, ys\n\n"
+        ],
+        [
+          822,
+          2.6,
+          "def gasoline(n: int) -> tuple[list[np.ndarray], list[np.ndarray]]:\n    \"\"\"Return a new gasoline-problem, specified by the two lists of 2d-non-negative-integer-points.\n    Both lists must have length at most n and consist only of points in \u2115^2.\n    \"\"\"\n    \"\"\"Yet another variation of the gasoline-problem generator.\"\"\"\n    k = int(math.log2(n + 2)) - 1\n    xs, ys = [], []\n    for i in range(1, k):\n        rounded = int(2**k * (1 - 2 ** (-i)))\n        xs.extend([np.array([rounded, 0]) for _ in range(2**i)])\n        ys.extend([np.array([rounded, 2]) for _ in range(2**i)])  # No change\n\n    xs.extend([np.array([2**k, 4]) for _ in range(2**k - 2)])  # No change\n    xs.append(np.array([0, 1]))  # Changed from [0, 2] to [0, 1]\n    xs.append(np.array([2**k, 2]))  # Changed from [2**k, 0] to [2**k, 2]\n\n    rounded = int(2**k * (1 - 2 ** (-k)))\n    ys.extend([np.array([rounded, 2]) for _ in range(2**k - 1)])  # No change\n    ys.append(np.array([0, 1]))  # Changed from [0, 2] to [0, 1]\n\n    return xs, ys\n\n"
+        ]
+      ],
+      "successCount":825,
+      "failureCount":8
+    }
+  ]
+}

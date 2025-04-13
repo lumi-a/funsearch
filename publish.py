@@ -85,9 +85,9 @@ def publish() -> None:
         json.dump(sorted(index_json), f, separators=(",", ":"), indent=2)
     new_filenames.add("index.json")
 
-    for filename in old_filenames - new_filenames:
+    for filename in sorted(old_filenames - new_filenames):
         print(f"❌ Missing {filename}")
-    for filename in new_filenames - old_filenames:
+    for filename in sorted(new_filenames - old_filenames):
         print(f"✅ Added {filename}")
 
 

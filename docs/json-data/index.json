@@ -48,6 +48,28 @@
     "gasoline-2d_1743584434.json"
   ],
   [
+    "gasoline-2d",
+    1744279739,
+    [
+      14,
+      30
+    ],
+    2.6,
+    "Old list-building-method. Start with Lucas' embedded into 2d. Mean of apx-ratios, enforcing that all inputs return a result.",
+    "gasoline-2d_1744279739.json"
+  ],
+  [
+    "gasoline-2d",
+    1744285135,
+    [
+      14,
+      30
+    ],
+    2.7333333333333334,
+    "Old list-building-method. Start with improved 2d-solution. Mean of apx-ratios, enforcing that all inputs return a result.",
+    "gasoline-2d_1744285135.json"
+  ],
+  [
     "gasoline-list",
     1740234412,
     [
@@ -321,52 +343,6 @@
     "kmeans-2d-greedy_1742488706.json"
   ],
   [
-    "kmedian-3d-hierarchy",
-    1742657453,
-    [
-      10,
-      12,
-      14,
-      16,
-      18
-    ],
-    1.25,
-    "Start from trivial, scored by max of approximation-ratios.",
-    "kmedian-3d-hierarchy_1742657453.json"
-  ],
-  [
-    "kmedian-3d-hierarchy",
-    1742896183,
-    [
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16
-    ],
-    1.3656716417910446,
-    "Start from good 1D-solution embedded into 3D, scored by max of approximation-ratios.",
-    "kmedian-3d-hierarchy_1742896183.json"
-  ],
-  [
-    "kmedian-8d-hierarchy",
-    1743599967,
-    [
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16
-    ],
-    1.746261216350947,
-    "Start from trivial, score by max of approximation-ratios.",
-    "kmedian-8d-hierarchy_1743599967.json"
-  ],
-  [
     "library",
     1740424536,
     [
@@ -399,33 +375,5 @@
     6.590935536335631,
     "Start from lower-bound solution from paper.",
     "weighted-kmeans-2d-greedy_1743253193.json"
-  ],
-  [
-    "weighted-kmedian-3d-hierarchy",
-    1743253777,
-    [
-      8,
-      10,
-      12,
-      14,
-      16
-    ],
-    1.4642983724488603,
-    "Start from trivial, score by max of approximation-ratios.",
-    "weighted-kmedian-3d-hierarchy_1743253777.json"
-  ],
-  [
-    "weighted-kmedian-8d-hierarchy",
-    1743615880,
-    [
-      8,
-      10,
-      12,
-      14,
-      16
-    ],
-    1.718306652458797,
-    "Start from trivial, score by max of approximation-ratios.",
-    "weighted-kmedian-8d-hierarchy_1743615880.json"
   ]
 ]

@@ -32,7 +32,7 @@ class ExternalProcessSandbox:
     code.
     """
 
-    def __init__(self, base_path: Path, timeout_secs: float = 180.0) -> None:
+    def __init__(self, base_path: Path, timeout_secs: float = 60.0) -> None:
         """Create a new sandbox that logs to `base_path` and runs a sample for at most `timeout_secs`."""
         base_path.mkdir(exist_ok=True)
         self.base_path = Path(base_path)

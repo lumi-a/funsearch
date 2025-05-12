@@ -39,7 +39,8 @@ def evaluate(_: int) -> float:
             old_bins = Counter(dict(node.bins))
             for old_level in old_bins:
                 new_level = old_level + item
-                if new_level > 1:
+                # Avoid floating-point rounding issues
+                if new_level > 1 + 1e-9:
                     continue
 
                 new_bins = old_bins.copy()
@@ -77,14 +78,22 @@ def evaluate(_: int) -> float:
         return math.inf
 
     def best_fit(instance: list[float]) -> int:
-        bins = []
+        bins = []  # There are more efficient datastructures.
         for item in instance:
+            best_bin_ix = None
+            best_bin_size = -1
             for i, old_bin in enumerate(bins):
-                if old_bin + item <= 1:
-                    bins[i] += item
-                    break
+                new_bin = old_bin + item
+                # Avoid floating-point rounding issues
+                if new_bin <= 1 + 1e-9 and new_bin > best_bin_size:
+                    best_bin_ix = i
+                    best_bin_size = new_bin
+
+            if best_bin_ix is not None:
+                bins[best_bin_ix] += item
             else:
                 bins.append(item)
+
         return len(bins)
 
     total = 0
@@ -93,7 +102,6 @@ def evaluate(_: int) -> float:
         random.shuffle(instance)
         total += best_fit(instance)
     mean = total / samples
-
     return mean / optimum_value(instance)
 
 

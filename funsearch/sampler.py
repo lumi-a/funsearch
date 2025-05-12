@@ -49,7 +49,7 @@ class LLM:
                     messages=[
                         {
                             "role": "assistant",
-                            "content": "You are a helpful coding assistant who only responds with code "
+                            "content": "You are a helpful coding assistant who only responds with python-code "
                             "and no markdown-formatting.",
                         },
                         {"role": "user", "content": prompt},

@@ -57,8 +57,7 @@ def memoize(database_name: str):
                 with sqlite3.connect(db_path, check_same_thread=False) as conn:
                     conn.execute("PRAGMA journal_mode=WAL;")
                     conn.execute(
-                        "INSERT OR REPLACE INTO memo_cache(args_str, result) VALUES (?, ?)",
-                        (args_str, result_json),
+                        "INSERT OR REPLACE INTO memo_cache(args_str, result) VALUES (?, ?)", (args_str, result_json)
                     )
                     conn.commit()
             except (OSError, sqlite3.Error) as e:

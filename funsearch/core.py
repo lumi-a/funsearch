@@ -129,11 +129,7 @@ class IterationManager:
 # So let's just ask them for the id directly and be a bit inefficient upfront. This might
 # make errors uglier, though.
 def run(
-    database: ProgramsDatabase,
-    output_path: Path,
-    timestamp: int,
-    num_samples: int = -1,
-    num_samples_per_call: int = 4,
+    database: ProgramsDatabase, output_path: Path, timestamp: int, num_samples: int = -1, num_samples_per_call: int = 4
 ) -> None:
     """Launches a FunSearch experiment in parallel using threads."""
     database.print_status()

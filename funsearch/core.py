@@ -23,9 +23,11 @@ import threading
 import time
 from typing import TYPE_CHECKING
 
-from mistralai import Mistral
+from openai import OpenAI
+
 
 from funsearch.sampler import LLM
+
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -204,7 +206,7 @@ def run(
     llm_threads: list[threading.Thread] = [
         threading.Thread(
             target=llm_response_worker,
-            args=(iteration_manager, stop_event, LLM(Mistral(api_key=os.environ["MISTRAL_API_KEY"]), log_path)),
+            args=(iteration_manager, stop_event, LLM(OpenAI(), log_path)),
         )
         for _ in range(num_llm_workers)
     ]

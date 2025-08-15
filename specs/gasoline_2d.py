@@ -13,8 +13,6 @@ import funsearch
 @funsearch.run
 def evaluate(n: int) -> float:
     """Returns the approximation-ratio of the gasoline problem."""
-    from funsearch.gasoline.iterative_rounding import SlotOrdered
-    from funsearch.memoize import memoize
 
     xs, ys = gasoline(n)
 
@@ -27,6 +25,13 @@ def evaluate(n: int) -> float:
     # Clamp inputs to avoid overflows in gurobi
     xs = [np.clip(np.round(x[:2]), 0, 2**31 - 1) for x in xs[:length]]
     ys = [np.clip(np.round(y[:2]), 0, 2**31 - 1) for y in ys[: length - 1]]
+
+    return evaluate_instance(xs, ys)
+
+
+def evaluate_instance(xs: list[np.ndarray], ys: list[np.ndarray]) -> float:
+    from funsearch.gasoline.iterative_rounding import SlotOrdered
+    from funsearch.memoize import memoize
 
     @memoize("gasoline-2d")
     def memoized_approximation_ratio(xs: list[np.ndarray], ys: list[np.ndarray]) -> float:

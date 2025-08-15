@@ -9,7 +9,18 @@ import funsearch
 
 @funsearch.run
 def evaluate(_: int) -> float:
-    """Returns the ratio between sizes of the pareto-set and sub-pareto-sets of the instance."""
+    instance = get_instance()
+    assert instance == get_instance()  # Assert determinancy
+    instance = [(max(0, weight), max(0, profit)) for (weight, profit) in instance]
+    return evaluate_instance(instance)
+
+
+def evaluate_instance(instance: list[tuple[float, float]]) -> float:
+    """Returns the ratio between sizes of the pareto-set and sub-pareto-sets of the instance.
+
+    Weights and profits must be non-negative.
+    """
+    assert all(weight >= 0 and profit >= 0 for (weight, profit) in instance), "weights and profits must be non-negative"
 
     type KnapsackDigest = tuple[int, int]  # WeightSum, ProfitSum
     # This is a list instead of a set so that we can track individual pareto-sets
@@ -17,10 +28,6 @@ def evaluate(_: int) -> float:
 
     max_sub_size = 0
     max_ratio = 0
-
-    instance = get_instance()
-    assert instance == get_instance()  # Assert determinancy
-    instance = [(max(0, weight), max(0, profit)) for (weight, profit) in instance]
 
     def add_item(p: list[KnapsackDigest], next_item: tuple[int, int]) -> list[KnapsackDigest]:
         (next_weight, next_profit) = (max(0, next_item[0]), max(0, next_item[1]))
@@ -67,9 +74,9 @@ def get_instance() -> list[tuple[float, float]]:
 
     The items are tuples of the form (weight, profit), where both weight and profit are non-negative floats.
     """
-    d = 3
+    d = 2
     a = 4
     b = 8
     n = 11
 
-    return [(2**i, 2**i) for i in range(a, b + 1)] + [(2**d, 2**d - 1)] * n
+    return [(2**i, 2**i) for i in range(a, b + 1)] + [(2**d, 2**d - 1)] * n + [(2**i, 2**i) for i in range(d + 1, a)]

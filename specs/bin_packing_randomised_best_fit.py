@@ -10,14 +10,22 @@ import funsearch
 @funsearch.run
 def evaluate(_: int) -> float:
     """Returns the estimated score of the instance."""
-    import random
-
     instance = get_items()
-
     # Assert determinancy
     if instance != get_items() or len(instance) == 0:
         return 0.0
     instance = [min(1.0, item) for item in instance if item > 0]
+    return evaluate_instance(instance)
+
+
+def evaluate_instance(instance: list[float]) -> float:
+    """Return the estimated score of an instance.
+
+    The items must be floats between 0 and 1.
+    """
+    assert all(0 <= item <= 1 for item in instance)
+
+    import random
 
     def optimum_value(instance: list[float]) -> int:
         from collections import Counter
@@ -109,6 +117,7 @@ def evaluate(_: int) -> float:
 def get_items() -> list[float]:
     """Return a new bin-packing-instance, specified by the list of items.
 
-    The items must be floats between 0 and 1."""
+    The items must be floats between 0 and 1.
+    """
     items = [0.4, 0.5, 0.6]
     return items

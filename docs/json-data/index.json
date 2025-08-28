@@ -1,6 +1,6 @@
 [
   [
-    "3-4-cyclefree",
+    "3_4_cyclefree",
     1740604239,
     [
       53
@@ -10,7 +10,7 @@
     "3_4_cyclefree_1740604239.json"
   ],
   [
-    "gasoline-2d",
+    "gasoline_2d",
     1743498946,
     [
       10,
@@ -22,7 +22,7 @@
     "gasoline_2d_1743498946.json"
   ],
   [
-    "gasoline-2d",
+    "gasoline_2d",
     1743513307,
     [
       6,
@@ -35,7 +35,7 @@
     "gasoline_2d_1743513307.json"
   ],
   [
-    "gasoline-2d",
+    "gasoline_2d",
     1743584434,
     [
       6,
@@ -48,7 +48,7 @@
     "gasoline_2d_1743584434.json"
   ],
   [
-    "gasoline-2d",
+    "gasoline_2d",
     1744279739,
     [
       14,
@@ -59,7 +59,7 @@
     "gasoline_2d_1744279739.json"
   ],
   [
-    "gasoline-2d",
+    "gasoline_2d",
     1744285135,
     [
       14,
@@ -70,7 +70,7 @@
     "gasoline_2d_1744285135.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740234412,
     [
       3
@@ -80,7 +80,7 @@
     "gasoline_list_1740234412.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740242660,
     [
       3
@@ -90,7 +90,7 @@
     "gasoline_list_1740242660.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740263394,
     [
       3
@@ -100,7 +100,7 @@
     "gasoline_list_1740263394.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740309473,
     [
       3
@@ -110,7 +110,7 @@
     "gasoline_list_1740309473.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740323614,
     [
       3
@@ -120,7 +120,7 @@
     "gasoline_list_1740323614.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740413681,
     [
       3
@@ -130,7 +130,7 @@
     "gasoline_list_1740413681.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740749743,
     [
       3
@@ -140,7 +140,7 @@
     "gasoline_list_1740749743.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740753997,
     [
       3
@@ -150,7 +150,7 @@
     "gasoline_list_1740753997.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740836098,
     [
       3
@@ -160,7 +160,7 @@
     "gasoline_list_1740836098.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740915114,
     [
       3
@@ -170,7 +170,7 @@
     "gasoline_list_1740915114.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740921680,
     [
       3
@@ -180,7 +180,7 @@
     "gasoline_list_1740921680.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1740937436,
     [
       3
@@ -190,7 +190,7 @@
     "gasoline_list_1740937436.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1741545792,
     [
       16
@@ -200,7 +200,7 @@
     "gasoline_list_1741545792.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1741606511,
     [
       20
@@ -210,7 +210,7 @@
     "gasoline_list_1741606511.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1741639734,
     [
       30
@@ -220,7 +220,7 @@
     "gasoline_list_1741639734.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1741739941,
     [
       24
@@ -230,7 +230,7 @@
     "gasoline_list_1741739941.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1741792084,
     [
       14
@@ -240,7 +240,7 @@
     "gasoline_list_1741792084.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1741797621,
     [
       14
@@ -250,7 +250,7 @@
     "gasoline_list_1741797621.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1742128786,
     [
       6,
@@ -262,7 +262,7 @@
     "gasoline_list_1742128786.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1742210364,
     [
       10,
@@ -277,7 +277,7 @@
     "gasoline_list_1742210364.json"
   ],
   [
-    "gasoline-list",
+    "gasoline_list",
     1742233157,
     [
       10,
@@ -292,7 +292,7 @@
     "gasoline_list_1742233157.json"
   ],
   [
-    "kmeans-2d-greedy",
+    "kmeans_2d_greedy",
     1742304811,
     [
       10,
@@ -308,7 +308,7 @@
     "kmeans_2d_greedy_1742304811.json"
   ],
   [
-    "kmeans-2d-greedy",
+    "kmeans_2d_greedy",
     1742479142,
     [
       10,
@@ -325,7 +325,7 @@
     "kmeans_2d_greedy_1742479142.json"
   ],
   [
-    "kmeans-2d-greedy",
+    "kmeans_2d_greedy",
     1742488706,
     [
       10,
@@ -353,7 +353,7 @@
     "library_1740424536.json"
   ],
   [
-    "weighted-kmeans-2d-greedy",
+    "weighted_kmeans_2d_greedy",
     1743247188,
     [
       8,
@@ -367,7 +367,7 @@
     "weighted_kmeans_2d_greedy_1743247188.json"
   ],
   [
-    "weighted-kmeans-2d-greedy",
+    "weighted_kmeans_2d_greedy",
     1743253193,
     [
       16

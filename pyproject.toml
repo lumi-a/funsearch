@@ -68,6 +68,3 @@ ignore = [
 [tool.pytest.ini_options]
 addopts = "--doctest-modules"
 testpaths = ["tests"]
-
-[tool.uv.workspace]
-members = ["specs/clustering-rs"]

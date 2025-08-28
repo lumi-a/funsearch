@@ -7,7 +7,7 @@
     ],
     163.0,
     "Benchmarking gpt-3.5-turbo",
-    "3-4-cyclefree_1740604239.json"
+    "3_4_cyclefree_1740604239.json"
   ],
   [
     "gasoline-2d",
@@ -19,7 +19,7 @@
     ],
     1.463095238095238,
     "Start from trivial, mean of approximation-ratios.",
-    "gasoline-2d_1743498946.json"
+    "gasoline_2d_1743498946.json"
   ],
   [
     "gasoline-2d",
@@ -32,7 +32,7 @@
     ],
     1.827465834818776,
     "Start from Lucas' solution embedded into 2D, mean of approximation-ratios.",
-    "gasoline-2d_1743513307.json"
+    "gasoline_2d_1743513307.json"
   ],
   [
     "gasoline-2d",
@@ -45,7 +45,7 @@
     ],
     1.6302884615384616,
     "Start from structure similar to Lucas' solution, mean of approximation-ratios.",
-    "gasoline-2d_1743584434.json"
+    "gasoline_2d_1743584434.json"
   ],
   [
     "gasoline-2d",
@@ -56,7 +56,7 @@
     ],
     2.6,
     "Old list-building-method. Start with Lucas' embedded into 2d. Mean of apx-ratios, enforcing that all inputs return a result.",
-    "gasoline-2d_1744279739.json"
+    "gasoline_2d_1744279739.json"
   ],
   [
     "gasoline-2d",
@@ -67,7 +67,7 @@
     ],
     2.7333333333333334,
     "Old list-building-method. Start with improved 2d-solution. Mean of apx-ratios, enforcing that all inputs return a result.",
-    "gasoline-2d_1744285135.json"
+    "gasoline_2d_1744285135.json"
   ],
   [
     "gasoline-list",
@@ -77,7 +77,7 @@
     ],
     1.6521739130434783,
     "Perturb Lucas' solution by making it linear instead of exponential.",
-    "gasoline-list_1740234412.json"
+    "gasoline_list_1740234412.json"
   ],
   [
     "gasoline-list",
@@ -87,7 +87,7 @@
     ],
     1110010.0099940917,
     "Perturb Lucas' solution by setting ys to 0.",
-    "gasoline-list_1740242660.json"
+    "gasoline_list_1740242660.json"
   ],
   [
     "gasoline-list",
@@ -97,7 +97,7 @@
     ],
     1.7777777777777777,
     "Perturb Lucas' solution by setting ys to 0.",
-    "gasoline-list_1740263394.json"
+    "gasoline_list_1740263394.json"
   ],
   [
     "gasoline-list",
@@ -107,7 +107,7 @@
     ],
     1.875,
     "Start from Lucas' solution.",
-    "gasoline-list_1740309473.json"
+    "gasoline_list_1740309473.json"
   ],
   [
     "gasoline-list",
@@ -117,7 +117,7 @@
     ],
     1.75,
     "Perturb Lucas' solution by not setting last xs to 0.",
-    "gasoline-list_1740323614.json"
+    "gasoline_list_1740323614.json"
   ],
   [
     "gasoline-list",
@@ -127,7 +127,7 @@
     ],
     1.7500002188608434,
     "Perturb Lucas' solution by removing most final entries.",
-    "gasoline-list_1740413681.json"
+    "gasoline_list_1740413681.json"
   ],
   [
     "gasoline-list",
@@ -137,7 +137,7 @@
     ],
     1.5,
     "\u23f1\ufe0f Benchmarking gpt-4o-mini",
-    "gasoline-list_1740749743.json"
+    "gasoline_list_1740749743.json"
   ],
   [
     "gasoline-list",
@@ -147,7 +147,7 @@
     ],
     1.8571428571428572,
     "\u23f1\ufe0f Benchmarking gpt-3.5-turbo",
-    "gasoline-list_1740753997.json"
+    "gasoline_list_1740753997.json"
   ],
   [
     "gasoline-list",
@@ -157,7 +157,7 @@
     ],
     1.25,
     "\u23f1\ufe0f Benchmarking codestral-latest, without prefixes or FIM",
-    "gasoline-list_1740836098.json"
+    "gasoline_list_1740836098.json"
   ],
   [
     "gasoline-list",
@@ -167,7 +167,7 @@
     ],
     1.75,
     "\u23f1\ufe0f Benchmarking open-mistral-nemo, without prefixes or FIM",
-    "gasoline-list_1740915114.json"
+    "gasoline_list_1740915114.json"
   ],
   [
     "gasoline-list",
@@ -177,7 +177,7 @@
     ],
     1.6616746085772633,
     "\u23f1\ufe0f Benchmarking gpt-4o-mini, temperature 1.5",
-    "gasoline-list_1740921680.json"
+    "gasoline_list_1740921680.json"
   ],
   [
     "gasoline-list",
@@ -187,7 +187,7 @@
     ],
     1.4153846153846155,
     "\u23f1\ufe0f Benchmarking gpt-4o-mini, temperature 1.25",
-    "gasoline-list_1740937436.json"
+    "gasoline_list_1740937436.json"
   ],
   [
     "gasoline-list",
@@ -197,7 +197,7 @@
     ],
     1.7142857142857142,
     "Listlength, change final entry of Lucas' solution",
-    "gasoline-list_1741545792.json"
+    "gasoline_list_1741545792.json"
   ],
   [
     "gasoline-list",
@@ -207,7 +207,7 @@
     ],
     1.9375,
     "Listlength, start with Lucas' solution.",
-    "gasoline-list_1741606511.json"
+    "gasoline_list_1741606511.json"
   ],
   [
     "gasoline-list",
@@ -217,7 +217,7 @@
     ],
     1.875,
     "Listlength, start with Lucas' solution.",
-    "gasoline-list_1741639734.json"
+    "gasoline_list_1741639734.json"
   ],
   [
     "gasoline-list",
@@ -227,7 +227,7 @@
     ],
     1.8461538461538463,
     "Listlength, start with a trivial instance.",
-    "gasoline-list_1741739941.json"
+    "gasoline_list_1741739941.json"
   ],
   [
     "gasoline-list",
@@ -237,7 +237,7 @@
     ],
     1.75,
     "Other way of building list, change final entry of Lucas' solution.",
-    "gasoline-list_1741792084.json"
+    "gasoline_list_1741792084.json"
   ],
   [
     "gasoline-list",
@@ -247,7 +247,7 @@
     ],
     1.7142857142857142,
     "Other way of building list, remove final entries and remove intermittent rounding.",
-    "gasoline-list_1741797621.json"
+    "gasoline_list_1741797621.json"
   ],
   [
     "gasoline-list",
@@ -259,7 +259,7 @@
     ],
     2.657142857142857,
     "Start from trivial.",
-    "gasoline-list_1742128786.json"
+    "gasoline_list_1742128786.json"
   ],
   [
     "gasoline-list",
@@ -274,7 +274,7 @@
     ],
     5.789174670704402,
     "Start from Lucas' solution with perturbed ends of lists.",
-    "gasoline-list_1742210364.json"
+    "gasoline_list_1742210364.json"
   ],
   [
     "gasoline-list",
@@ -289,7 +289,7 @@
     ],
     6.010497835497835,
     "Start from Lucas' solution.",
-    "gasoline-list_1742233157.json"
+    "gasoline_list_1742233157.json"
   ],
   [
     "kmeans-2d-greedy",
@@ -305,7 +305,7 @@
     ],
     12.537988032194415,
     "Start with trivial.",
-    "kmeans-2d-greedy_1742304811.json"
+    "kmeans_2d_greedy_1742304811.json"
   ],
   [
     "kmeans-2d-greedy",
@@ -322,7 +322,7 @@
     ],
     2.1740356516234542,
     "Start with trivial solution, scored by max of approximation-ratios.",
-    "kmeans-2d-greedy_1742479142.json"
+    "kmeans_2d_greedy_1742479142.json"
   ],
   [
     "kmeans-2d-greedy",
@@ -340,7 +340,7 @@
     ],
     3.0526824202690137,
     "Start from good solution, scored by max of approximation-ratios.",
-    "kmeans-2d-greedy_1742488706.json"
+    "kmeans_2d_greedy_1742488706.json"
   ],
   [
     "library",
@@ -364,7 +364,7 @@
     ],
     3.336782795969752,
     "Start from trivial, score by max of approximation-ratios.",
-    "weighted-kmeans-2d-greedy_1743247188.json"
+    "weighted_kmeans_2d_greedy_1743247188.json"
   ],
   [
     "weighted-kmeans-2d-greedy",
@@ -374,6 +374,6 @@
     ],
     6.590935536335631,
     "Start from lower-bound solution from paper.",
-    "weighted-kmeans-2d-greedy_1743253193.json"
+    "weighted_kmeans_2d_greedy_1743253193.json"
   ]
 ]

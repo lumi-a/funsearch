@@ -1,14 +1,14 @@
 import random
-from specs.nemhauser_ullmann import evaluate
+from specs.nemhauser_ullmann import evaluate_instance
 
 bounds = []
-for _ in range(10):
-    bounds.append((-20.0, 20.0))
-    bounds.extend([(-100, 100) for _ in range(3)])
+for _ in range(17):
+    bounds.extend([(1, 2**16), (1, 2**16)])
+
 
 def to_maximise(xs: list[float]):
-    items = [(2 ** max(32, min(-32, xs[i])), xs[(i + 1) : (i + 4)]) for i in range(0, len(xs), 4)]
-    return -evaluate(items)
+    items = [(int(xs[i]), int(xs[i + 1])) for i in range(0, len(xs), 2)]
+    return -evaluate_instance(items)
 
 
 def differential_evolution(to_maximise, bounds):
@@ -18,6 +18,7 @@ def differential_evolution(to_maximise, bounds):
     differential_weight = 0.8
 
     population = [[a + random.random() * (b - a) for (a, b) in bounds] for _ in range(population_size)]
+    scores = [to_maximise(x) for x in population]
 
     iteration = 0
     while True:
@@ -32,12 +33,16 @@ def differential_evolution(to_maximise, bounds):
             ]
             for i, (a, b) in enumerate(bounds):
                 y[i] = max(a, min(b, y[i]))
-            if to_maximise(y) <= to_maximise(x):
+
+            new_score = to_maximise(y)
+            if new_score <= scores[x_index]:
                 population[x_index] = y
+                scores[x_index] = new_score
 
         iteration += 1
         if iteration % 10 == 0:
-            best = max(population, key=to_maximise)
+            best_ix = max(range(len(scores)), key=scores.__getitem__)
+            best = population[best_ix]
             print(iteration, to_maximise(best), sep="\t")
             print(best)
 

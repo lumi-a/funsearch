@@ -41,6 +41,16 @@ if __name__ == "__main__":
 
         return True
 
+    min_samples = 2000
+    initial_print = True
+    for items in identities.values():
+        for ix_a, (a_name, a_samples, _) in enumerate(items):
+            if a_samples < min_samples:
+                if initial_print:
+                    print(f"Fewer than {min_samples} samples:")
+                    initial_print = False
+                print(f"    {a_samples} samples: {a_name}")
+
     for items in identities.values():
         non_subsets = []
         for ix_a, (a_name, a_samples, a_digest) in enumerate(items):
@@ -53,6 +63,6 @@ if __name__ == "__main__":
             if not was_subset:
                 non_subsets.append((a_name, a_samples))
         if len(non_subsets) > 1:
-            print(f"All have the same config, but are not subsets of each other:")
+            print("\nHave the same config, but no pairs are subsets of each other:")
             for name, samples in non_subsets:
                 print(f"   {samples} samples: {name}")

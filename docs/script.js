@@ -90,11 +90,12 @@ function getProblemContainer(problemName) {
         return maybeExisting
     }
 
+    console.log(`No container for ${problemName}, creating blank one`)
 
     const div = document.createElement("div")
     div.id = `container-${problemName}`
     div.classList.add("problem-container")
-    document.body.appendChild(div)
+    document.getElementById("content").appendChild(div)
 
     const heading = document.createElement("h2")
     heading.textContent = problemName

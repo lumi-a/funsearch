@@ -55,6 +55,7 @@ class LLM:
                         },
                         {"role": "user", "content": prompt},
                     ],
+                    temperature=1,
                 )
                 outputs = list(zip(indices, [choice.message.content or "" for choice in response.choices]))
                 break

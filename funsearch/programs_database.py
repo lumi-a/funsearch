@@ -400,9 +400,9 @@ class ProgramsDatabase:
 
     def get_prompt(self) -> Prompt:
         """Returns a prompt containing implementations from one chosen island."""
-        island_id = np.random.randint(len(self._islands))
-        code, version_generated = self._islands[island_id].get_prompt()
-        return Prompt(code, version_generated, island_id)
+        least_prompted_island_id = min(range(len(self._islands)), key=lambda i: len(self._islands[i]._runs))
+        code, version_generated = self._islands[least_prompted_island_id].get_prompt()
+        return Prompt(code, version_generated, least_prompted_island_id)
 
     def register_program_in_island(
         self, program: code_manipulation.Function, island_id: int, scores_per_test: ScoresPerTest

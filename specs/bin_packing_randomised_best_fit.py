@@ -1,6 +1,6 @@
 """I'm trying to find instances of the bin-packing problem where, if the input is shuffled, the best-fit online-heuristic performs poorly in expectation. All bins have capacity 1.0.
 
-To generate instances with poor scores, I have tried the following functions so far. Please write another one that is similar and has the same signature, but has some lines altered.
+To generate instances that best-fit performs poorly on, I have tried the following functions so far. Please write another one that returns an instance and is similar, but has some lines altered.
 """
 
 import math
@@ -19,71 +19,43 @@ def evaluate(_: int) -> float:
 
 
 def evaluate_instance(instance: list[float]) -> float:
-    """Return the estimated score of an instance.
-
-    The items must be floats between 0 and 1.
-    """
-    assert all(0 <= item <= 1 for item in instance)
-
+    """Returns the estimated score of the instance."""
     import random
+    import re
+    import subprocess
+    from pathlib import Path
+    import threading
+
+    ident = threading.get_ident()
 
     def optimum_value(instance: list[float]) -> int:
-        from collections import Counter
-        from collections.abc import Iterator
-        from dataclasses import dataclass
-        from queue import PriorityQueue
+        scaled = [math.floor(item * 1_000_000) for item in instance]
 
-        type Bin = frozenset[float, int]
-
-        @dataclass(order=True, frozen=True, kw_only=True)
-        class Node:
-            number_of_bins: int
-            next_node_index: int
-            bins: Bin
-
-        def neighbors(node: Node) -> Iterator[Node]:
-            updated_index = node.next_node_index + 1
-            item = instance[node.next_node_index]
-            old_bins = Counter(dict(node.bins))
-            for old_level in old_bins:
-                new_level = old_level + item
-                # Avoid floating-point rounding issues
-                if new_level > 1 + 1e-9:
-                    continue
-
-                new_bins = old_bins.copy()
-                new_bins += Counter([new_level])
-                new_bins -= Counter([old_level])
-                yield Node(
-                    number_of_bins=node.number_of_bins,
-                    next_node_index=updated_index,
-                    bins=frozenset(Counter(new_bins).items()),
-                )
-
-            new_singleton = old_bins.copy()
-            new_singleton += Counter([item])
-            yield Node(
-                number_of_bins=node.number_of_bins + 1,
-                next_node_index=updated_index,
-                bins=frozenset(Counter(new_singleton).items()),
-            )
-
-        start_node = Node(next_node_index=0, number_of_bins=0, bins=frozenset())
-        pqueue: PriorityQueue[Node] = PriorityQueue()
-        pqueue.put(start_node)
-        seen: set[Bin] = {start_node}
-
-        while not pqueue.empty():
-            node = pqueue.get()
-            if node.next_node_index == len(instance):
-                return node.number_of_bins
-            for neighbor in neighbors(node):
-                if neighbor.bins in seen:
-                    continue
-                seen.add(neighbor.bins)
-                pqueue.put(neighbor)
-
-        return math.inf
+        # This requires installing https://github.com/fontanf/packingsolver
+        Path(f"items-{ident}.csv").write_text("X\n" + "\n".join(map(str, scaled)))
+        Path(f"bins-{ident}.csv").write_text(f"X,COPIES\n1000000,{len(instance)}")
+        Path(f"parameters-{ident}.csv").write_text("NAME,VALUE\nobjective,bin-packing")
+        stdout = subprocess.check_output(
+            [
+                r"C:\a\packingsolver\install\bin\packingsolver_onedimensional.exe",
+                "--items",
+                f"items-{ident}.csv",
+                "--bins",
+                f"bins-{ident}.csv",
+                "--parameters",
+                f"parameters-{ident}.csv",
+                "--time-limit",
+                "1",
+            ],
+        ).decode()
+        # Remove files
+        Path(f"items-{ident}.csv").unlink()
+        Path(f"bins-{ident}.csv").unlink()
+        Path(f"parameters-{ident}.csv").unlink()
+        bins = int(re.search(r"Number of bins:\s*(\d+) / \d+ .*", stdout).group(1))
+        if bins == 0:
+            print(stdout)
+        return bins
 
     def best_fit(instance: list[float]) -> int:
         bins = []  # There are more efficient datastructures.

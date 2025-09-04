@@ -17,8 +17,6 @@ import funsearch
 @funsearch.run
 def evaluate(n: int) -> float:
     """Returns the ratio of the found instance."""
-    from exact_clustering import weighted_discrete_kmedian_price_of_hierarchy
-
     weighted_points = get_weighted_points(n)
 
     # Assert determinancy
@@ -27,9 +25,15 @@ def evaluate(n: int) -> float:
     ):
         return 0.0
 
+    return evaluate_instance(weighted_points[:n])
+
+
+def evaluate_instance(weighted_points: list[tuple[float, np.ndarray]]) -> float:
+    from exact_clustering import weighted_discrete_kmedian_price_of_hierarchy
+
     # Merging identical points avoids floating-point-rounding-issues and improves performance
     merged_weighted_points: dict[np.ndarray, float] = {}
-    for weight, v in weighted_points[:n]:
+    for weight, v in weighted_points:
         point = tuple(v[:3])
         merged_weighted_points[point] = merged_weighted_points.get(point, 0.0) + weight
     # Sorting by largest weight first helps with performance
@@ -38,7 +42,7 @@ def evaluate(n: int) -> float:
 
 
 @funsearch.evolve
-def get_weighted_points(n: int) -> list[np.ndarray]:
+def get_weighted_points(n: int) -> list[tuple[float, np.ndarray]]:
     """Return a new clustering-problem, specified by a list of n weighted points in 3D. The first
     element of each tuple is the weight of the point, the second the 3D-point itself."""
     points = []

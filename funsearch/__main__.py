@@ -189,7 +189,12 @@ def ls(db_file: click.File | None) -> None:
         renamed_program = copy.deepcopy(program)
         renamed_program.name += f"_{i}"
         click.echo(str(renamed_program))
-    comment(f"# Found {len(progs)} programs in file: {db_file.name}")
+    comment(
+        f"# Found {len(progs)} programs in file: {db_file.name}, {sum(len(island._runs) for island in database._islands)} samples total."
+    )
+    comment("")
+    for line in database._config.message.splitlines():
+        comment(f"# {line}")
 
 
 @main.command()

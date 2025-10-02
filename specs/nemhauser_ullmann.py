@@ -3,7 +3,6 @@
 Instances are generated via the `get_instance` function and then evaluated. I have tried the following implementations for `get_instance` so far. Please write another one that is similar and has the same signature, but has some lines altered.
 """
 
-import math
 import funsearch
 
 
@@ -11,11 +10,10 @@ import funsearch
 def evaluate(_: int) -> float:
     instance = get_instance()
     assert instance == get_instance()  # Assert determinancy
-    instance = [(max(0, weight), max(0, profit)) for (weight, profit) in instance]
-    return evaluate_instance(instance)
+    return evaluate_instance([(max(0, int(weight)), max(0, int(profit))) for (weight, profit) in instance])
 
 
-def evaluate_instance(instance: list[tuple[float, float]]) -> float:
+def evaluate_instance(instance: list[tuple[int, int]]) -> float:
     """Returns the ratio between sizes of the pareto-set and sub-pareto-sets of the instance.
 
     Weights and profits must be non-negative.
@@ -23,11 +21,6 @@ def evaluate_instance(instance: list[tuple[float, float]]) -> float:
     assert all(weight >= 0 and profit >= 0 for (weight, profit) in instance), "weights and profits must be non-negative"
 
     type KnapsackDigest = tuple[int, int]  # WeightSum, ProfitSum
-    # This is a list instead of a set so that we can track individual pareto-sets
-    p: list[KnapsackDigest] = [(0, 0)]
-
-    max_sub_size = 0
-    max_ratio = 0
 
     def add_item(p: list[KnapsackDigest], next_item: tuple[int, int]) -> list[KnapsackDigest]:
         (next_weight, next_profit) = (max(0, next_item[0]), max(0, next_item[1]))
@@ -48,35 +41,40 @@ def evaluate_instance(instance: list[tuple[float, float]]) -> float:
 
         new_p = []
         max_profit_so_far = -1
-        previous_weight = -1
+        weight_of_previous_max_profit = -1
+
         for weight, profit in q:
-            if (profit > max_profit_so_far) or (profit == max_profit_so_far and weight == previous_weight):
+            if profit > max_profit_so_far:
+                weight_of_previous_max_profit = weight
+                new_p.append((weight, profit))
+            elif profit == max_profit_so_far and weight == weight_of_previous_max_profit:
                 new_p.append((weight, profit))
 
             max_profit_so_far = max(max_profit_so_far, profit)
-            previous_weight = weight
-
         return new_p
+
+    # This is a list instead of a set so that we can track individual pareto-sets
+    p: list[KnapsackDigest] = [(0, 0)]
+
+    max_sub_size = 0
+    max_ratio = 0
 
     for next_item in instance:
         p = add_item(p, next_item)
-        max_sub_size = max(max_sub_size, len(p))
+        p_size = len(p)
+        max_sub_size = max(max_sub_size, p_size)
 
-        if len(p) > 0:
-            max_ratio = max(max_ratio, max_sub_size / len(p))
+        if p_size > 0:
+            max_ratio = max(max_ratio, max_sub_size / p_size)
 
     return max_ratio
 
 
 @funsearch.evolve
-def get_instance() -> list[tuple[float, float]]:
-    """Return a new knapsack-instance, specified by the list of items.
+def get_instance() -> list[tuple[int, int]]:
+    """Return an instance, specified by the list of (weight, profit) pairs.
 
-    The items are tuples of the form (weight, profit), where both weight and profit are non-negative floats.
+    Weights and profits must be non-negative integers.
     """
-    d = 2
-    a = 4
-    b = 8
-    n = 11
-
-    return [(2**i, 2**i) for i in range(a, b + 1)] + [(2**d, 2**d - 1)] * n + [(2**i, 2**i) for i in range(d + 1, a)]
+    items = [(4, 4)] * 2 + [(2, 1), (1, 2), (2, 2)]
+    return items

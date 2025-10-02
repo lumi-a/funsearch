@@ -40,7 +40,8 @@ def evaluate(n: int) -> float:
 @funsearch.evolve
 def get_weighted_points(n: int) -> list[tuple[float, np.ndarray]]:
     """Return a new clustering-problem, specified by a list of n weighted points in 2D. The first
-    element of each tuple is the weight of the point, the second the 2D-point itself."""
+    element of each tuple is the weight of the point, the second the 2D-point itself.
+    """
     points = []
     for i in range(n):
         weight = 1.0

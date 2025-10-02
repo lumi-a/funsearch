@@ -5,8 +5,9 @@ from __future__ import annotations
 import ast
 import logging
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence, Any
+from typing import Any
 
 import cloudpickle
 
@@ -60,7 +61,7 @@ class ExternalProcessSandbox:
         logging.debug(f"Executing {cmd}")
         try:
             with error_file_path.open("w") as error_file:
-                result: subprocess.CompletedProcess = subprocess.run(  # noqa: S603
+                result: subprocess.CompletedProcess = subprocess.run(
                     args=cmd, timeout=self.timeout_secs, stderr=error_file, check=False
                 )
         except subprocess.TimeoutExpired:

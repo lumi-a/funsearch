@@ -17,17 +17,15 @@
 
 from __future__ import annotations
 
-import os
 import queue
 import threading
 import time
+import os
 from typing import TYPE_CHECKING
 
 from openai import OpenAI
 
-
 from funsearch.sampler import LLM
-
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -204,17 +202,14 @@ def run(
     # Start web request worker threads.
     num_llm_workers = max_cached_samples // num_samples_per_call
     llm_threads: list[threading.Thread] = [
-        threading.Thread(
-            target=llm_response_worker,
-            args=(iteration_manager, stop_event, LLM(OpenAI(), log_path)),
-        )
+        threading.Thread(target=llm_response_worker, args=(iteration_manager, stop_event, LLM(OpenAI(), log_path)))
         for _ in range(num_llm_workers)
     ]
     for t in llm_threads:
         t.start()
 
     # Start analysation dispatcher threads
-    num_dispatcher_workers = os.cpu_count() or 8
+    num_dispatcher_workers = (os.cpu_count() or 2) - 1
     dispatcher_threads: list[threading.Thread] = [
         threading.Thread(target=analysation_dispatcher, args=(stop_event,)) for _ in range(num_dispatcher_workers)
     ]

@@ -54,6 +54,7 @@ def evaluate_instance(instance: list[tuple[int, int]]) -> float:
         return new_p
 
     # This is a list instead of a set so that we can track individual pareto-sets
+    # TODO: This would be faster with a multi-set.
     p: list[KnapsackDigest] = [(0, 0)]
 
     max_sub_size = 0
@@ -61,6 +62,19 @@ def evaluate_instance(instance: list[tuple[int, int]]) -> float:
 
     for next_item in instance:
         p = add_item(p, next_item)
+
+        # Remove duplicates
+        """
+        previous_item = None
+        new_p = []
+        for x in p:
+            if previous_item is not None and x == previous_item:
+                continue
+            new_p.append(x)
+            previous_item = x
+        p = new_p
+        """
+
         p_size = len(p)
         max_sub_size = max(max_sub_size, p_size)
 

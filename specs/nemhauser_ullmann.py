@@ -21,41 +21,53 @@ def evaluate_instance(instance: list[tuple[int, int]]) -> float:
     assert all(weight >= 0 and profit >= 0 for (weight, profit) in instance), "weights and profits must be non-negative"
 
     type KnapsackDigest = tuple[int, int]  # WeightSum, ProfitSum
+    type Count = int
+    type Multiset = list[tuple[KnapsackDigest, Count]]
+    p: Multiset = [((0, 0), 1)]
 
-    def add_item(p: list[KnapsackDigest], next_item: tuple[int, int]) -> list[KnapsackDigest]:
+    def add_item(p: Multiset, next_item: tuple[int, int]) -> Multiset:
         (next_weight, next_profit) = (max(0, next_item[0]), max(0, next_item[1]))
 
-        p_plus_i = [(weight + next_weight, profit + next_profit) for (weight, profit) in p]
+        p_plus_i: Multiset = [((weight + next_weight, profit + next_profit), count) for ((weight, profit), count) in p]
 
-        q = []
+        q: Multiset = []
         ix, plus_ix = 0, 0
         while ix < len(p) and plus_ix < len(p_plus_i):
-            if (p[ix][0], -p[ix][1]) < (p_plus_i[plus_ix][0], -p_plus_i[plus_ix][1]):
+            p_weightprofit = p[ix][0]
+            p_comparison = (p_weightprofit[0], -p_weightprofit[1])
+            p_plus_weightprofit = p_plus_i[plus_ix][0]
+            p_plus_comparison = (p_plus_weightprofit[0], -p_plus_weightprofit[1])
+
+            if p_comparison < p_plus_comparison:
                 q.append(p[ix])
                 ix += 1
-            else:
+            elif p_comparison > p_plus_comparison:
                 q.append(p_plus_i[plus_ix])
                 plus_ix += 1
+            else:
+                # The two have the same weight and profit, merge their counts
+                q.append((p_weightprofit, p[ix][1] + p_plus_i[plus_ix][1]))
+                ix += 1
+                plus_ix += 1
+
+        # Past this point, no merging is necessary / possible anymore.
         q.extend(p[ix:])
         q.extend(p_plus_i[plus_ix:])
 
-        new_p = []
+        new_p: Multiset = []
         max_profit_so_far = -1
         weight_of_previous_max_profit = -1
 
-        for weight, profit in q:
+        for (weight, profit), count in q:
+            # The count does not matter for comparing the elements here.
             if profit > max_profit_so_far:
                 weight_of_previous_max_profit = weight
-                new_p.append((weight, profit))
+                new_p.append(((weight, profit), count))
             elif profit == max_profit_so_far and weight == weight_of_previous_max_profit:
-                new_p.append((weight, profit))
+                new_p.append(((weight, profit), count))
 
             max_profit_so_far = max(max_profit_so_far, profit)
         return new_p
-
-    # This is a list instead of a set so that we can track individual pareto-sets
-    # TODO: This would be faster with a multi-set.
-    p: list[KnapsackDigest] = [(0, 0)]
 
     max_sub_size = 0
     max_ratio = 0
@@ -63,19 +75,11 @@ def evaluate_instance(instance: list[tuple[int, int]]) -> float:
     for next_item in instance:
         p = add_item(p, next_item)
 
-        # Remove duplicates
-        """
-        previous_item = None
-        new_p = []
-        for x in p:
-            if previous_item is not None and x == previous_item:
-                continue
-            new_p.append(x)
-            previous_item = x
-        p = new_p
-        """
+        # Count unique elements
+        #  p_size = len(p)
+        # Count total elements
+        p_size = sum(count for (_, count) in p)
 
-        p_size = len(p)
         max_sub_size = max(max_sub_size, p_size)
 
         if p_size > 0:
